@@ -25,7 +25,7 @@ Dự án này áp dụng thuật toán **SHO** (Tối ưu hóa đàn linh cẩu)
   + Chỉ những thành viên được thêm vào dự án mới có quyền pull request và xem xét duyệt
 ---
 
-## Minh họa các dùng và ví dụ
+## Minh họa cách dùng và ví dụ
 [Bổ sung sau]
 
 ---
