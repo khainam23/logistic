@@ -1,4 +1,4 @@
-package org.logistic.evalution;
+package org.logistic.evaluation;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package org.logistic.evalution;
+package org.logistic.evaluation;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;

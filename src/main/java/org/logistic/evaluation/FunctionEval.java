@@ -1,4 +1,4 @@
-package org.logistic.evalution;
+package org.logistic.evaluation;
 
 public class FunctionEval {
     public static Object feval(String fname, Object soln, Object Inp, Object Tar, Object test_dat, Object test_tar) {

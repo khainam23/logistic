@@ -1,20 +1,17 @@
 package org.logistic.algorithms;
-import org.apache.commons.math3.distribution.TruncatedNormalDistribution;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+
+import java.util.Random;
 
 public class NeuralNetwork {
     private int noOfInNodes;
     private int noOfOutNodes;
     private int noOfHiddenNodes;
     private double learningRate;
-    private Double bias;
-    private RealMatrix weightsInHidden;
-    private RealMatrix weightsHiddenOut;
+    private boolean bias;
+    private double[][] weightsInHidden;
+    private double[][] weightsHiddenOut;
 
-    public NeuralNetwork(int noOfInNodes, int noOfOutNodes, int noOfHiddenNodes, double learningRate, Double bias) {
+    public NeuralNetwork(int noOfInNodes, int noOfOutNodes, int noOfHiddenNodes, double learningRate, boolean bias) {
         this.noOfInNodes = noOfInNodes;
         this.noOfOutNodes = noOfOutNodes;
         this.noOfHiddenNodes = noOfHiddenNodes;
@@ -23,122 +20,14 @@ public class NeuralNetwork {
         createWeightMatrices();
     }
 
-    private void createWeightMatrices() {
-        int biasNode = (bias != null) ? 1 : 0;
-
-        double rad = 1 / Math.sqrt(noOfInNodes + biasNode);
-        TruncatedNormalDistribution distribution = new TruncatedNormalDistribution(0, 1, -rad, rad);
-        weightsInHidden = new Array2DRowRealMatrix(noOfHiddenNodes, noOfInNodes + biasNode);
-        for (int i = 0; i < noOfHiddenNodes; i++) {
-            for (int j = 0; j < noOfInNodes + biasNode; j++) {
-                weightsInHidden.setEntry(i, j, distribution.sample());
-            }
-        }
-
-        rad = 1 / Math.sqrt(noOfHiddenNodes + biasNode);
-        distribution = new TruncatedNormalDistribution(0, 1, -rad, rad);
-        weightsHiddenOut = new Array2DRowRealMatrix(noOfOutNodes, noOfHiddenNodes + biasNode);
-        for (int i = 0; i < noOfOutNodes; i++) {
-            for (int j = 0; j < noOfHiddenNodes + biasNode; j++) {
-                weightsHiddenOut.setEntry(i, j, distribution.sample());
-            }
-        }
-    }
-
-    public void train(double[] inputVector, double[] targetVector) {
-        int biasNode = (bias != null) ? 1 : 0;
-        if (bias != null) {
-            double[] extendedInput = new double[inputVector.length + 1];
-            System.arraycopy(inputVector, 0, extendedInput, 0, inputVector.length);
-            extendedInput[inputVector.length] = bias;
-            inputVector = extendedInput;
-        }
-
-        RealMatrix inputMatrix = new Array2DRowRealMatrix(inputVector).transpose();
-        RealMatrix targetMatrix = new Array2DRowRealMatrix(targetVector).transpose();
-
-        RealMatrix outputVector1 = weightsInHidden.multiply(inputMatrix);
-        RealMatrix outputVectorHidden = applySigmoid(outputVector1);
-
-        if (bias != null) {
-            double[] extendedOutputHidden = new double[outputVectorHidden.getRowDimension() + 1];
-            for (int i = 0; i < outputVectorHidden.getRowDimension(); i++) {
-                extendedOutputHidden[i] = outputVectorHidden.getEntry(i, 0);
-            }
-            extendedOutputHidden[outputVectorHidden.getRowDimension()] = bias;
-            outputVectorHidden = new Array2DRowRealMatrix(extendedOutputHidden).transpose();
-        }
-
-        RealMatrix outputVector2 = weightsHiddenOut.multiply(outputVectorHidden);
-        RealMatrix outputVectorNetwork = applySigmoid(outputVector2);
-
-        RealMatrix outputErrors = targetMatrix.subtract(outputVectorNetwork);
-        RealMatrix tmp = outputErrors.multiply(outputVectorNetwork).multiply(outputVectorNetwork.scalarMultiply(-1).add(1));
-        tmp = tmp.scalarMultiply(learningRate).multiply(outputVectorHidden.transpose());
-        weightsHiddenOut = weightsHiddenOut.add(tmp);
-
-        RealMatrix hiddenErrors = weightsHiddenOut.transpose().multiply(outputErrors);
-        tmp = hiddenErrors.multiply(outputVectorHidden).multiply(outputVectorHidden.scalarMultiply(-1).add(1));
-        RealMatrix x;
-        if (bias != null) {
-            x = tmp.multiply(inputMatrix.transpose()).getSubMatrix(0, tmp.getRowDimension() - 2, 0, tmp.getColumnDimension() - 1);
-        } else {
-            x = tmp.multiply(inputMatrix.transpose());
-        }
-        weightsInHidden = weightsInHidden.add(x.scalarMultiply(learningRate));
-    }
-
-    public RealMatrix run(double[] inputVector) {
-        if (bias != null) {
-            double[] extendedInput = new double[inputVector.length + 1];
-            System.arraycopy(inputVector, 0, extendedInput, 0, inputVector.length);
-            extendedInput[inputVector.length] = 1.0;
-            inputVector = extendedInput;
-        }
-
-        RealMatrix inputMatrix = new Array2DRowRealMatrix(inputVector).transpose();
-
-        RealMatrix outputVector = weightsInHidden.multiply(inputMatrix);
-        outputVector = applySigmoid(outputVector);
-
-        if (bias != null) {
-            double[] extendedOutput = new double[outputVector.getRowDimension() + 1];
-            for (int i = 0; i < outputVector.getRowDimension(); i++) {
-                extendedOutput[i] = outputVector.getEntry(i, 0);
-            }
-            extendedOutput[outputVector.getRowDimension()] = 1.0;
-            outputVector = new Array2DRowRealMatrix(extendedOutput).transpose();
-        }
-
-        outputVector = weightsHiddenOut.multiply(outputVector);
-        outputVector = applySigmoid(outputVector);
-
-        return outputVector;
-    }
-
-    private RealMatrix applySigmoid(RealMatrix matrix) {
-        RealMatrix result = new Array2DRowRealMatrix(matrix.getRowDimension(), matrix.getColumnDimension());
-        for (int i = 0; i < matrix.getRowDimension(); i++) {
-            for (int j = 0; j < matrix.getColumnDimension(); j++) {
-                result.setEntry(i, j, sigmoid(matrix.getEntry(i, j)));
-            }
-        }
-        return result;
-    }
-
-    private double sigmoid(double x) {
-        return 1 / (1 + Math.exp(-x));
-    }
-
     public static void main(String[] args) {
-        // Example usage of the neural network
-        // Replace with actual data
-        double[][] data = {{0.5, 0.1}, {0.2, 0.4}, {0.3, 0.6}};
-        double[] labels = {1.0, 0.0, 1.0};
-        double[][] test_data = {{0.4, 0.2}, {0.1, 0.3}};
-        int neu = 2;
+        // Example of using the NeuralNetwork class
+        double[][] data = {/* your training data */};
+        double[] labels = {/* your training labels */};
+        double[][] testData = {/* your test data */};
+        int neurons = 0/* number of hidden neurons */;
 
-        NeuralNetwork simpleNetwork = new NeuralNetwork(data[0].length, 1, neu, 0.1, null);
+        NeuralNetwork simpleNetwork = new NeuralNetwork(data[0].length, 1, neurons, 0.1, false);
 
         for (int epoch = 0; epoch < 20; epoch++) {
             System.out.println("Neural Network Train: Epoch " + epoch);
@@ -147,14 +36,201 @@ public class NeuralNetwork {
             }
         }
 
-        double[] pred = new double[test_data.length];
-        for (int i = 0; i < test_data.length; i++) {
-            RealMatrix y = simpleNetwork.run(test_data[i]);
-            pred[i] = y.getEntry(0, 0) > 0.5 ? 1.0 : 0.0;
+        double[] pred = new double[testData.length];
+        for (int i = 0; i < testData.length; i++) {
+            double[] y = simpleNetwork.run(testData[i]);
+            pred[i] = y[0] > 0.5 ? 1.0 : 0.0;
         }
 
+        // Print predictions
         for (double p : pred) {
-            System.out.println("Prediction: " + p);
+            System.out.println(p);
         }
+    }
+
+    private void createWeightMatrices() {
+        int biasNode = bias ? 1 : 0;
+
+        double rad = 1 / Math.sqrt(noOfInNodes + biasNode);
+        this.weightsInHidden = new double[noOfHiddenNodes][noOfInNodes + biasNode];
+        initializeWeights(weightsInHidden, -rad, rad);
+
+        rad = 1 / Math.sqrt(noOfHiddenNodes + biasNode);
+        this.weightsHiddenOut = new double[noOfOutNodes][noOfHiddenNodes + biasNode];
+        initializeWeights(weightsHiddenOut, -rad, rad);
+    }
+
+    private void initializeWeights(double[][] weights, double low, double high) {
+        Random rand = new Random();
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[i].length; j++) {
+                weights[i][j] = low + (high - low) * rand.nextDouble();
+            }
+        }
+    }
+
+    private double sigmoid(double x) {
+        return 1 / (1 + Math.exp(-x));
+    }
+
+    public void train(double[] inputVector, double[] targetVector) {
+        int biasNode = bias ? 1 : 0;
+        if (bias) {
+            inputVector = appendBias(inputVector, 1.0);
+        }
+
+        double[] outputVector1 = matrixVectorMultiply(weightsInHidden, inputVector);
+        double[] outputVectorHidden = applyActivationFunction(outputVector1);
+
+        if (bias) {
+            outputVectorHidden = appendBias(outputVectorHidden, 1.0);
+        }
+
+        double[] outputVector2 = matrixVectorMultiply(weightsHiddenOut, outputVectorHidden);
+        double[] outputVectorNetwork = applyActivationFunction(outputVector2);
+
+        double[] outputErrors = vectorSubtract(targetVector, outputVectorNetwork);
+        double[][] tmp = scalarMatrixMultiply(
+                outerProduct(vectorMultiply(outputErrors, vectorMultiply(outputVectorNetwork, vectorSubtract(1.0, outputVectorNetwork))), outputVectorHidden),
+                learningRate
+        );
+
+        weightsHiddenOut = matrixAdd(weightsHiddenOut, tmp);
+
+        double[] hiddenErrors = matrixVectorMultiply(transpose(weightsHiddenOut), outputErrors);
+        double[][] tmpHidden = scalarMatrixMultiply(
+                outerProduct(vectorMultiply(hiddenErrors, vectorMultiply(outputVectorHidden, vectorSubtract(1.0, outputVectorHidden))), inputVector),
+                learningRate
+        );
+
+        if (bias) {
+            tmpHidden = removeLastRow(tmpHidden);
+        }
+
+        weightsInHidden = matrixAdd(weightsInHidden, tmpHidden);
+    }
+
+    public double[] run(double[] inputVector) {
+        if (bias) {
+            inputVector = appendBias(inputVector, 1.0);
+        }
+
+        double[] outputVector = matrixVectorMultiply(weightsInHidden, inputVector);
+        outputVector = applyActivationFunction(outputVector);
+
+        if (bias) {
+            outputVector = appendBias(outputVector, 1.0);
+        }
+
+        outputVector = matrixVectorMultiply(weightsHiddenOut, outputVector);
+        outputVector = applyActivationFunction(outputVector);
+
+        return outputVector;
+    }
+
+    private double[] appendBias(double[] vector, double bias) {
+        double[] result = new double[vector.length + 1];
+        System.arraycopy(vector, 0, result, 0, vector.length);
+        result[vector.length] = bias;
+        return result;
+    }
+
+    private double[] matrixVectorMultiply(double[][] matrix, double[] vector) {
+        double[] result = new double[matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            result[i] = 0;
+            for (int j = 0; j < matrix[i].length; j++) {
+                result[i] += matrix[i][j] * vector[j];
+            }
+        }
+        return result;
+    }
+
+    private double[] applyActivationFunction(double[] vector) {
+        double[] result = new double[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            result[i] = sigmoid(vector[i]);
+        }
+        return result;
+    }
+
+    private double[] vectorSubtract(double[] a, double[] b) {
+        double[] result = new double[a.length];
+        for (int i = 0; i < a.length; i++) {
+            result[i] = a[i] - b[i];
+        }
+        return result;
+    }
+
+    private double[] vectorMultiply(double[] a, double b) {
+        double[] result = new double[a.length];
+        for (int i = 0; i < a.length; i++) {
+            result[i] = a[i] * b;
+        }
+        return result;
+    }
+
+    private double[] vectorMultiply(double[] a, double[] b) {
+        double[] result = new double[a.length];
+        for (int i = 0; i < a.length; i++) {
+            result[i] = a[i] * b[i];
+        }
+        return result;
+    }
+
+    private double[] vectorSubtract(double a, double[] b) {
+        double[] result = new double[b.length];
+        for (int i = 0; i < b.length; i++) {
+            result[i] = a - b[i];
+        }
+        return result;
+    }
+
+    private double[][] scalarMatrixMultiply(double[][] matrix, double scalar) {
+        double[][] result = new double[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                result[i][j] = matrix[i][j] * scalar;
+            }
+        }
+        return result;
+    }
+
+    private double[][] matrixAdd(double[][] a, double[][] b) {
+        double[][] result = new double[a.length][a[0].length];
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < a[i].length; j++) {
+                result[i][j] = a[i][j] + b[i][j];
+            }
+        }
+        return result;
+    }
+
+    private double[][] transpose(double[][] matrix) {
+        double[][] result = new double[matrix[0].length][matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                result[j][i] = matrix[i][j];
+            }
+        }
+        return result;
+    }
+
+    private double[][] outerProduct(double[] a, double[] b) {
+        double[][] result = new double[a.length][b.length];
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < b.length; j++) {
+                result[i][j] = a[i] * b[j];
+            }
+        }
+        return result;
+    }
+
+    private double[][] removeLastRow(double[][] matrix) {
+        double[][] result = new double[matrix.length - 1][matrix[0].length];
+        for (int i = 0; i < matrix.length - 1; i++) {
+            result[i] = matrix[i];
+        }
+        return result;
     }
 }

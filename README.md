@@ -9,8 +9,20 @@ Dự án này áp dụng thuật toán **SHO** (Tối ưu hóa đàn linh cẩu)
 ---
 
 ## Hướng dẫn chạy dự án
-[Bổ sung sau]
+- **Bước 1**: Lấy dự án về local <br>
+`git clone https://github.com/khainam23/logistic.git`
 
+- **Bước 2**: Truy cập vào dự án <br>
+`cd logistic`
+
+- **Bước 3**: Checkout qua nhánh công việc (nếu có) hoặc tạo mới dựa trên base của branch **main**
+- **Bước 4**: 
+  + Mở thư mục bằng các trình IDE
+  + Truy cập vào file **pom.xml**
+  + Thực hiện **Maven > Install** hoặc các lệnh tương ứng <br>
+- ***Lưu ý***: 
+  + Nếu trong quá trình thực hiện gặp lỗi thì hãy thực hiện tạo **issue** lấy label **help** để nhận sự hỗ trợ nhanh nhất
+  + Chỉ những thành viên được thêm vào dự án mới có quyền pull request và xem xét duyệt
 ---
 
 ## Minh họa các dùng và ví dụ
@@ -25,7 +37,11 @@ Dự án này áp dụng thuật toán **SHO** (Tối ưu hóa đàn linh cẩu)
 ---
 
 ## Phần phụ trợ
-[Bổ sung sau]
+### Cấu trúc thư mục
+- **algorithms/**: Chứa các thuật toán, kỹ thuật xử lý
+- **data/**: Chứa các class xử lý dữ liệu hoặc chứa dữ liệu
+- **evaluation/**: Dùng cho việc đánh giá, xem kết quả của thuật toán
+- **Main.java**: Chạy toàn bộ dự án theo qui trình được thiết lập (nếu có)
 
 ---
 
