@@ -42,8 +42,15 @@ Dự án này áp dụng thuật toán **SHO** (Tối ưu hóa đàn linh cẩu)
 - **data/**: Chứa các class xử lý dữ liệu hoặc chứa dữ liệu
 - **evaluation/**: Dùng cho việc đánh giá, xem kết quả của thuật toán
 - **Main.java**: Chạy toàn bộ dự án theo qui trình được thiết lập (nếu có)
+- **assets/**: Lưu trữ hình ảnh cho việc viết README.md hoặc các tài nguyên ngoài khác 
 
+### Các từ khóa 
+- Tệp .npy: Là một định dạng tệp của thư viện Numpy (Python) dùng để lưu dữ liệu của một mảng.
+- Tệp .xlsx: Là định dạng tệp của Microsoft Excel, dùng để lưu trữ bảng tính và dữ liệu.
+- Tệp .csv: Là mộtđịnh dạng tệp văn bản đơn giản dùng để lưu trữ dữ liệu bảng.
+- 
 ---
 
 ## Tài liệu tham khảo
-[Bổ sung sau]
+- [Intrusion-Detection-System-for-Internet-of-Things](https://github.com/ArchanaBathula/Intrusion-Detection-System-for-Internet-of-Things)
+- 

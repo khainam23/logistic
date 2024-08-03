@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### datasets ###
+**/src/main/**/data/datasets/
+**/src/main/**/data/datasets.zip
