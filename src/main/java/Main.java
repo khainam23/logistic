@@ -1,18 +1,13 @@
-package org.algorithm;
+import org.algorithm.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-
-//Authors:
-//Daniel Mundell
-//Christian Dlamini
-//Kishan Jackpersad
-//Sipho Ntobela
-//Praveer Ramphul
+import java.util.Objects;
 
 public class Main {
+    private static final String PATH = Objects.requireNonNull(Main.class.getClassLoader().getResource("")).getPath();
 
     //These are the variables which can be changed
     private static final int REQUESTS = 50;//Any value from: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50
@@ -150,12 +145,11 @@ public class Main {
         System.out.println(String.format("Average time to first valid solution: %sms", averageFirstTime));
         System.out.println(String.format("Fewest constraints broken: %s", constraintBest));
         System.out.println(String.format("Average constrains broken: %s", averageConstraint));
-
     }
 
     public static void readFromFile() {
         try {
-            BufferedReader csvReader = new BufferedReader(new FileReader("datasets/" + REQUESTS + "locations.csv"));
+            BufferedReader csvReader = new BufferedReader(new FileReader(PATH + REQUESTS + "locations.csv"));
             String row;
             while ((row = csvReader.readLine()) != null) {
                 String[] data = row.split(",");
@@ -170,7 +164,7 @@ public class Main {
         }
 
         try {
-            BufferedReader csvReader = new BufferedReader(new FileReader("datasets/" + REQUESTS + "distances.csv"));
+            BufferedReader csvReader = new BufferedReader(new FileReader(PATH + REQUESTS + "distances.csv"));
             String row;
             int j = 0;
             while ((row = csvReader.readLine()) != null) {
@@ -186,7 +180,7 @@ public class Main {
         }
 
         try {
-            BufferedReader csvReader = new BufferedReader(new FileReader("datasets/" + REQUESTS + "capacity.csv"));
+            BufferedReader csvReader = new BufferedReader(new FileReader(PATH + REQUESTS + "capacity.csv"));
             String row;
             while ((row = csvReader.readLine()) != null) {
                 String[] data = row.split(",");

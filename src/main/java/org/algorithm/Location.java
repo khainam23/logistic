@@ -14,8 +14,8 @@ import lombok.experimental.FieldDefaults;
 public class Location {
     final boolean pickup; // Điểm lấy hàng
     // Tọa độ
-    final int x;
-    final int y;
+    int x;
+    int y;
     final int load; // Khối lượng hàng hóa (+: Lấy, -: Nhận)
     int LTW;// Thời gian thấp nhất có thể thực hiện tại điểm này
     int UTW;// Thời gian cao nhất có thể thực hiện tại điểm này
