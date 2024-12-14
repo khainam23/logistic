@@ -110,7 +110,6 @@ public class TabuSearch {
 
             int inputPick = getRandom(1, shifted.size() - 1);
             int inputDrop = getRandom(inputPick + 1, shifted.size());
-            ;
 
             shifted.add(inputPick, pick1);
             shifted.add(inputDrop, drop1);

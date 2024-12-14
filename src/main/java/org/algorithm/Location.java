@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 public class Location {
-    final boolean pickup; // Điểm lấy hàng
+    final boolean pickup; // điểm lấy hàng (true) hay điểm nhận hàng (false)
     // Tọa độ
     int x;
     int y;
