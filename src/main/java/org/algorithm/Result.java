@@ -1,19 +1,15 @@
 package org.algorithm;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+
 /**
- * Kết quả của điểm
+ * Kết quả sẽ hiển thị xử lý
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Getter
-@AllArgsConstructor
 public class Result {
-    boolean valid; // Thỏa điều kiện?
-    int cost; // Chi phí
-    long timeOfFirstValidSolution; // Thời gian tại điểm tìm ra lời giải hợp lệ đầu tiên
-    int numberOfConstraintsBroken; // Số lượng ràng buộc không thảo mãn
+    double cost; // Chi phí
+    ArrayList<Vehicle> vehicles; // Các di chuyển của các xe
 }

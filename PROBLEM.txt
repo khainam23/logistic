@@ -1,2 +1,0 @@
-- Khoảng các là số nguyên
--

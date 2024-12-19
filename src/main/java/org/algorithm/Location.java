@@ -2,40 +2,34 @@ package org.algorithm;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.awt.*;
+
 /**
- * Địa điểm giao, nhận hàng hóa
+ * Thể hiện tính chất của một điểm trong không gian
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-@Setter
 public class Location {
-    final boolean pickup; // điểm lấy hàng (true) hay điểm nhận hàng (false)
-    // Tọa độ
-    int x;
-    int y;
-    final int load; // Khối lượng hàng hóa (+: Lấy, -: Nhận)
-    int LTW;// Thời gian thấp nhất có thể thực hiện tại điểm này
-    int UTW;// Thời gian cao nhất có thể thực hiện tại điểm này
-    boolean serviced; // Điểm đã được phục vụ chưa?
-    boolean serviceable; // Địa điểm có thể phục vụ hay không?
-    public Location(boolean pickup, int x, int y, int load) {
-        this.pickup = pickup;
-        this.x = x;
-        this.y = y;
-        this.load = load;
-        this.serviced = false; // Mặc định là chưa
-        this.serviceable = pickup; // Tùy thuộc vào có là điểm nhận hàng
-    }
-    // Đặt lại tình trạng của địa điểm là chưa phục vụ
-    public void resetServiced() {
-        serviced = false;
-        serviceable = pickup;
-    }
-    @Override
-    public String toString() {
-        return String.format("%8s %11s %6s %6s %6s %10s %13s", pickup, "(" + x + ", " + y + "):", load, LTW, UTW, serviced, serviceable);
+    int x; // Tọa độ x trong không gian
+    int y; // Tọa độ y trong không gian
+    boolean isPickup; // Có là điểm lấy hàng
+    boolean isDrop; // Có là điểm thả hàng
+    int loadPickup; // Số lượng phải lấy
+    int loadDrop; // Số lượng phải thả
+    boolean isGet; // Cho biết đã lấy chưa
+    boolean isGive; // Cho biết đã thả chưa
+    int LTW; // Low time window: Thời gian sớm nhất có thể tới
+    int UTW; // Upper time window: Thời gian trễ nhất có thể tới
+
+    /**
+     * Tính khoảng cách bằng phương pháp euclid.
+     * Sử dụng công thức tính trong Point đã được java triển khai.
+     */
+    public double calculatorDistance(Location oLoc) {
+        Point point = new Point(x, y);
+        Point oPoint = new Point(oLoc.x, oLoc.y);
+        return point.distance(oPoint);
     }
 }

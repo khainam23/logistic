@@ -1,140 +1,141 @@
 package org.algorithm;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
 import java.util.*;
 
-public class SpottedHyenaOptimizer {
-    static Map<TypeFunctionalRandom, IFunctionalRandom> mapFunctional;
+/**
+ * Thuật toán tối ưu hóa theo đàn linh cẩu.
+ * Out: Lộ trình được cho là tối ưu nhất.
+ */
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class SpottedHyenaOptimizer extends AAlgorithm {
+    int MAX_ITERATION; // Giới hạn số lần thực hiện
 
-    // Đưa vào constructor khi có
-    static {
-        mapFunctional = new HashMap<>();
-        mapFunctional.put(TypeFunctionalRandom.SWAP_OPERATOR, Collections::shuffle);
+    @Override
+    public void optimize() {
+        // Step 1: Khởi tạo các giải pháp
+        Map<Vehicle, ArrayList<ArrayList<Location>>> clusterSolutions = initialPopulation();
     }
 
-    public double[][] init(int searchAgents, int dimension, double[] upperbound, double[] lowerbound) {
-        Random rand = new Random();
-        int boundary = upperbound.length;
-        double[][] pos = new double[searchAgents][dimension];
-
-        if (boundary == 1) {
-            for (int i = 0; i < searchAgents; i++) {
-                for (int j = 0; j < dimension; j++) {
-                    pos[i][j] = rand.nextDouble() * (upperbound[0] - lowerbound[0]) + lowerbound[0];
-                }
-            }
-        } else if (boundary > 1) {
-            for (int i = 0; i < dimension; i++) {
-                for (int j = 0; j < searchAgents; j++) {
-                    pos[j][i] = rand.nextDouble() * (upperbound[i] - lowerbound[i]) + lowerbound[i];
-                }
-            }
+    /**
+     * Tìm ra giải pháp cho là tối ưu cho mỗi phương tiện
+     */
+    public Map<Vehicle, ArrayList<ArrayList<Location>>> initialPopulation() {
+        Map<Vehicle, ArrayList<ArrayList<Location>>> result = new HashMap<>();
+        for (Vehicle vehicle : vehicles) {
+            result.put(vehicle, createRandomSolution(vehicle));
         }
-
-        return pos;
     }
 
-    public int noh(double[] bestHyenaFitness) {
-        double min = 0.5;
-        double max = 1;
-        int count = 0;
-        Random rand = new Random();
-
-        double M = rand.nextDouble() * (max - min) + min;
-        M = M + bestHyenaFitness[0];
-
-        for (int i = 1; i < bestHyenaFitness.length; i++) {
-            if (M >= bestHyenaFitness[i]) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    // Hàm fitness cần phải được định nghĩa trước khi sử dụng
-    public double fitness(double[] position) {
-        // Thực thi hàm fitness ở đây
-        return 0.0;
-    }
-
-    public Object[] sho(int N, int maxIterations, double[] lowerbound, double[] upperbound, int dimension) {
-        double[][] hyenaPos = init(N, dimension, upperbound, lowerbound);
-        double[] convergenceCurve = new double[maxIterations];
-        int iteration = 0;
-        double[] bestHyenaScore = new double[1];
-        double[][] bestHyenaPos = new double[1][dimension];
-
-        while (iteration < maxIterations) {
-            double[] hyenaFitness = new double[N];
-
-            // Tính fitness cho các hyena
-            for (int i = 0; i < N; i++) {
-                // Kiểm tra giới hạn của hyena
-                for (int j = 0; j < dimension; j++) {
-                    if (hyenaPos[i][j] > upperbound[j]) hyenaPos[i][j] = upperbound[j];
-                    if (hyenaPos[i][j] < lowerbound[j]) hyenaPos[i][j] = lowerbound[j];
-                }
-
-                hyenaFitness[i] = fitness(hyenaPos[i]);
-            }
-
-            double[] fitnessSorted = Arrays.copyOf(hyenaFitness, N);
-            Arrays.sort(fitnessSorted);
-            int[] sortedIndices = new int[N];
-            for (int i = 0; i < N; i++) {
-                sortedIndices[i] = i;
-            }
-            Arrays.sort(sortedIndices);
-
-            double[][] sortedPopulation = new double[N][dimension];
-            for (int i = 0; i < N; i++) {
-                sortedPopulation[i] = hyenaPos[sortedIndices[i]];
-            }
-
-            // Lưu hyena tốt nhất
-            bestHyenaPos[0] = sortedPopulation[0];
-            bestHyenaScore[0] = fitnessSorted[0];
-
-            // Sử dụng hàm `noh` để tính toán số lượng hyena có thể "săn"
-            int NOH = noh(fitnessSorted);
-
-            // Cập nhật các hyena
-            double a = 5 - iteration * (5.0 / maxIterations);
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < dimension; j++) {
-                    double CV = 0;
-                    for (int k = 0; k < NOH; k++) {
-                        Random rand = new Random();
-                        double r1 = rand.nextDouble();
-                        double r2 = rand.nextDouble();
-                        double Var1 = 2 * a * r1 - a;
-                        double Var2 = 2 * r2;
-                        double distanceToHyena = Math.abs(Var2 * sortedPopulation[k][j] - hyenaPos[i][j]);
-                        CV += sortedPopulation[k][j] - Var1 * distanceToHyena;
-                    }
-                    hyenaPos[i][j] = CV / (NOH + 1);
+    /**
+     * Sử dụng thuật toán SA để tạo ra các giải pháp khả thi.
+     * 1. Sinh ra một giải pháp ngẫu nhiên (randomSolution) dựa trên firstSolution (đường đi được cho đầu tiên)
+     * 2. Tính chi phí randomSolution
+     * 3. Tạo ra một giải pháp khác lân cận (neighborSolution) giải pháp trước (randomSolution)
+     * 4. So sánh chi phí randomSolution và neighborSolutiion
+     * 5. Lựa chọn giải pháp tốt hơn
+     * 6. Lặp lại trên điều kiện
+     */
+    public ArrayList<ArrayList<Location>> createRandomSolution(Vehicle vehicle) {
+        ArrayList<ArrayList<Location>> result = new ArrayList<>();
+        final Random rd = new Random();
+        ArrayList<Location> currentLocation = new ArrayList<>(vehicle.getWay());
+        double oldCost = calculatorCost(currentLocation, vehicle); // Chi phí của cách đó đối với loại xe
+        double T = 1; // Giá trị bắt đầu
+        double TMin = 0.0001; // Ngưỡng dừng
+        double alpha = 0.9; // Giá trị giảm mỗi vòng
+        while (T > TMin) {
+            // Thử tìm một giá trị mới trong giới hạn lần
+            for (int i = 0; i < MAX_ITERATION; i++) {
+                ArrayList<Location> newLocation = neighborBySA(currentLocation); // Tìm ra lộ trình có giá trị gần
+                double newCost = calculatorCost(newLocation, vehicle); // Tính chi phí đường mới đối với xe
+                double ap = acceptanceProbability(oldCost, newCost, T); // Tính
+                if(ap > rd.nextDouble()) {
+                    // Chấp nhận ngẫu nhiên
+                    currentLocation = newLocation;
+                    oldCost = newCost;
                 }
             }
-
-            convergenceCurve[iteration] = bestHyenaScore[0];
-            iteration++;
+            T *= alpha;
         }
-
-        return new Object[]{bestHyenaScore[0], bestHyenaPos[0], convergenceCurve};
+        vehicle.setWay(currentLocation);
+        return currentLocation;
     }
 
-    enum TypeFunctionalRandom {
-        // Hoán đổi từng phần tử
-        SWAP_OPERATOR,
-        // Hoán đổi một nhóm phần tử
-        SWAP_SEQUENCE,
-        PD_SHIFT,
-        PD_EXCHANGE,
-        PD_REARRANGE
+    public ArrayList<Location> neighborBySA(ArrayList<Location> locations) {
+        return null;
     }
 
-    @FunctionalInterface
-    interface IFunctionalRandom {
-        void method(ArrayList<Location> hyena);
+    /**
+     * Tính phần trăm chấp nhận giá trị mới.
+     * Nếu nó tốt hơn (old > new) thì chấp nhận.
+     * Ngược lại tính theo công thức e^((old - new) / T) lý thuyết xác suất.
+     */
+    public double acceptanceProbability(double oldCost, double newCost, double T) {
+        return newCost <= oldCost ? 1 : Math.pow(Math.E, (oldCost - newCost) / T);
+    }
+
+    /**
+     * Tính giá trị của điểm.
+     * Giả sử thời gian di chuyển của xe thỏa không gian của lộ trình.
+     * (bắt đầu và kết thúc đủ để đi hết)
+     * Kết quả = Tổng thời gian + Điểm phạt nếu có + Chi phí vận hành xe
+     * Giá trị lớn = Tốt
+     * Giá trị dương thấp = Tạm
+     * Giá trị âm = Chưa ổn
+     * Lý do cộng cả trọng tải và thời gian là vì có thể có nhiều điểm ra 0,
+     * Và từ đó sẽ làm khó trong quá trình so sánh.
+     * (Trong bài báo không đề cập nên cách tính sẽ là điểm thưởng phạt)
+     */
+    private double calculationFitness(ArrayList<Location> location, Vehicle vehicle) {
+        double fitness = 0; // Kết quả điểm
+        double currentTime = 0; // Đánh giá cho thời gian
+        double currentLoad = 0; // Đánh giá cho trọng tải
+        final int bonus = 100; // Giá trị giả định nếu có thưởng / phạt
+
+        // Triển khai tính điểm
+        for (int i = 0; i < location.size() - 1; i++) {
+            Location currentLoc = location.get(i);
+            Location nextLoc = location.get(i + 1);
+
+            // Giả định khoảng cách 2 điểm chính là thời gian di chuyển
+            double tempTime = currentLoc.calculatorDistance(nextLoc);
+
+            // Cập nhật thời gian
+            currentTime += tempTime;
+            if(currentTime < currentLoc.getLTW()) {
+                // Đến trước thời gian cần giao -> Thưởng
+                fitness += bonus;
+            }
+            if (currentTime > currentLoc.getUTW()) {
+                // Đến trễ hơn thời gian cần giao -> Phạt
+                fitness -= bonus;
+            }
+
+            // Cập nhật tải trọng
+            currentLoad += calculatorLoad(currentLoc);
+            if(currentLoad < 0 || currentLoad > vehicle.getMaxLoad()) {
+                // Số hàng phải thả nhiều hơn số hàng hiện có -> Phạt
+                // Số hàng phải lấy lấy hơn giá trị chứa -> Phạt
+                fitness -= bonus;
+            }
+
+            fitness += currentTime;
+        }
+        fitness += vehicle.getCost();
+        return fitness;
+    }
+
+    /**
+     * Tính toán tải trọng nhận trên điểm.
+     * Tổng = Số hàng phải lấy - Số hàng phải thả
+     */
+    public double calculatorLoad(Location location) {
+        int total = 0;
+        if(location.isPickup()) total += location.getLoadPickup();
+        if(location.isDrop()) total -= location.getLoadDrop();
+        return total;
     }
 }
