@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.List;
 
 /**
  * Định danh về phương tiện trong không gian
@@ -15,11 +16,8 @@ import java.util.ArrayList;
 @Setter
 public class Vehicle {
     long id; // Định danh cho chiếc xe
-    int x; // Tọa độ x trong không gian
-    int y; // Tọa độ y trong không gian
-    int maxLoad; // Khả năng trọng tải tối đa
-    double cost; // Chi phí khi vận hành xe
-    double timeStart; // Thời gian bắt đầu di chuyển
-    double timeEnd; // Thời gian sẽ ngừng
-    ArrayList<Location> way; // Đoạn đường sẽ đi
+    Point point; // Tọa độ trong không gian
+    int Q; // Khả năng trọng tải tối đa (bao gồm cả hàng nhận và trả)
+    int q; // Trọng tải hiện đang có
+    List<Location> way; // Đoạn đường sẽ đi
 }

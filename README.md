@@ -27,6 +27,8 @@ m-VRPSPDTW là biến thể nâng cao trong đó sẽ m chuyến xe thực hiệ
   + Các khung thời gian của khách hàng.
   + Lộ trình hợp lý để thực hiện cả hai nhiệm vụ (giao và thu) trong cùng một chuyến đi.
 #### Thuật toán triển khai
+##### Các ràng buộc 
+- 
 ##### Vị trí
 Trong bài toán một điểm có thể giao và nhận, thì một vị trí phải được biểu diễn bởi 2 trạng thái:
 - Giao hàng

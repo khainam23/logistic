@@ -51,7 +51,7 @@ public class SpottedHyenaOptimizer extends AAlgorithm {
             } else {
                 // Swap theo sự giống nhau của prey
                 List<Location> preyWay = prey.get(prey.indexOf(vehicle)).getWay();
-
+                
             }
         }
         return heyna;
