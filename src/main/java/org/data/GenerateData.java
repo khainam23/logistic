@@ -1,8 +1,11 @@
 package org.data;
 
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.model.Location;
+import org.model.Vehicle;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,9 +13,13 @@ import java.util.List;
 import java.util.Random;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Getter
+@NoArgsConstructor
 public class GenerateData {
-    final int MAX_ITERATOR = 100; // Ràng buộc tìm kiếm
     List<Location> locations;
+    int[][] distances;
+    int capacity;
+    List<List<Vehicle>> solutions;
 
     /**
      * @param n     - Số lượng điểm location
@@ -22,17 +29,20 @@ public class GenerateData {
         if (n < 5)
             throw new RuntimeException("[GenerateData > generateLocations()] Number of tasks must be greater than 4!");
 
+        long startTime = System.currentTimeMillis();
+
         // Các tham số ràng buộc
         final int MIN_CORD = 1;
         final int MAX_CORD = 100;
-        final int MIN_CAPACITY = 1;
-        final int MAX_CAPACITY = 10;
+        final int MIN_CAPACITY = 10;
+        final int MAX_CAPACITY = 100;
 
         // Khởi tạo các biến sử dụng chính
-        int capacity = getRandom(MIN_CAPACITY, MAX_CAPACITY);
+        capacity = getRandom(MIN_CAPACITY, MAX_CAPACITY);
         locations = new ArrayList<>();
-        int[][] distances = new int[n][n];
+        distances = new int[n][n];
         int[] successfulRoute = new int[n];
+        solutions = new ArrayList<>();
 
         // Add n tasks
         Location depot = new Location(0, new Point(0, 0));
@@ -80,10 +90,10 @@ public class GenerateData {
             }
         }
 
-        //Average time of randomly generated route
+        // Tính thời gian trung bình tìm kiếm ra giải pháp
         int averageTime = time / visits;
 
-        //Create time windows which suite the route
+        // Tạo time phù hợp cho lộ trình
         for (int i = 1; i < locations.size(); i++) {
             int w = getRandom(1, width) * averageTime * 10;
             locations.get(i).setUTW(arrivalTime[i] + w);
@@ -93,12 +103,39 @@ public class GenerateData {
                 locations.get(i).setLTW(arrivalTime[i] - w);
             }
         }
+
+        resetLocation();
+        System.out.println("Finish generate locations: " + (System.currentTimeMillis() - startTime) + " ms");
+    }
+
+    public void resetLocation() {
+        locations.forEach(Location::reset);
+    }
+
+    public void printData() {
+        System.out.println("Distances by Euclid:");
+        int maxWidth = 0;
+        for (int[] row : distances) {
+            for (int num : row) {
+                maxWidth = Math.max(maxWidth, String.valueOf(num).length());
+            }
+        }
+
+        for (int[] row : distances) {
+            for (int num : row) {
+                System.out.printf("%" + (maxWidth + 2) + "d", num);
+            }
+            System.out.println();
+        }
+        System.out.println("-".repeat(maxWidth));
+        System.out.println("Locations:");
+        locations.forEach(Location::print);
     }
 
     public static void main(String[] args) {
         GenerateData generateData = new GenerateData();
         generateData.generateLocations(10, 10);
-        System.out.println(generateData.locations);
+        generateData.printData();
     }
 
     // Lấy ngẫu nhiên giá trị trong một khoảng

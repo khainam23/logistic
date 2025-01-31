@@ -43,6 +43,14 @@ public class Location {
     public int getLoad() {
         return demandPick - demandDeliver;
     }
+
+    public void reset() {
+        this.isServiced = false;
+    }
+
+    public void print() {
+        System.out.printf("Id: %d Point: (x=%d, y=%d) Pick=%d Deliver=%d Window=[%d, %d] Service=%d\n", no, point.x, point.y, demandPick, demandDeliver, LTW, UTW, serviceTime);
+    }
     /**
      * Dựa vào các thuộc tính trong database của VRPTW mà triển khai
      * các thuộc tính của một địa điểm
