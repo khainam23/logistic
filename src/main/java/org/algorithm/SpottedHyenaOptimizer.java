@@ -2,6 +2,7 @@ package org.algorithm;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.data.GenerateData;
 import org.data.Result;
 import org.model.Hyena;
 
@@ -15,10 +16,32 @@ public class SpottedHyenaOptimizer extends Algorithm {
     @Override
     public Result run() {
         FitnessEvaluate fitness = new FitnessEvaluate() {};
-
         sho(100, locations.size(), fitness);
-
         return null;
+    }
+
+    public static void main(String[] args) {
+        FitnessEvaluate fitness = new FitnessEvaluate() {
+            @Override
+            public double calculateSHO(double[] hyenaPos) {
+                return (new Random()).nextDouble(100);
+            }
+        };
+        GenerateData generateData = new GenerateData();
+        generateData.generateLocations(5, 100);
+        double[] ltw = new double[generateData.getLocations().size()];
+        double[] utw = new double[ltw.length];
+        for (int j = 0; j < generateData.getLocations().size(); j++) {
+            ltw[j] = generateData.getLocations().get(j).getLTW();
+            utw[j] = generateData.getLocations().get(j).getUTW();
+        }
+        SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer();
+        sho.setLowerBounds(ltw);
+        sho.setUpperBounds(utw);
+        System.out.println("LTW >> " + Arrays.toString(sho.getLowerBounds()));
+        System.out.println("UTW >> " + Arrays.toString(sho.getUpperBounds()));
+        sho.setLocations(generateData.getLocations());
+        sho.sho(100, ltw.length, fitness);
     }
 
     public double[][] init(int searchAgents, int dimension) {
@@ -70,6 +93,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
         int iteration = 1;
 
         while (iteration <= MAX_ITERATOR) {
+            System.out.println("Iterator " + iteration + " SHO:");
             double[] hyenaFitness = new double[N];
             for (int i = 0; i < N; i++) {
                 //  Đảm bảo rằng không có hyena nào ra khỏi giới hạn
@@ -128,5 +152,8 @@ public class SpottedHyenaOptimizer extends Algorithm {
             convergenceCurve[iteration - 1] = bestHyenaScore;
             iteration++;
         }
+
+        System.out.println("SHO");
+        System.out.println(Arrays.deepToString(hyenaPos));
     }
 }

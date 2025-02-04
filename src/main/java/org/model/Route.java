@@ -1,13 +1,21 @@
 package org.model;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class Route {
-    int[] routes; // Các location trong nhánh này
-    int currentCapacity;
-    /**
-     * Ràng buộc về việc di chuyển nhận giao giữa các location
-     */
+    List<Integer> indLoc; // Vị trí của location trong tập lớn
+    double score; // Giá trị của route này
+    static int ind = 1; // Dùng cho việc in ra
+
+    public void print() {
+        System.out.printf("Route %d, score=%s: ", ind++, score);
+        indLoc.forEach(i -> System.out.print(i + " "));
+        System.out.println();
+    }
 }

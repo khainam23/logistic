@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.model.Location;
+import org.model.Route;
 import org.model.Vehicle;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -20,8 +20,43 @@ public class GenerateData {
     int[][] distances;
     int capacity;
     List<List<Vehicle>> solutions;
+    final Random rd = new Random();
+
+    public List<Route> generateSolution(int numVehicle) {
+        if (numVehicle <= 0) {
+            System.out.println("!!! Auto set vehicle = 3");
+            numVehicle = 3;
+        }
+
+        if (locations == null) {
+            System.out.println("!!! Auto set location with n = 8, width = 100");
+            generateLocations(8, 100);
+        }
+
+        List<Integer> storeIndLoc = new ArrayList<>();
+        for (int i = 0; i < locations.size(); i++) {
+            storeIndLoc.add(i);
+        }
+
+        List<Route> routes = new ArrayList<>(numVehicle);
+        for (int i = 0; i < numVehicle; i++) {
+            int sizeRoute = i == numVehicle - 1 ? storeIndLoc.size() : storeIndLoc.size() / (numVehicle - i);
+            System.out.println(sizeRoute);
+            List<Integer> indLoc = new ArrayList<>();
+            for (int j = 0; j < sizeRoute; j++) {
+                indLoc.add(storeIndLoc.remove(rd.nextInt(storeIndLoc.size()))); // Loại bỏ khiến kích thước thay đổi liên tục
+            }
+            routes.add(Route.builder().indLoc(indLoc).build());
+        }
+        printData();
+        routes.forEach(Route::print);
+        return routes;
+    }
+
 
     /**
+     * Tạo ra các điểm location giả
+     *
      * @param n     - Số lượng điểm location
      * @param width - Khung thời gian
      */
@@ -76,6 +111,10 @@ public class GenerateData {
         int currentCapacity = 0;
         successfulRoute[0] = 0;
         while (visits < locations.size() - 1) {
+            if(System.currentTimeMillis() - startTime > 3000) {
+                System.out.println("So long generate locations !!!");
+                return;
+            }
             int index = getRandom(1, locations.size() - 1);//random location ignoring the depot
             if (!locations.get(index).isServiced()) {
                 if (currentCapacity + locations.get(index).getLoad() <= capacity) {
@@ -105,14 +144,16 @@ public class GenerateData {
         }
 
         resetLocation();
+        printData();
         System.out.println("Finish generate locations: " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
-    public void resetLocation() {
+    private void resetLocation() {
         locations.forEach(Location::reset);
     }
 
-    public void printData() {
+    private void printData() {
+        System.out.println("Capacity by generate: " + capacity);
         System.out.println("Distances by Euclid:");
         int maxWidth = 0;
         for (int[] row : distances) {
@@ -134,8 +175,13 @@ public class GenerateData {
 
     public static void main(String[] args) {
         GenerateData generateData = new GenerateData();
-        generateData.generateLocations(10, 10);
-        generateData.printData();
+
+        // Generate Locations
+//        generateData.generateLocations(100, 10);
+//        generateData.printData();
+
+        // Generate Solution
+        generateData.generateSolution(0);
     }
 
     // Lấy ngẫu nhiên giá trị trong một khoảng
