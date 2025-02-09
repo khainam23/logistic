@@ -22,11 +22,10 @@ public class GenerateData {
     List<List<Vehicle>> solutions;
     final Random rd = new Random();
 
-    public List<Route> generateSolution(int numVehicle) {
-        if (numVehicle <= 0) {
-            System.out.println("!!! Auto set vehicle = 3");
-            numVehicle = 3;
-        }
+    // Dùng để tạo ra một lời giải (không tối ưu)
+    public List<Route> generateSolution() {
+        System.out.println("!!! Auto set vehicle = 3");
+        int numVehicle = 3;
 
         if (locations == null) {
             System.out.println("!!! Auto set location with n = 8, width = 100");
@@ -34,7 +33,8 @@ public class GenerateData {
         }
 
         List<Integer> storeIndLoc = new ArrayList<>();
-        for (int i = 0; i < locations.size(); i++) {
+        // Không sử dụng depot
+        for (int i = 1; i < locations.size(); i++) {
             storeIndLoc.add(i);
         }
 
@@ -53,14 +53,13 @@ public class GenerateData {
         return routes;
     }
 
-
     /**
      * Tạo ra các điểm location giả
      *
      * @param n     - Số lượng điểm location
      * @param width - Khung thời gian
      */
-    public void generateLocations(int n, int width) {
+    private void generateLocations(int n, int width) {
         if (n < 5)
             throw new RuntimeException("[GenerateData > generateLocations()] Number of tasks must be greater than 4!");
 
@@ -111,7 +110,7 @@ public class GenerateData {
         int currentCapacity = 0;
         successfulRoute[0] = 0;
         while (visits < locations.size() - 1) {
-            if(System.currentTimeMillis() - startTime > 3000) {
+            if (System.currentTimeMillis() - startTime > 3000) {
                 System.out.println("So long generate locations !!!");
                 return;
             }
@@ -171,17 +170,6 @@ public class GenerateData {
         System.out.println("-".repeat(maxWidth));
         System.out.println("Locations:");
         locations.forEach(Location::print);
-    }
-
-    public static void main(String[] args) {
-        GenerateData generateData = new GenerateData();
-
-        // Generate Locations
-//        generateData.generateLocations(100, 10);
-//        generateData.printData();
-
-        // Generate Solution
-        generateData.generateSolution(0);
     }
 
     // Lấy ngẫu nhiên giá trị trong một khoảng

@@ -1,4 +1,7 @@
 import org.data.GenerateData;
+import org.model.Route;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -11,10 +14,7 @@ public class Main {
     public static void test() {
         // Create data
         GenerateData generateData = new GenerateData();
-        generateData.generateLocations(20, 1000);
-//        generateData.printData();
-
-        int vehicle = 5;
+        List<Route> routes = generateData.generateSolution(); // q = 3 n = 5 width = 100
 
 
     }

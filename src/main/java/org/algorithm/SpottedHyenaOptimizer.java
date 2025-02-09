@@ -2,158 +2,124 @@ package org.algorithm;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.data.GenerateData;
 import org.data.Result;
 import org.model.Hyena;
+import org.model.Route;
+import org.util.ChangeSolution;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpottedHyenaOptimizer extends Algorithm {
-    Hyena bestHyena;
+    final int SIZE_POPULATION = 100;
 
     @Override
-    public Result run() {
-        FitnessEvaluate fitness = new FitnessEvaluate() {};
-        sho(100, locations.size(), fitness);
+    public Result optimizer() {
         return null;
     }
 
-    public static void main(String[] args) {
-        FitnessEvaluate fitness = new FitnessEvaluate() {
-            @Override
-            public double calculateSHO(double[] hyenaPos) {
-                return (new Random()).nextDouble(100);
-            }
-        };
-        GenerateData generateData = new GenerateData();
-        generateData.generateLocations(5, 100);
-        double[] ltw = new double[generateData.getLocations().size()];
-        double[] utw = new double[ltw.length];
-        for (int j = 0; j < generateData.getLocations().size(); j++) {
-            ltw[j] = generateData.getLocations().get(j).getLTW();
-            utw[j] = generateData.getLocations().get(j).getUTW();
+    public Hyena sho() {
+        // Step 1: Khởi tạo ban đầu
+        List<Hyena> population = initializePopulation();
+
+        // Step 2: Lựa chọn các giá trị cho thuật toán
+            // Vòng lặp tối đa đã được định nghĩa ở class Algorithm
+        double h = 5;
+        double B = 2;
+        double E = 1;
+        int N = 2; // Ban đầu cứ lựa giả định
+
+        // Step 3: Tính giá trị fitness trên mỗi hyena
+        // (đã được tính trong quá trình khởi tạo giải pháp)
+        double[] fitness = new double[SIZE_POPULATION];
+        for (int i = 0; i < population.size(); i++) {
+            fitness[i] = population.get(i).getFitness();
         }
-        SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer();
-        sho.setLowerBounds(ltw);
-        sho.setUpperBounds(utw);
-        System.out.println("LTW >> " + Arrays.toString(sho.getLowerBounds()));
-        System.out.println("UTW >> " + Arrays.toString(sho.getUpperBounds()));
-        sho.setLocations(generateData.getLocations());
-        sho.sho(100, ltw.length, fitness);
-    }
 
-    public double[][] init(int searchAgents, int dimension) {
-        double[][] pos = new double[searchAgents][dimension];
-
-        if (upperBounds.length == 1 && lowerBounds.length == 1) {
-            double ub = upperBounds[0];
-            double lb = lowerBounds[0];
-            for (int i = 0; i < searchAgents; i++) {
-                for (int j = 0; j < dimension; j++) {
-                    pos[i][j] = rd.nextDouble() * (ub - lb) + lb; // Khởi tạo vị trí ngẫu hiên của các hyena
-                }
-            }
-        } else {
-            // Trường hợp là không gian lớn hơn
-            for (int i = 0; i < dimension; i++) {
-                double ub_i = upperBounds[i];
-                double lb_i = lowerBounds[i];
-                for (int j = 0; j < searchAgents; j++) {
-                    pos[j][i] = rd.nextDouble() * (ub_i - lb_i) + lb_i;
-                }
+        // Step 4: Hyena tốt nhất hiện tại - dựa vào fitness
+        double bestScoreHyena = fitness[0];
+        int indBestHyena = 0;
+        for (int i = 1; i < fitness.length; i++) {
+            if(bestScoreHyena >= fitness[i]) {
+                indBestHyena = i;
+                bestScoreHyena = fitness[i];
             }
         }
-        return pos;
+
+        // Spotted Hyena Optimizer
+        for (int i = 0; i < MAX_ITERATOR; i++) {
+            // Step 5: Xác định nhóm cá thể tối ưu
+            List<Hyena> clusterHyena = clusterHyenas(N);
+
+
+            // Step 6: Cập nhật vị trí của các hyena
+            updatePosition();
+
+            // Step 7: Kiểm soát giới hạn
+            checkBoundary();
+
+            // Step 8: Tính lại fitness và cập nhật best heyna nếu có
+            for (int j = 0; j < fitness.length; j++) {
+                fitness[j] = fitness(population.get(j).getRoutes());
+                if(bestScoreHyena >= fitness[j]) {
+                    bestScoreHyena = fitness[j];
+                    indBestHyena = j;
+                }
+            }
+
+            // Step 9: Cập nhật nhóm các cá thể tối ưu
+
+            // Step 10: Kiểm tra các điều kiện khác
+        }
+
+        // Step 11: Return về best hyena tìm được
+        return population.get(indBestHyena);
     }
 
-    public int noh(double[] bestHyenaFitness) {
+    /**
+     * Khởi tạo các giải pháp (hyena)
+     */
+    private List<Hyena> initializePopulation() {
+        List<Hyena> hyenas = new ArrayList<>();
+        for (int i = 0; i < SIZE_POPULATION; i++) {
+            List<Route> newSolution = ChangeSolution.swapOperation(solution);
+            Hyena hyena = new Hyena(newSolution, fitness(newSolution));
+            hyenas.add(hyena);
+        }
+        return hyenas;
+    }
+
+    /**
+     * Đếm các hyena vượt qua điều kiện test.
+     */
+    private int noh(List<Double> bestHyenaFitness) {
         double min = 0.5;
         double max = 1.0;
         double M = min + (max - min) * rd.nextDouble();
-        M += bestHyenaFitness[0];
+        M += bestHyenaFitness.get(0);
 
         int count = 0;
-        for (int i = 1; i < bestHyenaFitness.length; i++) {
-            if (M >= bestHyenaFitness[i]) {
-                count++;
-            }
+        for (int i = 0; i < bestHyenaFitness.size(); i++) {
+            if(M >= bestHyenaFitness.get(0))
+                ++count;
         }
         return count;
     }
 
-    public void sho(int N, int dimension, FitnessEvaluate fitness) {
-        double[][] hyenaPos = init(N, dimension);
-        double[] convergenceCurve = new double[MAX_ITERATOR];
-        double[] bestHyenaPos = new double[dimension];
-        double bestHyenaScore = Double.MAX_VALUE;
+    /**
+     * Tìm nhóm tối ưu. Sử dụng Eqs (8) và (9)
+     * @return
+     */
+    private List<Hyena> clusterHyenas(int N) {
+        return null;
+    }
 
-        Random rand = new Random();
-        int iteration = 1;
+    private void updatePosition() {
 
-        while (iteration <= MAX_ITERATOR) {
-            System.out.println("Iterator " + iteration + " SHO:");
-            double[] hyenaFitness = new double[N];
-            for (int i = 0; i < N; i++) {
-                //  Đảm bảo rằng không có hyena nào ra khỏi giới hạn
-                for (int j = 0; j < dimension; j++) {
-                    if (hyenaPos[i][j] > upperBounds[j]) {
-                        hyenaPos[i][j] = upperBounds[j];
-                    } else if (hyenaPos[i][j] < lowerBounds[j]) {
-                        hyenaPos[i][j] = lowerBounds[j];
-                    }
-                }
-                // Tính fitness của từng hyena
-                hyenaFitness[i] = fitness.calculateSHO(hyenaPos[i]);
-            }
+    }
 
-            // Sort fitness and positions
-            double[] sortedFitness = hyenaFitness.clone();
-            Arrays.sort(sortedFitness);
+    private void checkBoundary() {
 
-            double[][] sortedPopulation = new double[N][dimension];
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (hyenaFitness[j] == sortedFitness[i]) {
-                        sortedPopulation[i] = hyenaPos[j].clone();
-                        break;
-                    }
-                }
-            }
-
-            // Update best solutions
-            if (iteration == 1) {
-                bestHyenaScore = sortedFitness[0];
-                bestHyenaPos = sortedPopulation[0].clone();
-            }
-
-            int NOH = noh(sortedFitness);
-
-            double h = 5 - iteration * (5.0 / MAX_ITERATOR);
-            double CV = 0;
-
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < dimension; j++) {
-                    double newPos = 0;
-                    for (int k = 0; k < NOH; k++) {
-                        double r1 = rand.nextDouble();
-                        double r2 = rand.nextDouble();
-                        double E = 2 * h * r1 - h;
-                        double B = 2 * r2;
-
-                        double distanceToHyena = Math.abs(E * sortedPopulation[k][j] - hyenaPos[i][j]);
-                        newPos += sortedPopulation[k][j] - B * distanceToHyena;
-                    }
-                    hyenaPos[i][j] = newPos / (NOH + 1);
-                }
-            }
-
-            convergenceCurve[iteration - 1] = bestHyenaScore;
-            iteration++;
-        }
-
-        System.out.println("SHO");
-        System.out.println(Arrays.deepToString(hyenaPos));
     }
 }
