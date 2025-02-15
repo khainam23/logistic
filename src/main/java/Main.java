@@ -1,4 +1,7 @@
+import org.algorithm.Algorithm;
+import org.algorithm.SpottedHyenaOptimizer;
 import org.data.GenerateData;
+import org.data.Result;
 import org.model.Route;
 
 import java.util.List;
@@ -16,7 +19,10 @@ public class Main {
         GenerateData generateData = new GenerateData();
         List<Route> routes = generateData.generateSolution(); // q = 3 n = 5 width = 100
 
-
+        // Run algorithm
+        Algorithm algorithm = new SpottedHyenaOptimizer(generateData.getLocations(), routes);
+        Result result = algorithm.optimizer();
+        result.print();
     }
 
     /**

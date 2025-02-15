@@ -13,13 +13,24 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 @Data
 public abstract class Algorithm {
-    int maxCapacity; // Trọng tải tối đa chung của các xe
     final int MAX_ITERATOR = 100; // Giới hạn số lần tìm giải pháp
     final int MAX_TIME_SOLUTION = 60000; // Giới hạn thời gian tìm giải pháp
     double[][] distances; // Khoảng các giữa các điểm
     List<Location> locations; // Các khách hàng
-    List<Route> solution; // Giải pháp
+    List<Route> solution; // Giải pháp hiện có
+    long firstTimeSolution;
     final Random rd = new Random();
+
+    public Algorithm(List<Location> locations, List<Route> solution) {
+        this.locations = locations;
+        this.solution = solution;
+        this.distances = new double[locations.size()][locations.size()];
+        for (int i = 0; i < locations.size(); i++) {
+            for (int j = 0; j < locations.size(); j++) {
+                distances[i][j] = locations.get(i).distance(locations.get(j));
+            }
+        }
+    }
 
     /**
      * Đánh giá điểm số trên giải pháp nhận được.

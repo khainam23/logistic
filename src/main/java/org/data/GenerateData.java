@@ -41,14 +41,12 @@ public class GenerateData {
         List<Route> routes = new ArrayList<>(numVehicle);
         for (int i = 0; i < numVehicle; i++) {
             int sizeRoute = i == numVehicle - 1 ? storeIndLoc.size() : storeIndLoc.size() / (numVehicle - i);
-            System.out.println(sizeRoute);
             List<Integer> indLoc = new ArrayList<>();
             for (int j = 0; j < sizeRoute; j++) {
                 indLoc.add(storeIndLoc.remove(rd.nextInt(storeIndLoc.size()))); // Loại bỏ khiến kích thước thay đổi liên tục
             }
             routes.add(Route.builder().indLoc(indLoc).build());
         }
-        printData();
         routes.forEach(Route::print);
         return routes;
     }
@@ -110,8 +108,9 @@ public class GenerateData {
         int currentCapacity = 0;
         successfulRoute[0] = 0;
         while (visits < locations.size() - 1) {
-            if (System.currentTimeMillis() - startTime > 3000) {
+            if (System.currentTimeMillis() - startTime > 6000) {
                 System.out.println("So long generate locations !!!");
+                printData();
                 return;
             }
             int index = getRandom(1, locations.size() - 1);//random location ignoring the depot

@@ -1,11 +1,16 @@
 package org.algorithm;
 
 import org.data.Result;
+import org.model.Location;
 import org.model.Route;
 
 import java.util.List;
 
 public class SimulatedAnnealing extends Algorithm {
+    public SimulatedAnnealing(List<Location> locations, List<Route> solution) {
+        super(locations, solution);
+    }
+
     @Override
     public Result optimizer() {
         return null;

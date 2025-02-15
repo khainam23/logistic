@@ -12,12 +12,34 @@ import java.util.List;
 @Getter
 public class Route {
     List<Integer> indLoc; // Vị trí của location trong tập lớn
-    double score; // Giá trị của route này
-    static int ind = 1; // Dùng cho việc in ra
 
     public void print() {
-        System.out.printf("Route %d, score=%s: ", ind++, score);
         indLoc.forEach(i -> System.out.print(i + " "));
         System.out.println();
+    }
+
+    public int size() {
+        return indLoc.size();
+    }
+
+    public Integer get(int i) {
+        if (i >= indLoc.size() || i < 0) return null;
+        return indLoc.get(i);
+    }
+
+    public void add(Integer value) {
+        indLoc.add(value);
+    }
+
+    public Integer remove(int i) {
+        return indLoc.remove(i);
+    }
+
+    public void set(int i, Integer value) {
+        indLoc.set(i, value);
+    }
+
+    public int indexOf(Integer value) {
+        return indLoc.get(value);
     }
 }

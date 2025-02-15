@@ -20,7 +20,6 @@ public class Result {
         System.out.println("Algorithm: " + name);
         System.out.println("Final Solution:");
         finalSolution.forEach(Route::print);
-        System.out.println("Fitness: " + fitness);
     }
     /**
      * Lưu trữ các thông tin để sau này xem xét đánh giá lại

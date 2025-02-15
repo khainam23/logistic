@@ -1,20 +1,12 @@
 package org.model;
 
 import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @FieldDefaults(level = AccessLevel.PROTECTED)
-@Getter
+@Data
 public abstract class Vehicle {
-    List<Route> routes;
-    double fitness;
+    Route route;
     int capacity;
-
-    public Vehicle(List<Route> routes, double fitness) {
-        this.routes = routes;
-        this.fitness = fitness;
-    }
 }
