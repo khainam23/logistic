@@ -36,7 +36,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
         bestScoreHyena = new ArrayList<>(); // Ghi nhận các giá trị tốt
 
         // Lựa chọn các giá trị khởi tạo
-        int h = 5;
+        double h = 5;
         double B = 2;
         double E = 2;
         int N = 2;
@@ -56,6 +56,11 @@ public class SpottedHyenaOptimizer extends Algorithm {
             }
 
             // Kiểm tra điều kiện
+
+            // Cập nhật tham số
+            h = 5 - (i * (5 / MAX_ITERATOR));
+            B = 2 * rd.nextDouble();
+            E = 2 * h * rd.nextDouble() - h;
 
             // Tính giá trị fitness
             fitness = calculatorFitness();
@@ -98,7 +103,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
         int minSize = Math.min(r1.size(), r2.size());
         int sInd = rd.nextInt(minSize);
         int indR1 = r1.indexOf(r2.get(sInd));
-        if (indR1 == -1) {
+        if (indR1 != -1) {
             int ranInd = rd.nextInt(r1.size());
             int temp = r1.get(indR1);
             r1.set(indR1, r1.get(ranInd));

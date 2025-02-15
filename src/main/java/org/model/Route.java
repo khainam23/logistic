@@ -40,6 +40,10 @@ public class Route {
     }
 
     public int indexOf(Integer value) {
-        return indLoc.get(value);
+       try {
+           return indLoc.indexOf(value);
+       } catch (IndexOutOfBoundsException e) {
+           return -1;
+       }
     }
 }
