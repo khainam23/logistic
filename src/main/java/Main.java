@@ -21,6 +21,8 @@ public class Main {
 
         // Run algorithm
         Algorithm algorithm = new SpottedHyenaOptimizer(generateData.getLocations(), routes);
+        // Fitness of solution by generate
+        System.out.println("First Fitness:" + algorithm.fitness(routes));
         Result result = algorithm.optimizer();
         result.print();
     }
