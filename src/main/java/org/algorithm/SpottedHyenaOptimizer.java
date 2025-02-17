@@ -9,6 +9,7 @@ import org.model.Route;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -34,6 +35,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
         population = new ArrayList<>();
         initialPopulation();
         bestScoreHyena = new ArrayList<>(); // Ghi nhận các giá trị tốt
+        List<Double> fitness;
 
         // Lựa chọn các giá trị khởi tạo
         double h = 5;
@@ -41,18 +43,17 @@ public class SpottedHyenaOptimizer extends Algorithm {
         double E = 2;
         int N = 2;
 
-        // Tính giá trị fitness
-        List<Double> fitness = calculatorFitness();
-
         // Giới hạn số lần tìm kiếm
         for (int i = 0; i < MAX_ITERATOR; i++) {
-            // Giới hạn thời gian tìm kiếm
+            // Tính giá trị fitness
+            fitness = calculatorFitness();
+
             // Tìm nhóm tối ưu
-            List<Double> cluster = findCluster(fitness, N, B, E);
+            List<Double> cluster = findCluster(fitness, N);
 
             // Cập nhật vị trí
             for (int j = 0; j < POPULATION_SIZE; j++) {
-                updatePosition(population.get(j), E, B);
+                updatePosition(cluster, population.get(j), E, B);
             }
 
             // Kiểm tra điều kiện
@@ -61,9 +62,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
             h = 5 - (i * (5 / MAX_ITERATOR));
             B = 2 * rd.nextDouble();
             E = 2 * h * rd.nextDouble() - h;
-
-            // Tính giá trị fitness
-            fitness = calculatorFitness();
+            N = noh(fitness);
         }
     }
 
@@ -83,19 +82,25 @@ public class SpottedHyenaOptimizer extends Algorithm {
         return fitness;
     }
 
-    private void updatePosition(Hyena hyena, double E, double B) {
+    private void updatePosition(List<Double> cluster, Hyena hyena, double E, double B) {
         if (E > 1) {
             // Tình huống cần tìm giải pháp mới
             if (B < 1) {
                 swapRoutev1(hyena.getSolution());
             }
         } else {
+            // Thay đổi giữa trên giải pháp tốt hiện biết
             if (B > 1) {
                 swapRoutev2(hyena.getSolution());
             }
         }
     }
 
+    /**
+     * Thực hiện swap theo giải pháp tốt nhất
+     *
+     * @param routes
+     */
     private void swapRoutev2(List<Route> routes) {
         int i = rd.nextInt(routes.size());
         Route r1 = routes.get(i);
@@ -111,7 +116,20 @@ public class SpottedHyenaOptimizer extends Algorithm {
         }
     }
 
+    public int noh(List<Double> fitness) {
+        double M = rd.nextDouble(0.5, 1) + fitness.get(indBestHyena);
+        int count = 0;
+        for (Double Ph : fitness)
+            if (Ph < M)
+                count++;
+        return count;
+    }
 
+    /**
+     * Thực hiện swap tìm giải pháp mới
+     *
+     * @param routes
+     */
     private void swapRoutev1(List<Route> routes) {
         int i1 = rd.nextInt(routes.size());
         int i2 = rd.nextInt(routes.size());
@@ -132,13 +150,26 @@ public class SpottedHyenaOptimizer extends Algorithm {
         }
     }
 
-    private List<Double> findCluster(List<Double> fitness, int N, double B, double E) {
-        List<Double> cluster = new ArrayList<>();
+    /**
+     * Tìm nhóm tối ưu
+     * @param fitness
+     * @param N
+     * @return
+     */
+    private List<Hyena> findCluster(List<Double> fitness, int N) {
+        List<Hyena> cluster = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>(Collections.nCopies(fitness.size(), 0));
+        List<Double> sortedFitness = new ArrayList<>(fitness);
+        sortedFitness.sort(Comparator.naturalOrder()); // Sắp xếp tăng dần
+
+        for (int newIndex = 0; newIndex < sortedFitness.size(); newIndex++) {
+            double value = sortedFitness.get(newIndex);
+            int originalIndex = fitness.indexOf(value);
+            indices.set(originalIndex, newIndex);
+        }
+
         for (int i = 0; i < N; i++) {
-            int ind = rd.nextInt(fitness.size());
-            double D = Math.abs(B * fitness.get(indBestHyena) - fitness.get(ind));
-            double Pk = fitness.get(indBestHyena) - E * D;
-            cluster.add(Pk);
+            cluster.add(population.get(indices.get(i)));
         }
         return cluster;
     }
@@ -161,6 +192,6 @@ public class SpottedHyenaOptimizer extends Algorithm {
 
     /**
      * Spotted Hyena Optimizer
-     * Bài toán lấy ý tưởng từ việc di chuyển của đàn linh cẩu.
+     * Bài toán lấy ý tưởng từ việc săn mồi của đàn linh cẩu.
      */
 }
