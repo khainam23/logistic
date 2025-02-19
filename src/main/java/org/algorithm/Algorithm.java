@@ -89,7 +89,13 @@ public abstract class Algorithm {
      *
      */
     private int calculationServices(List<Route> routes) {
-        return -1;
+        int totalServices = 0;
+        for (Route route : routes) {
+            for (Integer index : route.getIndLoc()) {
+                totalServices += locations.get(index).getServiceTime();
+            }
+        }
+        return totalServices;
     }
 
     /**
