@@ -8,6 +8,7 @@ import org.model.Location;
 import org.model.Pair;
 import org.model.Route;
 import org.model.Vehicle;
+import org.utils.Fitness;
 
 import java.util.List;
 import java.util.Random;
@@ -35,95 +36,12 @@ public abstract class Algorithm {
         }
     }
 
-    /**
-     * Đánh giá điểm số trên giải pháp nhận được.
-     * !!! CÀNG THẤP THÌ CÀNG TỐT !!!
-     * Tính toán giá trị tối ưu trên các tiêu chí:
-     * + NV - Số lượng đội xe sử dụng
-     * + TC - Tổng quảng đường đi được
-     * + SD - Thời lượng của dịch vụ
-     * + WT - Thời gian phải chờ của khách hàng
-     *
-     * @return
-     */
-    public double fitness(List<Route> route) {
-        int NV = route.size(); // Mỗi route đại diện cho cách di chuyển của 1 phương tiện
-        double TC = calculationDistanceRoutes(route);
-        int SD = calculationServices(route);
-        int WT = calculatorWidthTime(route);
-        return NV + TC + SD + WT;
-    }
-
-    /**
-     * Tính thời gian chờ của khách.
-     * Di chuyển tới + dịch vụ
-     *
-     * @param routes
-     * @return
-     */
-    private int calculatorWidthTime(List<Route> routes) {
-        int totalWT = 0;
-        Location depot = locations.get(0);
-        for (Route route : routes) {
-            List<Pair<Integer, Location>> indLoc = route.getIndLoc();
-            double waitTime = calculatorWaitTime(depot, locations.get(indLoc.get(0).getKey()));
-            for (int i = 0; i < indLoc.size() - 1; i++) {
-                waitTime += calculatorWaitTime(locations.get(indLoc.get(i).getKey()), locations.get(indLoc.get(i + 1).getKey()));
-            }
-            waitTime += calculatorWaitTime(locations.get(indLoc.get(indLoc.size() - 1).getKey()), depot);
-            totalWT += waitTime;
-        }
-        return totalWT;
-    }
-
-    /**
-     * Tính thời gian chờ khi di chuyển giữa hai điểm
-     *
-     * @param location
-     * @param oLocation
-     * @return
-     */
-    private double calculatorWaitTime(Location location, Location oLocation) {
-        double wait = location.distance(oLocation) + location.getServiceTime() - oLocation.getLTW();
-        return wait < 0 ? 0 : wait;
-    }
-
-    /**
-     *
-     */
-    private int calculationServices(List<Route> routes) {
-        int totalServices = 0;
-        for (Route route : routes) {
-            for (int i = 0; i < route.size(); i++) {
-                totalServices += route.get(i).getValue().getServiceTime();
-            }
-        }
-        return totalServices;
-    }
-
-    /**
-     * Tính khoảng cách di chuyển trong route,
-     * bao gồm cả thời gian đi từ depot và về nó
-     *
-     * @param routes
-     * @return
-     */
-    private double calculationDistanceRoutes(List<Route> routes) {
-        double totalDistance = 0;
-        Location depot = locations.get(0);
-        for (Route route : routes) {
-            List<Pair<Integer, Location>> indLoc = route.getIndLoc();
-            totalDistance += depot.distance(locations.get(indLoc.get(0).getKey()));
-            for (int i = 0; i < indLoc.size() - 1; i++) {
-                totalDistance += locations.get(indLoc.get(i).getKey()).distance(locations.get(indLoc.get(i + 1).getKey()));
-            }
-            totalDistance += depot.distance(locations.get(indLoc.size() - 1));
-        }
-        return totalDistance;
+    public double fitness(List<Route> routes) {
+        return Fitness.getInstance().calculate(locations, routes);
     }
 
     public boolean isInsertionFeasible(Vehicle vehicle, Location cusPick, Location cusDelivery, int indPick, int indDelivery) {
-        if(indPick > indDelivery) return false;
+        if (indPick > indDelivery) return false;
 
         Route cloneRoute = vehicle.cloneRoute();
         cloneRoute.add(Pair.<Integer, Location>builder().key(indPick).value(cusPick).build());
@@ -140,24 +58,24 @@ public abstract class Algorithm {
         double finishServiceTime = 0;
         double arrivalTime = 0;
         for (int i = 0; i < cloneRoute.size(); i++) {
-            if(i == 0) {
+            if (i == 0) {
                 // Di chuyển đi lần đầu
                 arrivalTime = depot.distance(cloneRoute.get(i).getValue());
                 finishServiceTime += Math.max(arrivalTime, cloneRoute.get(i).getValue().getLTW())
-                + cloneRoute.get(i).getValue().getServiceTime();
+                        + cloneRoute.get(i).getValue().getServiceTime();
             } else {
                 // Di chuyển giữa các điểm
                 arrivalTime = finishServiceTime + cloneRoute.get(i - 1).getValue().distance(cloneRoute.get(i).getValue());
                 finishServiceTime = Math.max(arrivalTime, cloneRoute.get(i).getValue().getLTW()) + cloneRoute.get(i).getValue().getServiceTime();
             }
 
-            if(arrivalTime > cloneRoute.get(i).getValue().getUTW()) return false;
+            if (arrivalTime > cloneRoute.get(i).getValue().getUTW()) return false;
         }
 
         // Kiểm tra time window của depot và điểm cuối (quay về)
         arrivalTime += finishServiceTime +
                 cloneRoute.get(cloneRoute.size() - 1).getValue().distance(depot);
-        if(arrivalTime > cloneRoute.get(0).getValue().getUTW()) return false;
+        if (arrivalTime > cloneRoute.get(0).getValue().getUTW()) return false;
 
         return true;
     }
