@@ -33,23 +33,9 @@ public class GenerateData {
             generateLocations(8, 100);
         }
 
-        List<Integer> storeIndLoc = new ArrayList<>();
-        // Không sử dụng depot
-        for (int i = 1; i < locations.size(); i++) {
-            storeIndLoc.add(i);
-        }
 
-        List<Route> routes = new ArrayList<>(numVehicle);
-        for (int i = 0; i < numVehicle; i++) {
-            int sizeRoute = i == numVehicle - 1 ? storeIndLoc.size() : storeIndLoc.size() / (numVehicle - i);
-            List<Integer> indLoc = new ArrayList<>();
-            for (int j = 0; j < sizeRoute; j++) {
-                indLoc.add(storeIndLoc.remove(rd.nextInt(storeIndLoc.size()))); // Loại bỏ khiến kích thước thay đổi liên tục
-            }
-//            routes.add(Route.builder().indLoc(indLoc).build());
-        }
-        routes.forEach(Route::print);
-        return routes;
+
+        return null;
     }
 
     public static void main(String[] args) {
@@ -80,8 +66,7 @@ public class GenerateData {
         successfulRoute = new int[n];
 
         // Add n tasks
-        Location depot = new Location(0, new Point(0, 0));
-        locations.add(depot);
+        locations.add(Location.depot);
         for (int i = 1; i < n; i++) {
             // Generate location
             int x = getRandom(MIN_CORD, MAX_CORD);
@@ -148,6 +133,8 @@ public class GenerateData {
         System.out.println("Success route: " + Arrays.toString(successfulRoute));
 
         resetLocation();
+        // Không để depot ở locations bởi không phải khách hàng
+        locations.remove(0);
         printData();
         System.out.println("Finish generate locations: " + (System.currentTimeMillis() - startTime) + " ms");
     }

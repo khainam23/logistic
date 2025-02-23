@@ -17,6 +17,7 @@ public class Location {
     double UTW;
     int serviceTime; // Bao gồm cả thời lấy và thời gian trả hàng
     boolean isServiced; // Cho biết điểm có thể phục vụ
+    public static final Location depot = new Location(0, new Point(0, 0));
 
     // Khởi tạo ban đầu
     public Location(long no, Point point) {
