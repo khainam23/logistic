@@ -8,5 +8,10 @@ import lombok.experimental.FieldDefaults;
 @Data
 public abstract class Vehicle {
     Route route;
+    int currentLoad;
     int capacity;
+
+    public Route cloneRoute() {
+        return route.clone();
+    }
 }

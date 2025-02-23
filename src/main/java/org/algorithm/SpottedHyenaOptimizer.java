@@ -5,19 +5,17 @@ import lombok.experimental.FieldDefaults;
 import org.data.Result;
 import org.model.Hyena;
 import org.model.Location;
+import org.model.Pair;
 import org.model.Route;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpottedHyenaOptimizer extends Algorithm {
     final int POPULATION_SIZE = 20;
     int indBestHyena;
     List<Hyena> population;
-    List<Double> bestScoreHyena;
+    Set<Double> bestScoreHyena;
 
     public SpottedHyenaOptimizer(List<Location> locations, List<Route> solution) {
         super(locations, solution);
@@ -27,6 +25,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
     public Result optimizer() {
         sho();
         Hyena bestHyena = population.get(indBestHyena);
+        System.out.println("Best scores: " + bestScoreHyena);
         return new Result("Spotted Hyena Optimizer", bestHyena.getSolution(), bestHyena.getFitness(), firstTimeSolution);
     }
 
@@ -37,7 +36,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
         // Khởi tạo quần thể
         population = new ArrayList<>();
         initialPopulation();
-        bestScoreHyena = new ArrayList<>(); // Ghi nhận các giá trị tốt
+        bestScoreHyena = new HashSet<>(); // Ghi nhận các giá trị tốt
         List<Double> fitness;
 
         // Lựa chọn các giá trị khởi tạo
@@ -123,10 +122,10 @@ public class SpottedHyenaOptimizer extends Algorithm {
         Route r2 = cluster.get(indBestHyena % cluster.size()).getSolution().get(i);
         int minSize = Math.min(r1.size(), r2.size());
         int sInd = rd.nextInt(minSize);
-        int indR1 = r1.indexOf(r2.get(sInd));
+        int indR1 = r1.indexOf(r2.get(sInd).getKey());
         if (indR1 != -1) {
             int ranInd = rd.nextInt(r1.size());
-            int temp = r1.get(indR1);
+            Pair<Integer, Location> temp = r1.get(indR1);
             r1.set(indR1, r1.get(ranInd));
             r1.set(ranInd, temp);
         }
@@ -170,7 +169,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
             r2.add(r1.remove(randInd));
         } else {
             // Tình huống 2 Hyena có giải pháp bằng nhau 
-            Integer temp = r1.get(randInd);
+            Pair<Integer, Location> temp = r1.get(randInd);
             r1.set(randInd, r2.get(randInd));
             r2.set(randInd, temp);
         }

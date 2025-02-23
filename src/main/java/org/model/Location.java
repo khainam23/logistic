@@ -13,12 +13,12 @@ public class Location {
     Point point;
     int demandPick;
     int demandDeliver;
-    int LTW;
-    int UTW;
+    double LTW;
+    double UTW;
     int serviceTime; // Bao gồm cả thời lấy và thời gian trả hàng
     boolean isServiced; // Cho biết điểm có thể phục vụ
 
-    // Dành cho depot
+    // Khởi tạo ban đầu
     public Location(long no, Point point) {
         this.no = no;
         this.point = point;
@@ -49,7 +49,7 @@ public class Location {
     }
 
     public void print() {
-        System.out.printf("Id: %d Point: (x=%d, y=%d) Pick=%d Deliver=%d Window=[%d, %d] Service=%d\n", no, point.x, point.y, demandPick, demandDeliver, LTW, UTW, serviceTime);
+        System.out.printf("Id: %d Point: (x=%d, y=%d) Pick=%d Deliver=%d Window=[%s, %s] Service=%d\n", no, point.x, point.y, demandPick, demandDeliver, LTW, UTW, serviceTime);
     }
     /**
      * Dựa vào các thuộc tính trong database của VRPTW mà triển khai

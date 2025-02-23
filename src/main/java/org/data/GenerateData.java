@@ -6,11 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.model.Location;
 import org.model.Route;
-import org.model.Vehicle;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
+import java.util.Random;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -19,7 +20,7 @@ public class GenerateData {
     List<Location> locations;
     int[][] distances;
     int capacity;
-    List<List<Vehicle>> solutions;
+    int[] successfulRoute; // 1 giải pháp của dạng TSP
     final Random rd = new Random();
 
     // Dùng để tạo ra một lời giải (không tối ưu)
@@ -45,10 +46,15 @@ public class GenerateData {
             for (int j = 0; j < sizeRoute; j++) {
                 indLoc.add(storeIndLoc.remove(rd.nextInt(storeIndLoc.size()))); // Loại bỏ khiến kích thước thay đổi liên tục
             }
-            routes.add(Route.builder().indLoc(indLoc).build());
+//            routes.add(Route.builder().indLoc(indLoc).build());
         }
         routes.forEach(Route::print);
         return routes;
+    }
+
+    public static void main(String[] args) {
+        GenerateData generateData = new GenerateData();
+        generateData.generateLocations(8, 100);
     }
 
     /**
@@ -61,8 +67,6 @@ public class GenerateData {
         if (n < 5)
             throw new RuntimeException("[GenerateData > generateLocations()] Number of tasks must be greater than 4!");
 
-        long startTime = System.currentTimeMillis();
-
         // Các tham số ràng buộc
         final int MIN_CORD = 1;
         final int MAX_CORD = 100;
@@ -73,8 +77,7 @@ public class GenerateData {
         capacity = getRandom(MIN_CAPACITY, MAX_CAPACITY);
         locations = new ArrayList<>();
         distances = new int[n][n];
-        int[] successfulRoute = new int[n];
-        solutions = new ArrayList<>();
+        successfulRoute = new int[n];
 
         // Add n tasks
         Location depot = new Location(0, new Point(0, 0));
@@ -101,14 +104,15 @@ public class GenerateData {
         }
 
         // Khởi tạo các điểm ràng buộc
+        double time = 0;
         int visits = 0;
-        int time = 0;
-        int[] arrivalTime = new int[locations.size()];
+        double[] arrivalTime = new double[locations.size()];
         int previousIndex = 0;
         int currentCapacity = 0;
         successfulRoute[0] = 0;
+        long startTime = System.currentTimeMillis();
         while (visits < locations.size() - 1) {
-            if (System.currentTimeMillis() - startTime > 6000) {
+            if (System.currentTimeMillis() - startTime > 60000) {
                 System.out.println("So long generate locations !!!");
                 printData();
                 return;
@@ -118,7 +122,7 @@ public class GenerateData {
                 if (currentCapacity + locations.get(index).getLoad() <= capacity) {
                     currentCapacity += locations.get(index).getLoad();
                     locations.get(index).setServiced(true);
-                    time += distances[previousIndex][index];
+                    time += locations.get(previousIndex).distance(locations.get(index));
                     previousIndex = index;
                     arrivalTime[index] = time;
                     successfulRoute[visits + 1] = index;
@@ -128,18 +132,20 @@ public class GenerateData {
         }
 
         // Tính thời gian trung bình tìm kiếm ra giải pháp
-        int averageTime = time / visits;
+        double averageTime = time / visits;
 
         // Tạo time phù hợp cho lộ trình
         for (int i = 1; i < locations.size(); i++) {
-            int w = getRandom(1, width) * averageTime * 10;
+            double w = getRandom(1, width) * averageTime * 10;
             locations.get(i).setUTW(arrivalTime[i] + w);
             locations.get(i).setLTW(arrivalTime[i] - w);
-            if (locations.get(i).getLTW() < 0) {// Use a different formula if LTW goes below 0
-                w = getRandom(1, arrivalTime[i]);
+            if (locations.get(i).getLTW() < 0) { // Use a different formula if LTW goes below 0
+                w = rd.nextDouble(1, arrivalTime[i]);
                 locations.get(i).setLTW(arrivalTime[i] - w);
             }
         }
+
+        System.out.println("Success route: " + Arrays.toString(successfulRoute));
 
         resetLocation();
         printData();
