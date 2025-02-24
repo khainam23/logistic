@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.model.Location;
+import org.model.Pair;
 import org.model.Route;
 
 import java.awt.*;
@@ -25,22 +26,41 @@ public class GenerateData {
 
     // Dùng để tạo ra một lời giải (không tối ưu)
     public List<Route> generateSolution() {
-        System.out.println("!!! Auto set vehicle = 3");
-        int numVehicle = 3;
+        System.out.println("!!! Auto set vehicle [2 - 4]");
+        int numVehicle = getRandom(2, 4);
+        System.out.println("Vehicle is: " + numVehicle);
 
         if (locations == null) {
             System.out.println("!!! Auto set location with n = 8, width = 100");
             generateLocations(8, 100);
         }
 
+        List<Integer> storeIndLoc = new ArrayList<>();
+        for (int i = 1; i < successfulRoute.length; i++) {
+            storeIndLoc.add(successfulRoute[i]);
+        }
 
+        List<Route> routes = new ArrayList<>(numVehicle);
+        for (int i = 0; i < numVehicle; i++) {
+            int sizeRoute = i == numVehicle - 1 ? storeIndLoc.size() : storeIndLoc.size() / (numVehicle - i);
+            List<Pair<Integer, Location>> indLoc = new ArrayList<>();
+            for (int j = 0; j < sizeRoute; j++) {
+                int tempInd = storeIndLoc.remove(getRandom(0, storeIndLoc.size() - 1));
+                indLoc.add(Pair.of(tempInd, locations.get(tempInd))); // Loại bỏ khiến kích thước thay đổi liên tục
+            }
+            routes.add(Route.builder().indLoc(indLoc).build());
+        }
+        routes.forEach(Route::print);
+        return routes;
+    }
 
-        return null;
+    private void handleRoute(List<Pair<Integer, Location>> route) {
+
     }
 
     public static void main(String[] args) {
         GenerateData generateData = new GenerateData();
-        generateData.generateLocations(8, 100);
+        generateData.generateSolution();
     }
 
     /**
@@ -89,9 +109,9 @@ public class GenerateData {
         }
 
         // Khởi tạo các điểm ràng buộc
-        double time = 0;
+        int time = 0;
         int visits = 0;
-        double[] arrivalTime = new double[locations.size()];
+        int[] arrivalTime = new int[locations.size()];
         int previousIndex = 0;
         int currentCapacity = 0;
         successfulRoute[0] = 0;
@@ -117,24 +137,20 @@ public class GenerateData {
         }
 
         // Tính thời gian trung bình tìm kiếm ra giải pháp
-        double averageTime = time / visits;
+        int averageTime = time / visits;
 
         // Tạo time phù hợp cho lộ trình
         for (int i = 1; i < locations.size(); i++) {
-            double w = getRandom(1, width) * averageTime * 10;
+            int w = getRandom(1, width) * averageTime * 10;
             locations.get(i).setUTW(arrivalTime[i] + w);
             locations.get(i).setLTW(arrivalTime[i] - w);
             if (locations.get(i).getLTW() < 0) { // Use a different formula if LTW goes below 0
-                w = rd.nextDouble(1, arrivalTime[i]);
+                w = getRandom(1, arrivalTime[i]);
                 locations.get(i).setLTW(arrivalTime[i] - w);
             }
         }
 
-        System.out.println("Success route: " + Arrays.toString(successfulRoute));
-
         resetLocation();
-        // Không để depot ở locations bởi không phải khách hàng
-        locations.remove(0);
         printData();
         System.out.println("Finish generate locations: " + (System.currentTimeMillis() - startTime) + " ms");
     }
@@ -162,6 +178,7 @@ public class GenerateData {
         System.out.println("-".repeat(maxWidth));
         System.out.println("Locations:");
         locations.forEach(Location::print);
+        System.out.println("Success Route:" + Arrays.toString(successfulRoute));
     }
 
     // Lấy ngẫu nhiên giá trị trong một khoảng

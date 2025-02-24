@@ -7,6 +7,7 @@ import org.model.Hyena;
 import org.model.Location;
 import org.model.Pair;
 import org.model.Route;
+import org.utils.CheckConstraint;
 
 import java.util.*;
 
@@ -98,38 +99,67 @@ public class SpottedHyenaOptimizer extends Algorithm {
      * @param B
      */
     private void updatePosition(List<Hyena> cluster, Hyena hyena, double E, double B) {
+        List<Route> routes = hyena.getSolution();
         if (E > 1) {
             // Tình huống cần tìm giải pháp mới
             if (B < 1) {
-                swapRoutev1(hyena.getSolution());
+                int indR1 = rd.nextInt(routes.size());
+                int indR2 = rd.nextInt(routes.size());
+                while (indR1 == indR2)
+                    indR2 = rd.nextInt(routes.size());
+                swapOperator(routes.get(indR1), routes.get(indR2));
             }
         } else {
             // Thay đổi giữa trên giải pháp tốt hiện biết
             if (B > 1) {
-                swapRoutev2(cluster, hyena.getSolution());
+                int indRdGoodHyena = rd.nextInt(cluster.size()); // Lấy ngẫu nhiên hyena tốt
+                List<Route> goodSolution = cluster.get(indRdGoodHyena).getSolution();
+                int indRdGoodRoute = rd.nextInt(goodSolution.size()); // Lấy ngẫu nhiên giải pháp tốt hyena
+                int indRdNormalRoute = rd.nextInt(routes.size()); // Lấy ngẫu nhiên giải pháp thông thường
+                Route goodRoute = goodSolution.get(indRdGoodRoute);
+                Route normalRoute = routes.get(indRdNormalRoute);
+                swapOperator(goodRoute, normalRoute);
             }
         }
     }
 
     /**
      * Thực hiện swap theo các giải pháp tốt nhất
-     *
-     * @param routes
      */
-    private void swapRoutev2(List<Hyena> cluster, List<Route> routes) {
-        int i = rd.nextInt(routes.size());
-        Route r1 = routes.get(i);
-        Route r2 = cluster.get(indBestHyena % cluster.size()).getSolution().get(i);
-        int minSize = Math.min(r1.size(), r2.size());
-        int sInd = rd.nextInt(minSize);
-        int indR1 = r1.indexOf(r2.get(sInd).getKey());
-        if (indR1 != -1) {
-            int ranInd = rd.nextInt(r1.size());
-            Pair<Integer, Location> temp = r1.get(indR1);
-            r1.set(indR1, r1.get(ranInd));
-            r1.set(ranInd, temp);
+    private void swapOperator(Route r1, Route r2) {
+        // Lấy cặp giải pháp trong good solution
+        List<Pair<Integer, Location>> listGoodInd = getRdPD(r1);
+        int i1 = listGoodInd.get(0).getKey();
+        int i2 = listGoodInd.get(1).getKey();
+        if (r2.contains(listGoodInd.get(0)) &&
+                r2.contains(listGoodInd.get(1))) {
+            // Đã tồn tại cặp này trong giải pháp
+            // Thực hiện 2 opt trên cặp này
+            twoOpt(r2, i1, i2);
+        } else {
+            // Thêm vào
+            if (CheckConstraint.getInstance()
+                    .isInsertionFeasible(vehicle, listGoodInd.get(0).getValue(), listGoodInd.get(1).getValue(), i1, i2)
+            ) {
+                // Thêm vào được trên tuyến đường hiện tại
+                r2.set(i1, listGoodInd.get(0));
+                r2.set(i2, listGoodInd.get(1));
+            }
+
+            // Nếu không xem như hyena này đã đi quá xa và không cần quan tâm đến
         }
-        // Nếu hyena hiện tại quá khác xa giải pháp tốt thì bỏ nó
+    }
+
+    private void twoOpt(Route route, int i1, int i2) {
+        if (CheckConstraint.getInstance().isInsertionFeasible(
+                vehicle, route.get(i2).getValue(), route.get(i1).getValue(), i2, i1
+        )) {
+            // Nếu có thể đảo
+            Pair<Integer, Location> tempPair = route.get(i1);
+            route.set(i1, route.get(i2));
+            route.set(i2, tempPair);
+        }
+        // Không thì không can thiệp vào giải pháp của hyena
     }
 
     /**
@@ -145,34 +175,6 @@ public class SpottedHyenaOptimizer extends Algorithm {
             if (Ph < M)
                 count++;
         return count;
-    }
-
-    /**
-     * Thực hiện swap tìm giải pháp mới
-     *
-     * @param routes
-     */
-    private void swapRoutev1(List<Route> routes) {
-        int i1 = rd.nextInt(routes.size());
-        int i2 = rd.nextInt(routes.size());
-        while (i1 == i2) { // Đảm bảo không trùng
-            i2 = rd.nextInt(routes.size());
-        }
-        Route r1 = routes.get(i1);
-        Route r2 = routes.get(i2);
-        int randInd = rd.nextInt(rd.nextDouble() > 0.5 ? r1.size() : r2.size());
-        if (r1.get(randInd) == null) {
-            // Tình huống Hyena 2 có giải pháp dài hơn
-            r1.add(r2.remove(randInd));
-        } else if (r2.get(randInd) == null) {
-            // Tình huống Hyena 1 có giải pháp dài hơn
-            r2.add(r1.remove(randInd));
-        } else {
-            // Tình huống 2 Hyena có giải pháp bằng nhau 
-            Pair<Integer, Location> temp = r1.get(randInd);
-            r1.set(randInd, r2.get(randInd));
-            r2.set(randInd, temp);
-        }
     }
 
     /**
@@ -193,7 +195,7 @@ public class SpottedHyenaOptimizer extends Algorithm {
             indices.add(fitness.indexOf(sortedFitness.get(i)));
         }
 
-        // Lấy cấc giá trị được xem là nhóm tối ưu
+        // Lấy các giá trị được xem là nhóm tối ưu
         for (int i = 0; i < N; i++) {
             cluster.add(population.get(indices.get(i)));
         }

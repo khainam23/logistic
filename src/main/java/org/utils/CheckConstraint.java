@@ -11,7 +11,8 @@ import org.model.Vehicle;
 public class CheckConstraint {
     static CheckConstraint checkConstraint;
 
-    private CheckConstraint() {}
+    private CheckConstraint() {
+    }
 
     public static CheckConstraint getInstance() {
         if (checkConstraint == null) {
@@ -20,12 +21,13 @@ public class CheckConstraint {
         return checkConstraint;
     }
 
-    private boolean isInsertionFeasible(Vehicle vehicle, Location cusPick, Location cusDelivery, int indPick, int indDelivery) {
+    public boolean isInsertionFeasible(Vehicle vehicle, Location cusPick, Location cusDelivery, int indPick, int indDelivery) {
         if (indPick > indDelivery) return false;
 
         Route cloneRoute = vehicle.cloneRoute();
-        cloneRoute.add(Pair.<Integer, Location>builder().key(indPick).value(cusPick).build());
-        cloneRoute.add(Pair.<Integer, Location>builder().key(indDelivery).value(cusDelivery).build());
+        // Ghi đè hoán đổi vị trí
+        cloneRoute.set(indPick, Pair.<Integer, Location>builder().key(indPick).value(cusPick).build());
+        cloneRoute.set(indDelivery, Pair.<Integer, Location>builder().key(indDelivery).value(cusDelivery).build());
 
         // Kiểm tra ràng buộc trọng lượng
         int currentCapacity = 0;

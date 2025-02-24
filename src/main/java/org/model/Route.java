@@ -15,7 +15,7 @@ public class Route {
     List<Pair<Integer, Location>> indLoc; // Vị trí của location trong tập lớn
 
     public void print() {
-        indLoc.forEach(i -> System.out.print(i + " "));
+        indLoc.forEach(pair -> System.out.print(pair.getKey() + " "));
         System.out.println();
     }
 
@@ -37,16 +37,23 @@ public class Route {
     }
 
     public void set(int i, Pair<Integer, Location> value) {
-        indLoc.set(i, value);
+        if(i >= indLoc.size())
+            indLoc.add(value);
+        else
+            indLoc.set(i, value);
     }
 
-    public int indexOf(Integer value) {
+    public int indexOfInd(Integer index) {
         int ind = -1;
         for (int i = 0; i < indLoc.size(); i++) {
-            if (value.equals(indLoc.get(i).getKey()))
+            if (index.equals(indLoc.get(i).getKey()))
                 ind = i;
         }
         return ind;
+    }
+
+    public boolean contains(Pair<Integer, Location> value) {
+        return indLoc.contains(value);
     }
 
     public Route clone() {

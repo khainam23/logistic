@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.awt.*;
+import java.util.Objects;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
@@ -13,10 +14,10 @@ public class Location {
     Point point;
     int demandPick;
     int demandDeliver;
-    double LTW;
-    double UTW;
+    int LTW;
+    int UTW;
     int serviceTime; // Bao gồm cả thời lấy và thời gian trả hàng
-    boolean isServiced; // Cho biết điểm có thể phục vụ
+    boolean isServiced; // Cho biết điểm có thể phục vụ cả 2 đầu không
     public static final Location depot = new Location(0, new Point(0, 0));
 
     // Khởi tạo ban đầu
@@ -47,6 +48,24 @@ public class Location {
 
     public void reset() {
         this.isServiced = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return no == location.no &&
+                demandPick == location.demandPick &&
+                demandDeliver == location.demandDeliver &&
+                LTW == location.LTW && UTW == location.UTW &&
+                serviceTime == location.serviceTime &&
+                isServiced == location.isServiced &&
+                Objects.equals(point, location.point);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(no, point, demandPick, demandDeliver, LTW, UTW, serviceTime, isServiced);
     }
 
     public void print() {
