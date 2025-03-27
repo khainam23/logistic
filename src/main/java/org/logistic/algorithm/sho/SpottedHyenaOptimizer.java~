@@ -1,0 +1,16 @@
+package org.logistic.algorithm.sho;
+
+import org.logistic.model.Solution;
+import org.logistic.model.Vehicle;
+
+import java.util.List;
+
+public class SpottedHyenaOptimizer {
+    List<Hyena> hyenas; // Quần thể khởi tạo ban đầu
+
+    // Khởi tạo quần thể
+    private List<Hyena> initPopulation(Solution solution) {
+        SimulatedAnnealing sa = new SimulatedAnnealing(solution);
+        return sa.run();
+    }
+}

@@ -1,0 +1,7 @@
+package org.logistic.util;
+
+public class FitnessUtil {
+    public static double fitness(Solution solution) {
+
+    }
+}
