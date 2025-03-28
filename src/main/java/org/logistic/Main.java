@@ -2,16 +2,18 @@ package org.logistic;
 
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.data.GenerateData;
+import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Point;
 import org.logistic.model.Solution;
 import org.logistic.model.Vehicle;
 import org.logistic.util.WriteLog;
 
+import java.net.URISyntaxException;
 
 public class Main {
-    public static void main(String[] args) {
-        test();
+    public static void main(String[] args) throws URISyntaxException {
+        testRealDataPdptw();
     }
 
     public static void test() {
@@ -53,12 +55,13 @@ public class Main {
         Vehicle[] optimizedVehicles = optimizer.getOptimizedVehicles();
         for (int i = 0; i < optimizedVehicles.length; i++) {
             int[] route = optimizedVehicles[i].getRoute();
-            
+
             // Tính quãng đường cho xe này
             double vehicleDistance = 0;
             if (route.length > 0) {
                 // Từ kho đến điểm đầu tiên
-                vehicleDistance += Math.sqrt(Math.pow(optimizedVehicles[i].getPoint().getX() - locations[route[0]].getPoint().getX(), 2) +
+                vehicleDistance += Math.sqrt(Math
+                        .pow(optimizedVehicles[i].getPoint().getX() - locations[route[0]].getPoint().getX(), 2) +
                         Math.pow(optimizedVehicles[i].getPoint().getY() - locations[route[0]].getPoint().getY(), 2));
 
                 // Giữa các điểm
@@ -67,8 +70,12 @@ public class Main {
                 }
 
                 // Từ điểm cuối về kho
-                vehicleDistance += Math.sqrt(Math.pow(optimizedVehicles[i].getPoint().getX() - locations[route[route.length - 1]].getPoint().getX(), 2) +
-                        Math.pow(optimizedVehicles[i].getPoint().getY() - locations[route[route.length - 1]].getPoint().getY(), 2));
+                vehicleDistance += Math.sqrt(Math
+                        .pow(optimizedVehicles[i].getPoint().getX()
+                                - locations[route[route.length - 1]].getPoint().getX(), 2)
+                        +
+                        Math.pow(optimizedVehicles[i].getPoint().getY()
+                                - locations[route[route.length - 1]].getPoint().getY(), 2));
             }
             logger.logVehicleRoute(i, route, vehicleDistance);
         }
@@ -79,8 +86,9 @@ public class Main {
             int[] route = vehicle.getRoute();
             if (route.length > 0) {
                 // Thêm khoảng cách từ kho đến điểm đầu tiên
-                totalDistance += Math.sqrt(Math.pow(vehicle.getPoint().getX() - locations[route[0]].getPoint().getX(), 2) +
-                        Math.pow(vehicle.getPoint().getY() - locations[route[0]].getPoint().getY(), 2));
+                totalDistance += Math
+                        .sqrt(Math.pow(vehicle.getPoint().getX() - locations[route[0]].getPoint().getX(), 2) +
+                                Math.pow(vehicle.getPoint().getY() - locations[route[0]].getPoint().getY(), 2));
 
                 // Tính khoảng cách giữa các điểm
                 for (int i = 0; i < route.length - 1; i++) {
@@ -88,11 +96,30 @@ public class Main {
                 }
 
                 // Thêm khoảng cách từ điểm cuối về kho
-                totalDistance += Math.sqrt(Math.pow(vehicle.getPoint().getX() - locations[route[route.length - 1]].getPoint().getX(), 2) +
+                totalDistance += Math.sqrt(Math
+                        .pow(vehicle.getPoint().getX() - locations[route[route.length - 1]].getPoint().getX(), 2) +
                         Math.pow(vehicle.getPoint().getY() - locations[route[route.length - 1]].getPoint().getY(), 2));
             }
         }
         logger.logTotalDistance(totalDistance);
         logger.close();
+    }
+
+    public static void testRealDataVrptw() throws URISyntaxException {
+        String data = "data/vrptw/src/c101.txt";
+
+        ReadDataFromFile readDataVRPTW = new ReadDataFromFile();
+        readDataVRPTW.dataOfVrptw(data);
+
+        System.out.println(readDataVRPTW.getLocations());
+    }
+
+    public static void testRealDataPdptw() throws URISyntaxException {
+        String data = "data/pdptw/src/lc101.txt";
+
+        ReadDataFromFile readDataPdptw = new ReadDataFromFile();
+        readDataPdptw.dataOfPdptw(data);
+
+        System.out.println(readDataPdptw.getLocations());
     }
 }

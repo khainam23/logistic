@@ -2,11 +2,13 @@ package org.logistic.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
 @Builder
 @AllArgsConstructor
 @Getter
+@Data
 public class Location {
     Point point;
     int serviceTimePick;
