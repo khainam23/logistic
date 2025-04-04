@@ -20,41 +20,11 @@ public class Location {
     boolean isPick;
     boolean isDeliver;
 
-    public Location(Point point, int serviceTime) {
-        this.point = point;
-        this.serviceTimePick = serviceTime;
-        this.serviceTimeDeliver = serviceTime;
+    public int totalServiceTime() {
+        return serviceTimeDeliver + serviceTimeDeliver;
     }
 
-    public boolean isPick() {
-        return isPick;
-    }
-
-    public boolean isDeliver() {
-        return isDeliver;
-    }
-
-    public int getServiceTimePick() {
-        return serviceTimePick;
-    }
-
-    public int getServiceTimeDeliver() {
-        return serviceTimeDeliver;
-    }
-
-    public int getLtw() {
-        return ltw;
-    }
-
-    public int getUtw() {
-        return utw;
-    }
-
-    public int getDemandPick() {
-        return demandPick;
-    }
-
-    public int getDemandDeliver() {
-        return demandDeliver;
+    public int distance(Location oLocation) {
+        return this.point.distanceTo(oLocation.point);
     }
 }

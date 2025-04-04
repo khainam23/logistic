@@ -5,82 +5,44 @@ import org.logistic.model.Location;
 import org.logistic.model.Point;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Getter
 public class ReadDataFromFile {
-    private List<Location> locations;
-
-    public ReadDataFromFile() {
-        this.locations = new ArrayList<>();
-    }
+    private final List<Location> locations = new ArrayList<>();
 
     public void dataOfVrptw(String filePath) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(filePath)).getPath())));
-            String line;
-            int count = 0;
-            String name;
-            String[] infoVehicle;
-            locations = new ArrayList<>();
-            while((line = reader.readLine()) != null) {
-                // Tên
-                if(count == 0) {
-                    name = line;
-                } else if(count == 4){
-                    infoVehicle = line.trim().split("\\s+");
-                } else if(count >= 9) {
-                    String[] parts = line.trim().split("\\s+");
-                    int id = Integer.parseInt(parts[0]);
-                    int x = Integer.parseInt(parts[1]);
-                    int y = Integer.parseInt(parts[2]);
-                    int demand = Integer.parseInt(parts[3]);
-                    int ltw = Integer.parseInt(parts[4]);
-                    int utw = Integer.parseInt(parts[5]);
-                    int service = Integer.parseInt(parts[6]);
-                    Location location = Location.builder()
-                            .point(new Point(x, y))
-                            .serviceTimePick(service)
-                            .serviceTimeDeliver(service)
-                            .demandDeliver(demand)
-                            .demandPick(demand)
-                            .ltw(ltw)
-                            .utw(utw)
-                            .build();
-
-                    locations.add(location);
-                }
-
-                ++count;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        readFile(filePath, false);
     }
 
     public void dataOfPdptw(String filePath) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(filePath)).getPath())));
+        readFile(filePath, true);
+    }
+
+    private void readFile(String filePath, boolean isPdptw) {
+        Path path = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(filePath)).getPath());
+
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            String[] infoVehicle;
-            locations = new ArrayList<>();
-            while((line = reader.readLine()) != null) {
-                if(count == 0){
-                    infoVehicle = line.trim().split("\\s+");
-                } else if(count >= 1) {
+            while ((line = reader.readLine()) != null) {
+                if (count >= (isPdptw ? 1 : 9)) {
                     String[] parts = line.trim().split("\\s+");
+
                     int id = Integer.parseInt(parts[0]);
-                    int task = Integer.parseInt(parts[1]);
-                    int x = Integer.parseInt(parts[2]);
-                    int y = Integer.parseInt(parts[3]);
-                    int demand = Integer.parseInt(parts[4]);
-                    int ltw = Integer.parseInt(parts[5]);
-                    int utw = Integer.parseInt(parts[6]);
-                    int service = Integer.parseInt(parts[7]);
-                    Location location = Location.builder()
+                    int x = Integer.parseInt(parts[isPdptw ? 2 : 1]);
+                    int y = Integer.parseInt(parts[isPdptw ? 3 : 2]);
+                    int demand = Integer.parseInt(parts[isPdptw ? 4 : 3]);
+                    int ltw = Integer.parseInt(parts[isPdptw ? 5 : 4]);
+                    int utw = Integer.parseInt(parts[isPdptw ? 6 : 5]);
+                    int service = Integer.parseInt(parts[isPdptw ? 7 : 6]);
+
+                    locations.add(Location.builder()
                             .point(new Point(x, y))
                             .serviceTimePick(service)
                             .serviceTimeDeliver(service)
@@ -88,15 +50,12 @@ public class ReadDataFromFile {
                             .demandPick(demand)
                             .ltw(ltw)
                             .utw(utw)
-                            .build();
-
-                    locations.add(location);
+                            .build());
                 }
-
-                ++count;
+                count++;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error reading file: " + filePath, e);
         }
     }
 }

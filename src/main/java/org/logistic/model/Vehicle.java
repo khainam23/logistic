@@ -7,6 +7,4 @@ import lombok.Getter;
 @Getter
 public class Vehicle {
     Point point;
-    int capacity;
-    int[] route; // Cách chiếc xe này di chuyển
 }

@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.io.File;
 import java.util.List;
 
-public class WriteLogUtil {
-    private static WriteLogUtil instance;
+public class WriteLog {
+    private static WriteLog instance;
     private static final String LOG_FILE = "src/main/resources/SpottedHyenaOptimizer.log";
     private PrintWriter writer;
 
-    private WriteLogUtil() {
+    private WriteLog() {
         try {
             File logDir = new File("src/main/resources");
             if (!logDir.exists()) {
@@ -26,9 +26,9 @@ public class WriteLogUtil {
         }
     }
 
-    public static synchronized WriteLogUtil getInstance() {
+    public static synchronized WriteLog getInstance() {
         if (instance == null) {
-            instance = new WriteLogUtil();
+            instance = new WriteLog();
         }
         return instance;
     }
