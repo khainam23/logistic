@@ -97,6 +97,7 @@ public class ReadDataFromFile {
             int count = 0;
             while ((line = reader.readLine()) != null) {
                 if (count >= 7) {
+                    System.out.println(line);
                     String[] parts = line.substring(line.indexOf(':') + 1).trim().split("\\s+");
                     int[] indLocs = new int[parts.length];
                     for (int i = 0; i < parts.length; ++i) {

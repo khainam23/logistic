@@ -40,9 +40,9 @@ public class CheckConditionUtil {
                 currentCapacity -= location.getDemandDeliver();
             }
             
-            if (currentCapacity > vehicle.getCapacity()) {
-                return false;
-            }
+//            if (currentCapacity > vehicle.getCapacity()) {
+//                return false;
+//            }
         }
 
         // Kiểm tra ràng buộc về thời gian

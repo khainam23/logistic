@@ -1,12 +1,19 @@
 package org.logistic.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 public class Route {
     int[] indLocations; // Những điểm mà đoạn đường đi qua
     int[] distances; // Khoảng cách giữa chúng
     int[] serviceTimes; // Thời gian phục vụ
+
+    public Route(int[] indLocations) {
+        this.indLocations = indLocations;
+    }
 
     // Tổng quảng cách cần di chuyển
     public int totalDistances() {
@@ -24,5 +31,10 @@ public class Route {
             total += serviceTimes[i];
         }
         return total;
+    }
+
+    @Override
+    public String toString() {
+        return "Route: " + Arrays.toString(indLocations);
     }
 }

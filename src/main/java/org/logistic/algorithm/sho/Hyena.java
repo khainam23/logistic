@@ -13,8 +13,4 @@ import org.logistic.model.Solution;
 public class Hyena {
     Solution solution; // Lời giải hiện tại
     double fitness; // Giá trị fitness của lời giải
-    
-    public Hyena copy() {
-        return new Hyena(this.solution.copy(), this.fitness);
-    }
 }

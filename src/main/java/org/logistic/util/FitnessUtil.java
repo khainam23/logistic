@@ -4,7 +4,19 @@ import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 
+import java.lang.module.FindException;
+
 public class FitnessUtil {
+    static FitnessUtil fitnessUtil;
+
+    private FitnessUtil() {}
+
+    public static synchronized FitnessUtil getInstance() {
+        if(fitnessUtil == null)
+            fitnessUtil = new FitnessUtil();
+        return fitnessUtil;
+    }
+
     /**
      * Tính giá trị của giải pháp.
      *
