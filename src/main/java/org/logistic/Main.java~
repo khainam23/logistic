@@ -25,8 +25,6 @@ public class Main {
         // Lấy dữ liệu
         Location[] locations = readData(rdff, dataVrptw, ReadDataFromFile.ProblemType.VRPTW);
         Route[] routes = readSolution(rdff, solutionVrptw);
-
-
     }
 
     public static Location[] readData(ReadDataFromFile rdff, String filePath, ReadDataFromFile.ProblemType problemType) throws URISyntaxException {

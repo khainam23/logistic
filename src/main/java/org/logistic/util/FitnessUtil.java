@@ -9,10 +9,11 @@ import java.lang.module.FindException;
 public class FitnessUtil {
     static FitnessUtil fitnessUtil;
 
-    private FitnessUtil() {}
+    private FitnessUtil() {
+    }
 
     public static synchronized FitnessUtil getInstance() {
-        if(fitnessUtil == null)
+        if (fitnessUtil == null)
             fitnessUtil = new FitnessUtil();
         return fitnessUtil;
     }
@@ -20,21 +21,23 @@ public class FitnessUtil {
     /**
      * Tính giá trị của giải pháp.
      *
-     * @param solution
      * @return
      */
-    public double calculatorFitness(Solution solution, Location[] locations) {
+    public double calculatorFitness(Route[] routes, Location[] locations) {
         int totalDistances = 0, totalServiceTime = 0, totalWaitingTime = 0;
-        int numberVehicle = solution.countVehicles();  // Đếm số lượng xe
+        int numberVehicle = routes.length;  // Đếm số lượng xe
 
-        for (Route route : solution.getRoutes()) {
-            totalDistances += route.totalDistances(); // Tính tổng khoảng cách
-            totalServiceTime += route.totalServiceTimes(); // Tính tổng thời gian phục vụ
-
+        for (Route route : routes) {
             int[] indLocs = route.getIndLocations();
             for (int j = 0; j < indLocs.length - 1; j++) {
                 Location currLoc = locations[indLocs[j]];
                 Location nextLoc = locations[indLocs[j + 1]];
+
+                // Tính khoảng cách
+                totalDistances += currLoc.distance(nextLoc);
+
+                // Tính thời gian phục vụ
+                totalServiceTime += nextLoc.totalServiceTime();
 
                 // Tính thời gian chờ
                 int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);

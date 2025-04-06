@@ -1,5 +1,6 @@
 package org.logistic.data;
 
+import lombok.Getter;
 import org.logistic.model.Location;
 import org.logistic.model.Point;
 import org.logistic.model.Route;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class ReadDataFromFile {
     private Location[] locations;
     private Route[] routes;
@@ -87,7 +89,7 @@ public class ReadDataFromFile {
         }
     }
 
-    private void readSolution(String filePath) throws URISyntaxException {
+    public void readSolution(String filePath) throws URISyntaxException {
         Path path = Paths.get(Objects.requireNonNull(
                 ReadDataFromFile.class.getClassLoader().getResource(filePath)).toURI());
 
@@ -114,12 +116,5 @@ public class ReadDataFromFile {
         } catch (IOException e) {
             throw new RuntimeException("Error reading file: " + filePath, e);
         }
-    }
-
-    public static void main(String[] args) throws URISyntaxException {
-        String data = "data/pdptw/solution/lc101.txt";
-        ReadDataFromFile readDataFromFile = new ReadDataFromFile();
-        readDataFromFile.readSolution(data);
-        PrintUtil.printRoutes(readDataFromFile.routes);
     }
 }
