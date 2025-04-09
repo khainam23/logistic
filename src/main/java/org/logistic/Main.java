@@ -1,5 +1,6 @@
 package org.logistic;
 
+import org.logistic.algorithm.sho.SimulatedAnnealing;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
@@ -25,8 +26,15 @@ public class Main {
         // Lấy dữ liệu
         Location[] locations = readData(rdff, dataVrptw, ReadDataFromFile.ProblemType.VRPTW);
         Route[] routes = readSolution(rdff, solutionVrptw);
+//        Location[] locations = readData(rdff, dataPdptw, ReadDataFromFile.ProblemType.PDPTW);
+//        Route[] routes = readSolution(rdff, solutionPdptw);
 
+        // Tính điểm của giải pháp và khởi tạo lưu trữ cho giải pháp
+        double fitnessVal = fitnessUtil.calculatorFitness(routes, locations);
+        Solution mainSolution = new Solution(routes, fitnessVal);
 
+        // Sử dụng thuật toán Simulated Annealing tạo các giải pháp khác nhau
+//        SimulatedAnnealing sa = new SimulatedAnnealing();
     }
 
     public static Location[] readData(ReadDataFromFile rdff, String filePath, ReadDataFromFile.ProblemType problemType) throws URISyntaxException {
