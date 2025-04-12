@@ -1,100 +1,92 @@
 package org.logistic.util;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import lombok.Setter;
+
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.io.File;
 import java.util.List;
 
 public class WriteLogUtil {
-    private static WriteLogUtil instance;
-    private static final String LOG_FILE = "src/main/resources/SpottedHyenaOptimizer.log";
-    private PrintWriter writer;
+    BufferedWriter writer;
+    String logFilePath;
+    static WriteLogUtil writeLogUtil;
 
-    private WriteLogUtil() {
+    public enum PathLog {
+        SA("logs/SimulatedAnnealing.log");
+
+        private final String path;
+
+        PathLog(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+    }
+
+    private WriteLogUtil() {}
+
+    public static WriteLogUtil getInstance() {
+        if (writeLogUtil == null)
+            writeLogUtil = new WriteLogUtil();
+        return writeLogUtil;
+    }
+
+    public void setLogFilePath(String logFilePath) {
+        this.logFilePath = logFilePath;
+        initWriter();
+    }
+
+    // Khởi tạo writer và tạo thư mục nếu cần
+    private void initWriter() {
         try {
-            File logDir = new File("src/main/resources");
-            if (!logDir.exists()) {
-                logDir.mkdirs();
+            File file = new File(logFilePath);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs(); // Tạo thư mục cha nếu chưa có
             }
-            writer = new PrintWriter(new FileWriter(LOG_FILE, false));
+
+            writer = new BufferedWriter(new FileWriter(file, false)); // append = true
         } catch (IOException e) {
-            System.err.println("Error initializing log file: " + e.getMessage());
+            System.err.println("Không thể khởi tạo Logger: " + e.getMessage());
         }
     }
 
-    public static synchronized WriteLogUtil getInstance() {
-        if (instance == null) {
-            instance = new WriteLogUtil();
-        }
-        return instance;
-    }
-
-    private String getCurrentTimestamp() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    }
-
-    public void log(String message) {
-        if (writer != null) {
-            writer.println(String.format("[%s] %s", getCurrentTimestamp(), message));
+    private void log(String level, String message) {
+        try {
+            String timestamp = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            writer.write(String.format("[%s] [%s] %s%n", timestamp, level, message));
             writer.flush();
+        } catch (IOException e) {
+            System.err.println("Lỗi khi ghi log: " + e.getMessage());
         }
     }
 
-    public void logIterationInfo(int currentIteration, int maxIterations, double bestFitness) {
-        log(String.format("Iteration %d/%d - Best fitness value: %.2f", 
-            currentIteration, maxIterations, bestFitness));
+    public void info(String message) {
+        log("INFO", message);
     }
 
-    public void logInitialInfo(double initialFitness) {
-        log(String.format("Starting SHO optimization process..."));
-        log(String.format("Initial best fitness value: %.2f", initialFitness));
+    public void debug(String message) {
+        log("DEBUG", message);
     }
 
-    public void logInitialSolution(List<List<Integer>> routes, double[][] distances) {
-        log("Initial Solution Details:");
-        double totalDistance = 0;
-        for (int i = 0; i < routes.size(); i++) {
-            log(String.format("Vehicle %d - Route: %s, Distance: %.2f", 
-                i + 1, routes.get(i).toString(), distances[i][0]));
-            totalDistance += distances[i][0];
-        }
-        log(String.format("Initial Total Distance: %.2f", totalDistance));
+    public void error(String message) {
+        log("ERROR", message);
     }
 
-    public void logVehicleRoute(int vehicleIndex, int[] route, double distance) {
-        log(String.format("Vehicle %d - Route: %s, Distance: %.2f", 
-            vehicleIndex + 1, Arrays.toString(route), distance));
-    }
-
-    public void logTotalDistance(double totalDistance) {
-        log(String.format("Total Distance: %.2f", totalDistance));
-    }
-
-    public void logFinalResult(double bestFitness) {
-        log("Optimization completed.");
-        log(String.format("Final optimized fitness value: %.2f", bestFitness));
-    }
-
-    public void logFinalResult(double bestFitness, List<List<Integer>> routes, double[][] distances) {
-        log("\nOptimization completed. Final Solution Details:");
-        double totalDistance = 0;
-        for (int i = 0; i < routes.size(); i++) {
-            log(String.format("Vehicle %d - Route: %s, Distance: %.2f", 
-                i + 1, routes.get(i).toString(), distances[i][0]));
-            totalDistance += distances[i][0];
-        }
-        log(String.format("Total Distance: %.2f", totalDistance));
-        log(String.format("Final Fitness Value: %.2f", bestFitness));
-        log(String.format("Final Optimized Fitness Value: %.2f", bestFitness));
+    public void warn(String message) {
+        log("WARN", message);
     }
 
     public void close() {
-        if (writer != null) {
-            writer.close();
+        try {
+            if (writer != null) writer.close();
+        } catch (IOException e) {
+            System.err.println("Lỗi khi đóng Logger: " + e.getMessage());
         }
     }
 }

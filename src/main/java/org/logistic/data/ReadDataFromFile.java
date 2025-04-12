@@ -80,7 +80,7 @@ public class ReadDataFromFile {
                             .utw(utw)
                             .build();
 
-                    // Nếu đây là giải pháp của pdptư
+                    // Nếu đây là giải pháp của pdptw
                     if(isPdptw) {
                         if(demand < 0) {
                             location.setPick(true);

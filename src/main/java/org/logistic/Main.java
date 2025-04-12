@@ -31,11 +31,14 @@ public class Main {
         Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
 
         //  Tạo đa giải pháp
-        SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
-        Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations);
+        SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution, writeLogUtil);
+        Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
 
         // In ra kết quả
         printUtil.printSolutions(solutions);
+
+        // Đóng các util nếu có
+        writeLogUtil.close();
     }
 
 

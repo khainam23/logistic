@@ -8,8 +8,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Solution.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/SpottedHyenaOptimizer.log" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,33 +36,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "Application.ReadDataFromFile.executor": "Run",
-    "Maven.Logistic [org.apache.maven.plugins:maven-clean-plugin:3.2.0:clean].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Logistic/new/Logistic/src/main/resources/data/pdptw/src",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ReadDataFromFile.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Logistic [org.apache.maven.plugins:maven-clean-plugin:3.2.0:clean].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Logistic/new/Logistic/src/main/resources/data/pdptw/src&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data\pdptw\src" />
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data\vrptw" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Logistic\new\Logistic\src\main\resources" />
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data\pdptw\" />
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data\vrptw" />
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data" />
@@ -138,12 +141,50 @@
       <workItem from="1744340766635" duration="868000" />
       <workItem from="1744342946088" duration="130000" />
       <workItem from="1744343084371" duration="1662000" />
-      <workItem from="1744438715336" duration="3511000" />
+      <workItem from="1744438715336" duration="5914000" />
+      <workItem from="1744444831609" duration="1641000" />
+      <workItem from="1744446688943" duration="328000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>113</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>114</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>115</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>148</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>129</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
+          <line>165</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -57,7 +57,7 @@ public class SimulatedAnnealing {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 Solution newSolution = perturbSolution(currentSolution.copy(), checkConditionUtil, locations, currentTarget);
 
-               if(!newSolution.equals(currentSolution)) { // Không nên kiểm tra trùng vì có thể giảm khả năng khám phá
+               if(!newSolution.equals(currentSolution)) { // Không nên kiểm tra trùng vì có thể giảm khả năng khám phá 
                    // Ghi lại nếu có sự thay đổi
                    writeLogUtil.warn("New solution is different from current solution");
                    writeLogUtil.info("New solution: ");
