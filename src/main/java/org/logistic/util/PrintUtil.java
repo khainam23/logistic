@@ -2,9 +2,32 @@ package org.logistic.util;
 
 import org.logistic.model.Location;
 import org.logistic.model.Route;
+import org.logistic.model.Solution;
 
 public class PrintUtil {
-    public static void printRoutes(Route[] routes) {
+    static PrintUtil printUtil;
+
+    private PrintUtil() {}
+
+    public static PrintUtil getInstance() {
+        if (printUtil == null)
+            printUtil = new PrintUtil();
+        return printUtil;
+    }
+
+    public void printSolutions(Solution[] solutions) {
+        for (Solution solution : solutions) {
+            printSolution(solution);
+        }
+    }
+
+    public void printSolution(Solution solution) {
+        System.out.println("Solution: ");
+        printRoutes(solution.getRoutes());
+        System.out.println("*".repeat(10));
+    }
+
+    public void printRoutes(Route[] routes) {
         if (routes == null) {
             System.out.println("Routes: null");
             return;
@@ -16,7 +39,7 @@ public class PrintUtil {
         }
     }
 
-    public static void printLocation(Location location) {
+    public void printLocation(Location location) {
         if (location == null) {
             System.out.println("Location: null");
             return;
@@ -33,7 +56,7 @@ public class PrintUtil {
         System.out.println("  Is Deliver: " + location.isDeliver());
     }
 
-    public static void printLocations(Location[] locations) {
+    public void printLocations(Location[] locations) {
         if (locations == null) {
             System.out.println("Locations array: null");
             return;

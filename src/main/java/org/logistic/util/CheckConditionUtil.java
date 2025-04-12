@@ -10,8 +10,7 @@ import java.util.List;
 public class CheckConditionUtil {
     private static CheckConditionUtil checkConditionUtil;
 
-    private CheckConditionUtil() {
-    }
+    private CheckConditionUtil() {}
 
     public static CheckConditionUtil getInstance() {
         if (checkConditionUtil == null)
@@ -30,12 +29,38 @@ public class CheckConditionUtil {
      */
     public boolean isInsertionFeasible(Route route, Location[] locations, int maxPayload) {
         int[] indLocations = route.getIndLocations();
-        int targetPayload = 0;
+        int targetPayload = maxPayload;
         int serviceTime = 0;
         int length = indLocations.length;
 
         for (int i = 0; i < length; i++) {
             Location currLoc = locations[indLocations[i]];
+
+            // Kiểm tra có vi phạm thời gian tối đa
+            if (i < length - 1) {
+                Location nextLoc = locations[indLocations[i + 1]];
+                serviceTime += currLoc.totalServiceTime() + currLoc.distance(nextLoc);
+                if (serviceTime > nextLoc.getUtw()) return false;
+            }
+
+            // Điểm đầu chỉ có giao
+            if(i == 0) {
+//                if(currLoc.isPick()) {
+//                    targetPayload += currLoc.getDemandPick();
+//                    continue;
+//                }
+//                return false;
+                continue;
+            }
+
+            // Điểm cuối chỉ có nhận
+            if(i == length - 1) {
+                if(currLoc.isDeliver()) {
+                    targetPayload -= currLoc.getDemandDeliver();
+                    continue;
+                }
+                return false;
+            }
 
             // Cần kiểm tra có nhận hàng trước
             if (currLoc.isDeliver()) {
@@ -44,17 +69,10 @@ public class CheckConditionUtil {
             }
 
             // Lấy hàng nếu có
-            if (currLoc.isPick()) {
-                targetPayload += currLoc.getDemandPick();
-                if (targetPayload > maxPayload) return false;
-            }
-
-            // Kiểm tra có vi phạm thời gian tối đa
-            if (i < length - 1) {
-                Location nextLoc = locations[indLocations[i + 1]];
-                serviceTime += currLoc.totalServiceTime() + currLoc.distance(nextLoc);
-                if (serviceTime > nextLoc.getUtw()) return false;
-            }
+//            if (currLoc.isPick()) {
+//                targetPayload += currLoc.getDemandPick();
+//                if (targetPayload > maxPayload) return false;
+//            }
         }
 
         return true;

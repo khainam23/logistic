@@ -4,24 +4,24 @@ import lombok.Getter;
 import org.logistic.model.Location;
 import org.logistic.model.Point;
 import org.logistic.model.Route;
-import org.logistic.util.PrintUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Getter
 public class ReadDataFromFile {
-    private Location[] locations;
-    private Route[] routes;
+    Location[] locations;
+    Route[] routes;
+    int maxCapacity;
+    Random rd = new Random();
 
     public enum ProblemType {
         VRPTW,
@@ -42,7 +42,7 @@ public class ReadDataFromFile {
                 default:
                     throw new IllegalArgumentException("Unsupported problem type: " + problemType);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -56,6 +56,11 @@ public class ReadDataFromFile {
             String line;
             int count = 0;
             while ((line = reader.readLine()) != null) {
+                if(count == (isPdptw ? 0 : 4)) {
+                    String[] parts = line.trim().split("\\s+");
+                    maxCapacity = Integer.parseInt(parts[1]);
+                }
+
                 if (count >= (isPdptw ? 1 : 9)) {
                     String[] parts = line.trim().split("\\s+");
 
@@ -69,13 +74,26 @@ public class ReadDataFromFile {
 
                     Location location = Location.builder()
                             .point(new Point(x, y))
-                            .serviceTimePick(service)
+                            .serviceTimePick(0)
                             .serviceTimeDeliver(service)
-                            .demandDeliver(demand)
-                            .demandPick(demand)
                             .ltw(ltw)
                             .utw(utw)
                             .build();
+
+                    // Nếu đây là giải pháp của pdptư
+                    if(isPdptw) {
+                        if(demand < 0) {
+                            location.setPick(true);
+                            location.setDemandPick(Math.abs(demand));
+                        } else {
+                            location.setDeliver(true);
+                            location.setDemandDeliver(demand);
+                        }
+                    } else {
+                        // vrptw
+                        location.setDeliver(true);
+                        location.setDemandDeliver(demand);
+                    }
 
                     locationList.add(location);
                 }
@@ -105,7 +123,8 @@ public class ReadDataFromFile {
                         indLocs[i] = Integer.parseInt(parts[i]);
                     }
 
-                    Route route = new Route(indLocs);
+                    Route route = new Route(indLocs, maxCapacity);
+
                     routeList.add(route);
                 }
                 count++;

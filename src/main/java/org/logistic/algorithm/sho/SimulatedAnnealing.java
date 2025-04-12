@@ -60,8 +60,6 @@ public class SimulatedAnnealing {
     }
 
     private Solution perturbSolution(Solution solution, CheckConditionUtil checkConditionUtil, Location[] locations) {
-        Solution newSolution = solution.copy();
-
         // Chọn ngẫu nhiên một toán tử biến đổi: swap, insert, hoặc reverse
         int operator = random.nextInt(3);
 
@@ -70,27 +68,20 @@ public class SimulatedAnnealing {
 
         // Chọn ngẫu nhiên một tuyến đường để biến đổi
         int routeIndex = random.nextInt(routes.length);
-        Route route = routes[routeIndex];
-        Route cloneRoute = route.copy();
+        Route cloneRoute = routes[routeIndex].copy();
 
-        // Áp dụng toán tử biến đổi được chọn
-        switch (operator) {
-            case 0: // Swap operator
-                cloneRoute = applySwapOperator(cloneRoute);
-                break;
-            case 1: // Insert operator
-                cloneRoute = applyInsertOperator(cloneRoute);
-                break;
-            case 2: // Reverse operator
-                cloneRoute = applyReverseOperator(cloneRoute);
-                break;
+        cloneRoute = switch (operator) {
+            case 0 -> applySwapOperator(cloneRoute);
+            case 1 -> applyInsertOperator(cloneRoute);
+            case 2 -> applyReverseOperator(cloneRoute);
+            default -> throw new IllegalStateException("Unexpected value: " + operator);
+        };
+
+        if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload())) {
+            routes[routeIndex] = cloneRoute;
         }
 
-        if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, route.getMaxPayload())) {
-
-        }
-
-        return newSolution;
+        return solution;
     }
 
     // Toán tử Swap: hoán đổi vị trí của hai điểm trong tuyến đường
@@ -123,7 +114,7 @@ public class SimulatedAnnealing {
         // Chọn vị trí mới để chèn điểm (không bao gồm depot ở đầu và cuối)
         int insertPos = random.nextInt(way.length - 2) + 1;
 
-        for (int i = Math.min(insertPos, pos); i <  Math.max(insertPos, pos); i++) {
+        for (int i = Math.min(insertPos, pos); i < Math.max(insertPos, pos); i++) {
             int tempVal = way[i];
             way[i] = posVal;
             posVal = tempVal;
@@ -159,7 +150,7 @@ public class SimulatedAnnealing {
         return route;
     }
 
-    private double calculateEnergy(FitnessUtil fitnessUtil,Route[] route, Location[] locations) {
+    private double calculateEnergy(FitnessUtil fitnessUtil, Route[] route, Location[] locations) {
         return fitnessUtil.calculatorFitness(route, locations);
     }
 

@@ -8,9 +8,12 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Location.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Location.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Solution.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/PrintUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/PrintUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/SpottedHyenaOptimizer.log" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/SpottedHyenaOptimizer.log" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +70,20 @@
       <recent name="D:\Logistic\new\Logistic\src\main\resources\data" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.Main">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.logistic.Main" />
+      <module name="Logistic" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.logistic.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="ReadDataFromFile" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.logistic.data.ReadDataFromFile" />
       <module name="Logistic" />
@@ -83,6 +99,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.Main" />
         <item itemvalue="Application.ReadDataFromFile" />
       </list>
     </recent_temporary>
@@ -119,6 +136,13 @@
       <workItem from="1743901955444" duration="1478000" />
       <workItem from="1744028895298" duration="2414000" />
       <workItem from="1744188690762" duration="4573000" />
+      <workItem from="1744252891219" duration="594000" />
+      <workItem from="1744256597643" duration="2263000" />
+      <workItem from="1744258950293" duration="2740000" />
+      <workItem from="1744340766635" duration="868000" />
+      <workItem from="1744342946088" duration="130000" />
+      <workItem from="1744343084371" duration="1662000" />
+      <workItem from="1744438715336" duration="760000" />
     </task>
     <servers />
   </component>

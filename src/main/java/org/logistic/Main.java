@@ -5,7 +5,9 @@ import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
+import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
+import org.logistic.util.PrintUtil;
 import org.logistic.util.WriteLogUtil;
 
 import java.net.URISyntaxException;
@@ -14,28 +16,29 @@ public class Main {
     public static void main(String[] args) throws URISyntaxException {
         // Thiết lập công cụ
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
+        PrintUtil printUtil = PrintUtil.getInstance();
+        CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
         WriteLogUtil writeLogUtil = WriteLogUtil.getInstance();
         ReadDataFromFile rdff = new ReadDataFromFile();
 
-        // Thiết lập đường dẫn
-        String dataVrptw = "data/vrptw/src/c101.txt";
-        String solutionVrptw = "data/vrptw/solution/c101.txt";
-//        String dataPdptw = "data/pdptw/src/lc101.txt";
-//        String solutionPdptw = "data/pdptw/solution/lc101.txt";
+        // Đọc dữ liệu
+        String dataLocation = "data/vrptw/src/c101.txt";
+        String dataSolution = "data/vrptw/solution/c101.txt";
+        Location[] locations = readData(rdff, dataLocation, ReadDataFromFile.ProblemType.VRPTW);
+        Route[] routes = readSolution(rdff, dataSolution);
 
-        // Lấy dữ liệu
-        Location[] locations = readData(rdff, dataVrptw, ReadDataFromFile.ProblemType.VRPTW);
-        Route[] routes = readSolution(rdff, solutionVrptw);
-//        Location[] locations = readData(rdff, dataPdptw, ReadDataFromFile.ProblemType.PDPTW);
-//        Route[] routes = readSolution(rdff, solutionPdptw);
+        // Tạo giải pháp đầu tiên
+        Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
 
-        // Tính điểm của giải pháp và khởi tạo lưu trữ cho giải pháp
-        double fitnessVal = fitnessUtil.calculatorFitness(routes, locations);
-        Solution mainSolution = new Solution(routes, fitnessVal);
+        //  Tạo đa giải pháp
+        SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
+        Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations);
 
-        // Sử dụng thuật toán Simulated Annealing tạo các giải pháp khác nhau
-//        SimulatedAnnealing sa = new SimulatedAnnealing();
+        // In ra kết quả
+        printUtil.printSolutions(solutions);
     }
+
+
 
     public static Location[] readData(ReadDataFromFile rdff, String filePath, ReadDataFromFile.ProblemType problemType) throws URISyntaxException {
         rdff.dataOfProblem(filePath, problemType);

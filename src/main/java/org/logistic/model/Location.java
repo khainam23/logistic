@@ -1,13 +1,11 @@
 package org.logistic.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 @Builder
 @AllArgsConstructor
 @Getter
+@Setter
 @Data
 public class Location {
     Point point;
@@ -21,7 +19,7 @@ public class Location {
     boolean isDeliver;
 
     public int totalServiceTime() {
-        return serviceTimeDeliver + serviceTimeDeliver;
+        return serviceTimeDeliver;
     }
 
     public int distance(Location oLocation) {
