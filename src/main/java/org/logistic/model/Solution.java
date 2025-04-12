@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.logistic.util.FitnessUtil;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 @Data
 @Getter
 @Setter
@@ -20,5 +23,17 @@ public class Solution {
             newRoutes[i] = routes[i].copy();
         }
         return new Solution(newRoutes, this.fitness);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Solution solution = (Solution) o;
+        return Double.compare(fitness, solution.fitness) == 0 && Objects.deepEquals(routes, solution.routes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(routes), fitness);
     }
 }
