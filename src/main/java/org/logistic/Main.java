@@ -1,5 +1,7 @@
 package org.logistic;
 
+import org.logistic.algorithm.aco.AntColonyOptimization;
+import org.logistic.algorithm.gwo.GreyWolfOptimizer;
 import org.logistic.algorithm.sho.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.data.ReadDataFromFile;
@@ -14,7 +16,23 @@ import org.logistic.util.WriteLogUtil;
 import java.net.URISyntaxException;
 
 public class Main {
+    enum Algorithm {SHO, ACO, GWO}
+
+    // Cấu trúc việc chạy chương trình
     public static void main(String[] args) throws URISyntaxException {
+        // Thiết lập thuật toán mặc định
+        Algorithm algorithm = Algorithm.GWO;
+        
+        // Kiểm tra tham số dòng lệnh để chọn thuật toán
+        if (args.length > 0) {
+            try {
+                algorithm = Algorithm.valueOf(args[0].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Thuật toán không hợp lệ. Sử dụng SHO, ACO hoặc GWO.");
+                System.out.println("Sử dụng thuật toán mặc định: " + algorithm);
+            }
+        }
+        
         // Thiết lập công cụ
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
         PrintUtil printUtil = PrintUtil.getInstance();
@@ -36,8 +54,34 @@ public class Main {
         Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
 
         // Tìm lời giải tối ưu dựa trên tập giải pháp đã tìm được
-        SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer(writeLogUtil);
-        Solution optimizedSolution = sho.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+        Solution optimizedSolution;
+        
+        switch (algorithm) {
+            case ACO:
+                // Sử dụng thuật toán Ant Colony Optimization
+                System.out.println("Đang chạy thuật toán Ant Colony Optimization (ACO)...");
+                AntColonyOptimization aco = new AntColonyOptimization(writeLogUtil);
+                optimizedSolution = aco.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+                writeLogUtil.info("ACO completed with fitness: " + optimizedSolution.getFitness());
+                break;
+                
+            case GWO:
+                // Sử dụng thuật toán Grey Wolf Optimizer
+                System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
+                GreyWolfOptimizer gwo = new GreyWolfOptimizer(writeLogUtil);
+                optimizedSolution = gwo.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+                writeLogUtil.info("GWO completed with fitness: " + optimizedSolution.getFitness());
+                break;
+                
+            case SHO:
+            default:
+                // Sử dụng thuật toán Spotted Hyena Optimizer
+                System.out.println("Đang chạy thuật toán Spotted Hyena Optimizer (SHO)...");
+                SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer(writeLogUtil);
+                optimizedSolution = sho.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+                writeLogUtil.info("SHO completed with fitness: " + optimizedSolution.getFitness());
+                break;
+        }
         
         // In ra kết quả tối ưu
         printUtil.printSolution(optimizedSolution);
@@ -46,7 +90,6 @@ public class Main {
         // Đóng các util nếu có
         writeLogUtil.close();
     }
-
 
 
     public static Location[] readData(ReadDataFromFile rdff, String filePath, ReadDataFromFile.ProblemType problemType) throws URISyntaxException {

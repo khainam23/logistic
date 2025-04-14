@@ -15,7 +15,9 @@ public class WriteLogUtil {
 
     public enum PathLog {
         SA("logs/SimulatedAnnealing.log"),
-        SHO("logs/SpottedHyenaOptimizer.log");
+        SHO("logs/SpottedHyenaOptimizer.log"),
+        ACO("logs/AntColonyOptimization.log"),
+        GWO("logs/GreyWolfOptimizer.log");
 
         private final String path;
 
