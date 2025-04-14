@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/aco/AntColonyOptimization.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/gwo/GreyWolfOptimizer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +139,7 @@
       <workItem from="1744444831609" duration="1641000" />
       <workItem from="1744446688943" duration="1598000" />
       <workItem from="1744448332340" duration="1523000" />
-      <workItem from="1744622279890" duration="1826000" />
+      <workItem from="1744622279890" duration="2734000" />
     </task>
     <servers />
   </component>
