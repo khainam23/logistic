@@ -6,12 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/WriteLogUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/SpottedHyenaOptimizer.log" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +142,9 @@
       <workItem from="1744343084371" duration="1662000" />
       <workItem from="1744438715336" duration="5914000" />
       <workItem from="1744444831609" duration="1641000" />
-      <workItem from="1744446688943" duration="328000" />
+      <workItem from="1744446688943" duration="1598000" />
+      <workItem from="1744448332340" duration="1523000" />
+      <workItem from="1744622279890" duration="304000" />
     </task>
     <servers />
   </component>
@@ -155,32 +156,32 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>113</line>
+          <line>105</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>114</line>
+          <line>106</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>115</line>
+          <line>107</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>148</line>
+          <line>140</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>129</line>
+          <line>121</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SimulatedAnnealing.java</url>
-          <line>165</line>
+          <line>157</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>

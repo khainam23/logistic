@@ -1,6 +1,7 @@
 package org.logistic;
 
 import org.logistic.algorithm.sho.SimulatedAnnealing;
+import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
@@ -34,8 +35,13 @@ public class Main {
         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution, writeLogUtil);
         Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
 
-        // In ra kết quả
-        printUtil.printSolutions(solutions);
+        // Tìm lời giải tối ưu dựa trên tập giải pháp đã tìm được
+        SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer(writeLogUtil);
+        Solution optimizedSolution = sho.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+        
+        // In ra kết quả tối ưu
+        printUtil.printSolution(optimizedSolution);
+        writeLogUtil.info("Final optimized solution fitness: " + optimizedSolution.getFitness());
 
         // Đóng các util nếu có
         writeLogUtil.close();

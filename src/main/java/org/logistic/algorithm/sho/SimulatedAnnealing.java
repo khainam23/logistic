@@ -77,18 +77,12 @@ public class SimulatedAnnealing {
                            writeLogUtil.info("New best solution: ");
                            writeLogUtil.info(bestSolution.toString());
                            writeLogUtil.info("New best energy: " + bestEnergy);
-
-                           // Chỉ nhận giải pháp tốt
-                           population.add(newSolution);
-                       }
-
-                       if(newEnergy == bestEnergy) {
-                           population.add(newSolution);
                        }
                    }
                }
             }
 
+            population.add(currentSolution);
             temperature *= COOLING_RATE;
         }
 
