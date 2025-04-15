@@ -1,5 +1,6 @@
 package org.logistic;
 
+import org.logistic.algorithm.Optimizer;
 import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
 import org.logistic.algorithm.sa.SimulatedAnnealing;
@@ -16,7 +17,7 @@ import org.logistic.util.WriteLogUtil;
 import java.net.URISyntaxException;
 
 public class Main {
-    enum Algorithm {SHO, ACO, GWO}
+    enum Algorithm {SHO, ACO, GWO, SA}
 
     // Cấu trúc việc chạy chương trình
     public static void main(String[] args) throws URISyntaxException {
@@ -28,7 +29,7 @@ public class Main {
             try {
                 algorithm = Algorithm.valueOf(args[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                System.out.println("Thuật toán không hợp lệ. Sử dụng SHO, ACO hoặc GWO.");
+                System.out.println("Thuật toán không hợp lệ. Sử dụng SHO, ACO, GWO hoặc SA.");
                 System.out.println("Sử dụng thuật toán mặc định: " + algorithm);
             }
         }
@@ -49,39 +50,50 @@ public class Main {
         // Tạo giải pháp đầu tiên
         Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
 
-        //  Tạo đa giải pháp
+        // Tạo đa giải pháp sử dụng SimulatedAnnealing
         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution, writeLogUtil);
-        Solution[] solutions = sa.run(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
-
-        // Tìm lời giải tối ưu dựa trên tập giải pháp đã tìm được
-        Solution optimizedSolution;
-
+        Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+        
+        // Tạo đối tượng thuật toán tối ưu hóa dựa trên lựa chọn
+        Optimizer optimizer;
+        
         switch (algorithm) {
             case ACO:
                 // Sử dụng thuật toán Ant Colony Optimization
                 System.out.println("Đang chạy thuật toán Ant Colony Optimization (ACO)...");
-                AntColonyOptimization aco = new AntColonyOptimization(writeLogUtil);
-                optimizedSolution = aco.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
-                writeLogUtil.info("ACO completed with fitness: " + optimizedSolution.getFitness());
+                optimizer = new AntColonyOptimization(writeLogUtil);
                 break;
 
             case GWO:
                 // Sử dụng thuật toán Grey Wolf Optimizer
                 System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
-                GreyWolfOptimizer gwo = new GreyWolfOptimizer(writeLogUtil);
-                optimizedSolution = gwo.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
-                writeLogUtil.info("GWO completed with fitness: " + optimizedSolution.getFitness());
+                optimizer = new GreyWolfOptimizer(writeLogUtil);
+                break;
+                
+            case SA:
+                // Sử dụng thuật toán Simulated Annealing
+                System.out.println("Đang chạy thuật toán Simulated Annealing (SA)...");
+                optimizer = sa; // Sử dụng lại đối tượng SA đã tạo
                 break;
 
             case SHO:
             default:
                 // Sử dụng thuật toán Spotted Hyena Optimizer
                 System.out.println("Đang chạy thuật toán Spotted Hyena Optimizer (SHO)...");
-                SpottedHyenaOptimizer sho = new SpottedHyenaOptimizer(writeLogUtil);
-                optimizedSolution = sho.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
-                writeLogUtil.info("SHO completed with fitness: " + optimizedSolution.getFitness());
+                optimizer = new SpottedHyenaOptimizer(writeLogUtil);
                 break;
         }
+        
+        // Chạy thuật toán tối ưu hóa đã chọn
+        Solution optimizedSolution = optimizer.run(
+            initialSolutions, 
+            fitnessUtil, 
+            checkConditionUtil, 
+            locations, 
+            routes[0].getMaxPayload()
+        );
+        
+        writeLogUtil.info(algorithm + " completed with fitness: " + optimizedSolution.getFitness());
 
         // In ra kết quả tối ưu
         printUtil.printSolution(optimizedSolution);

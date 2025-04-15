@@ -2,9 +2,8 @@ package org.logistic.algorithm.sho;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.logistic.algorithm.Optimizer;
+import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.model.Location;
-import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
@@ -12,35 +11,29 @@ import org.logistic.util.WriteLogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Thuật toán Spotted Hyena Optimizer
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SpottedHyenaOptimizer implements Optimizer {
+public class SpottedHyenaOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
     static final int CLUSTER_SIZE = 5; // Kích thước cụm linh cẩu
     static final double A_DECREASE_FACTOR = 0.01; // Tốc độ giảm của hệ số A
-
-    final Random random;
-    final WriteLogUtil writeLogUtil;
 
     // Danh sách các linh cẩu
     List<Hyena> population;
     List<List<Hyena>> clusters; // Các cụm linh cẩu
     Hyena bestHyena; // Linh cẩu có fitness tốt nhất
 
-    // Các tham số khác
-    Location[] locations;
-    FitnessUtil fitnessUtil;
-    CheckConditionUtil checkConditionUtil;
-    int currentTarget;
-
+    /**
+     * Khởi tạo thuật toán Spotted Hyena Optimizer
+     * 
+     * @param writeLogUtil Tiện ích ghi log
+     */
     public SpottedHyenaOptimizer(WriteLogUtil writeLogUtil) {
-        this.random = new Random();
-        this.writeLogUtil = writeLogUtil;
+        super(writeLogUtil);
         this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.SHO.getPath());
     }
 
@@ -205,88 +198,18 @@ public class SpottedHyenaOptimizer implements Optimizer {
         }
     }
 
-    /**
-     * Áp dụng toán tử ngẫu nhiên cho khám phá
-     */
-    private void applyRandomOperation(org.logistic.model.Route route) {
-        int operator = random.nextInt(3);
-        switch (operator) {
-            case 0 -> applySwapOperator(route);
-            case 1 -> applyInsertOperator(route);
-            case 2 -> applyReverseOperator(route);
-        }
-    }
-
-    private void applySwapOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 khác pos2
-        while (pos1 == pos2) {
-            pos2 = random.nextInt(way.length);
-        }
-
-        // Hoán đổi hai điểm
-        int temp = way[pos1];
-        way[pos1] = way[pos2];
-        way[pos2] = temp;
-
-    }
-
-    // Toán tử Insert: di chuyển một điểm đến vị trí mới trong tuyến đường
-    private void applyInsertOperator(Route route) {
-        // Chọn một điểm để di chuyển (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos = random.nextInt(way.length);
-
-        // Chọn vị trí mới để chèn điểm (không bao gồm depot ở đầu và cuối)
-        int insertPos = random.nextInt(way.length);
-        int posVal = way[Math.max(insertPos, pos)];
-
-        for (int i = Math.min(insertPos, pos); i <= Math.max(insertPos, pos); i++) {
-            int tempVal = way[i];
-            way[i] = posVal;
-            posVal = tempVal;
-        }
-    }
-
-    // Toán tử Reverse: đảo ngược thứ tự của một đoạn trong tuyến đường
-    private void applyReverseOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 < pos2
-        if (pos1 > pos2) {
-            int temp = pos1;
-            pos1 = pos2;
-            pos2 = temp;
-        }
-
-        // Đảo ngược đoạn từ pos1 đến pos2
-        while (pos1 < pos2) {
-            int temp = way[pos1];
-            way[pos1] = way[pos2];
-            way[pos2] = temp;
-            pos1++;
-            pos2--;
-        }
-
-    }
+    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
+    // đã được chuyển lên lớp cha AbstractOptimizer
 
     /**
      * Chạy thuật toán SHO cải tiến
      */
+    @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
-        this.fitnessUtil = fitnessUtil;
-        this.checkConditionUtil = checkConditionUtil;
-        this.locations = locations;
-        this.currentTarget = currentTarget;
+        // Thiết lập các tham số từ lớp cha
+        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
 
         writeLogUtil.info("Starting Improved Spotted Hyena Optimizer");
         writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);

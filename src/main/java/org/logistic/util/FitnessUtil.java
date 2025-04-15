@@ -39,7 +39,7 @@ public class FitnessUtil {
                 // Tính thời gian phục vụ
                 totalServiceTime += nextLoc.totalServiceTime();
 
-                // Tính thời gian chờ
+                // Tính thời gian chờ của khách hàng
                 int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
                 if (waitingTime > 0) totalWaitingTime += waitingTime;
             }

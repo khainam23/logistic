@@ -2,7 +2,7 @@ package org.logistic.algorithm.sa;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.logistic.algorithm.Optimizer;
+import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -16,43 +16,58 @@ import java.util.*;
  * Thuật toán Simulated Annealing
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SimulatedAnnealing implements Optimizer {
+public class SimulatedAnnealing extends AbstractOptimizer {
+    // Các tham số của thuật toán
     static final double INITIAL_TEMPERATURE = 100.0;
-    static double COOLING_RATE = 0.95;
+    static final double COOLING_RATE = 0.95;
     static final double FINAL_TEMPERATURE = 0.1;
     static final int MAX_ITERATIONS = 1000;
 
-    final Solution solution;
-    final Random random;
-    final WriteLogUtil writeLogUtil;
+    // Giải pháp ban đầu
+    final Solution initialSolution;
 
+    /**
+     * Khởi tạo thuật toán Simulated Annealing với giải pháp ban đầu
+     * 
+     * @param solution Giải pháp ban đầu
+     * @param writeLogUtil Tiện ích ghi log
+     */
     public SimulatedAnnealing(Solution solution, WriteLogUtil writeLogUtil) {
-        this.solution = solution;
-        this.random = new Random();
-        this.writeLogUtil = writeLogUtil;
+        super(writeLogUtil);
+        this.initialSolution = solution;
         this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.SA.getPath());
     }
 
     @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil, 
                       CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
+        // Thiết lập các tham số từ lớp cha
+        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        
         // Ghi lại các tham số ban đầu
+        writeLogUtil.info("Starting Simulated Annealing");
         writeLogUtil.info("Initial temperature: " + INITIAL_TEMPERATURE);
         writeLogUtil.info("Cooling rate: " + COOLING_RATE);
         writeLogUtil.info("Final temperature: " + FINAL_TEMPERATURE);
         writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);
 
+        // Sử dụng giải pháp ban đầu từ constructor hoặc từ tham số nếu có
+        Solution startSolution = initialSolution;
+        if (initialSolutions != null && initialSolutions.length > 0) {
+            startSolution = initialSolutions[0];
+        }
+        
         // Ghi lại tập giải pháp ban đầu
         writeLogUtil.info("Initial solution: ");
-        writeLogUtil.info(solution.toString());
+        writeLogUtil.info(startSolution.toString());
 
         Set<Solution> population = new HashSet<>();
-        population.add(solution);
+        population.add(startSolution);
         double temperature = INITIAL_TEMPERATURE;
 
-        Solution currentSolution = solution;
-        Solution bestSolution = currentSolution;
-        double bestEnergy = calculateEnergy(fitnessUtil, bestSolution.getRoutes(), locations);
+        Solution currentSolution = startSolution;
+        Solution bestSolution = currentSolution.copy();
+        double bestEnergy = calculateEnergy(bestSolution.getRoutes());
 
         writeLogUtil.info("*".repeat(20));
 
@@ -61,7 +76,7 @@ public class SimulatedAnnealing implements Optimizer {
             writeLogUtil.info("Temperature: " + temperature);
 
             for (int i = 0; i < MAX_ITERATIONS; i++) {
-                Solution newSolution = perturbSolution(currentSolution.copy(), checkConditionUtil, locations, currentTarget);
+                Solution newSolution = perturbSolution(currentSolution.copy());
 
                if(!newSolution.equals(currentSolution)) { // Không nên kiểm tra trùng vì có thể giảm khả năng khám phá
                    // Ghi lại nếu có sự thay đổi
@@ -69,8 +84,8 @@ public class SimulatedAnnealing implements Optimizer {
                    writeLogUtil.info("New solution: ");
                    writeLogUtil.info(newSolution.toString());
 
-                   double currentEnergy = calculateEnergy(fitnessUtil, currentSolution.getRoutes(), locations);
-                   double newEnergy = calculateEnergy(fitnessUtil, newSolution.getRoutes(), locations);
+                   double currentEnergy = calculateEnergy(currentSolution.getRoutes());
+                   double newEnergy = calculateEnergy(newSolution.getRoutes());
                    double deltaEnergy = newEnergy - currentEnergy;
 
                    if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
@@ -95,6 +110,7 @@ public class SimulatedAnnealing implements Optimizer {
         writeLogUtil.info("*".repeat(20));
 
         // Ghi lại kết quả tìm được
+        writeLogUtil.info("Simulated Annealing completed");
         writeLogUtil.info("Best solution: ");
         writeLogUtil.info(bestSolution.toString());
         writeLogUtil.info("Best energy: " + bestEnergy);
@@ -108,18 +124,23 @@ public class SimulatedAnnealing implements Optimizer {
      */
     public Solution[] runAndGetPopulation(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil, 
                                         Location[] locations, int currentTarget) {
-        run(new Solution[]{solution}, fitnessUtil, checkConditionUtil, locations, currentTarget);
+        // Thiết lập các tham số từ lớp cha
+        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
         
+        // Chạy thuật toán để tìm giải pháp tốt nhất
+        run(new Solution[]{initialSolution}, fitnessUtil, checkConditionUtil, locations, currentTarget);
+        
+        // Tạo tập quần thể
         Set<Solution> population = new HashSet<>();
-        population.add(solution);
+        population.add(initialSolution);
         double temperature = INITIAL_TEMPERATURE;
-        Solution currentSolution = solution;
+        Solution currentSolution = initialSolution;
         
         while (temperature > FINAL_TEMPERATURE) {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
-                Solution newSolution = perturbSolution(currentSolution.copy(), checkConditionUtil, locations, currentTarget);
-                double currentEnergy = calculateEnergy(fitnessUtil, currentSolution.getRoutes(), locations);
-                double newEnergy = calculateEnergy(fitnessUtil, newSolution.getRoutes(), locations);
+                Solution newSolution = perturbSolution(currentSolution.copy());
+                double currentEnergy = calculateEnergy(currentSolution.getRoutes());
+                double newEnergy = calculateEnergy(newSolution.getRoutes());
                 double deltaEnergy = newEnergy - currentEnergy;
 
                 if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
@@ -133,17 +154,24 @@ public class SimulatedAnnealing implements Optimizer {
         return population.toArray(new Solution[0]);
     }
 
-    private Solution perturbSolution(Solution solution, CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
+    /**
+     * Biến đổi giải pháp bằng cách áp dụng một toán tử ngẫu nhiên
+     * 
+     * @param solution Giải pháp cần biến đổi
+     * @return Giải pháp mới sau khi biến đổi
+     */
+    private Solution perturbSolution(Solution solution) {
         // Chọn ngẫu nhiên một toán tử biến đổi: swap, insert, hoặc reverse
         int operator = random.nextInt(3);
 
         // Lấy các tuyến đường từ giải pháp
-        Route[] routes = solution.getRoutes(); // Tạo một bản sao của routes
+        Route[] routes = solution.getRoutes();
 
         // Chọn ngẫu nhiên một tuyến đường để biến đổi
         int routeIndex = random.nextInt(routes.length);
         Route cloneRoute = routes[routeIndex].copy();
 
+        // Áp dụng toán tử biến đổi
         switch (operator) {
             case 0 -> applySwapOperator(cloneRoute);
             case 1 -> applyInsertOperator(cloneRoute);
@@ -151,78 +179,34 @@ public class SimulatedAnnealing implements Optimizer {
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         }
 
+        // Kiểm tra tính khả thi của tuyến đường mới
         if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload(), currentTarget)) {
-            routes[routeIndex] = cloneRoute; // Cập nhật
+            routes[routeIndex] = cloneRoute; // Cập nhật tuyến đường
         }
 
         return solution;
     }
 
-    // Toán tử Swap: hoán đổi vị trí của hai điểm trong tuyến đường
-    private void applySwapOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
+    // Các phương thức applySwapOperator, applyInsertOperator, applyReverseOperator
+    // đã được chuyển lên lớp cha AbstractOptimizer
 
-        // Đảm bảo pos1 khác pos2
-        while (pos1 == pos2) {
-            pos2 = random.nextInt(way.length);
-        }
-
-        // Hoán đổi hai điểm
-        int temp = way[pos1];
-        way[pos1] = way[pos2];
-        way[pos2] = temp;
-
+    /**
+     * Tính toán năng lượng (fitness) của một tập tuyến đường
+     * 
+     * @param routes Tập tuyến đường cần tính năng lượng
+     * @return Giá trị năng lượng
+     */
+    private double calculateEnergy(Route[] routes) {
+        return fitnessUtil.calculatorFitness(routes, locations);
     }
 
-    // Toán tử Insert: di chuyển một điểm đến vị trí mới trong tuyến đường
-    private void applyInsertOperator(Route route) {
-        // Chọn một điểm để di chuyển (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos = random.nextInt(way.length);
-
-        // Chọn vị trí mới để chèn điểm (không bao gồm depot ở đầu và cuối)
-        int insertPos = random.nextInt(way.length);
-        int posVal = way[Math.max(insertPos, pos)];
-
-        for (int i = Math.min(insertPos, pos); i <= Math.max(insertPos, pos); i++) {
-            int tempVal = way[i];
-            way[i] = posVal;
-            posVal = tempVal;
-        }
-    }
-
-    // Toán tử Reverse: đảo ngược thứ tự của một đoạn trong tuyến đường
-    private void applyReverseOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên (không bao gồm depot ở đầu và cuối)
-        int[] way = route.getIndLocations();
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 < pos2
-        if (pos1 > pos2) {
-            int temp = pos1;
-            pos1 = pos2;
-            pos2 = temp;
-        }
-
-        // Đảo ngược đoạn từ pos1 đến pos2
-        while (pos1 < pos2) {
-            int temp = way[pos1];
-            way[pos1] = way[pos2];
-            way[pos2] = temp;
-            pos1++;
-            pos2--;
-        }
-
-    }
-
-    private double calculateEnergy(FitnessUtil fitnessUtil, Route[] route, Location[] locations) {
-        return fitnessUtil.calculatorFitness(route, locations);
-    }
-
+    /**
+     * Tính xác suất chấp nhận một giải pháp tệ hơn
+     * 
+     * @param deltaEnergy Chênh lệch năng lượng
+     * @param temperature Nhiệt độ hiện tại
+     * @return Xác suất chấp nhận
+     */
     private double acceptanceProbability(double deltaEnergy, double temperature) {
         return Math.exp(-deltaEnergy / temperature);
     }
