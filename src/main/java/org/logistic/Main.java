@@ -2,7 +2,7 @@ package org.logistic;
 
 import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
-import org.logistic.algorithm.sho.SimulatedAnnealing;
+import org.logistic.algorithm.sa.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
@@ -21,7 +21,7 @@ public class Main {
     // Cấu trúc việc chạy chương trình
     public static void main(String[] args) throws URISyntaxException {
         // Thiết lập thuật toán mặc định
-        Algorithm algorithm = Algorithm.GWO;
+        Algorithm algorithm = Algorithm.SHO;
         
         // Kiểm tra tham số dòng lệnh để chọn thuật toán
         if (args.length > 0) {
@@ -41,9 +41,9 @@ public class Main {
         ReadDataFromFile rdff = new ReadDataFromFile();
 
         // Đọc dữ liệu
-        String dataLocation = "data/vrptw/src/c101.txt";
-        String dataSolution = "data/vrptw/solution/c101.txt";
-        Location[] locations = readData(rdff, dataLocation, ReadDataFromFile.ProblemType.VRPTW);
+        String dataLocation = "data/pdptw/src/lc101.txt";
+        String dataSolution = "data/pdptw/solution/lc101.txt";
+        Location[] locations = readData(rdff, dataLocation, ReadDataFromFile.ProblemType.PDPTW);
         Route[] routes = readSolution(rdff, dataSolution);
 
         // Tạo giải pháp đầu tiên
@@ -55,7 +55,7 @@ public class Main {
 
         // Tìm lời giải tối ưu dựa trên tập giải pháp đã tìm được
         Solution optimizedSolution;
-        
+
         switch (algorithm) {
             case ACO:
                 // Sử dụng thuật toán Ant Colony Optimization
@@ -64,7 +64,7 @@ public class Main {
                 optimizedSolution = aco.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
                 writeLogUtil.info("ACO completed with fitness: " + optimizedSolution.getFitness());
                 break;
-                
+
             case GWO:
                 // Sử dụng thuật toán Grey Wolf Optimizer
                 System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
@@ -72,7 +72,7 @@ public class Main {
                 optimizedSolution = gwo.run(solutions, fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
                 writeLogUtil.info("GWO completed with fitness: " + optimizedSolution.getFitness());
                 break;
-                
+
             case SHO:
             default:
                 // Sử dụng thuật toán Spotted Hyena Optimizer
@@ -82,7 +82,7 @@ public class Main {
                 writeLogUtil.info("SHO completed with fitness: " + optimizedSolution.getFitness());
                 break;
         }
-        
+
         // In ra kết quả tối ưu
         printUtil.printSolution(optimizedSolution);
         writeLogUtil.info("Final optimized solution fitness: " + optimizedSolution.getFitness());

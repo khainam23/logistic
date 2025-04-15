@@ -1,16 +1,16 @@
 package org.logistic.algorithm.sho;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import lombok.AccessLevel;
+import org.logistic.algorithm.Agent;
 import org.logistic.model.Solution;
 
-
+/**
+ * Đối tượng Hyena trong thuật toán Spotted Hyena Optimizer
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Data
-public class Hyena {
-    Solution solution; // Lời giải hiện tại
-    double fitness; // Giá trị fitness của lời giải
+public class Hyena extends Agent {
+    public Hyena(Solution solution, double fitness) {
+        super(solution, fitness);
+    }
 }

@@ -1,7 +1,8 @@
-package org.logistic.algorithm.sho;
+package org.logistic.algorithm.sa;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.logistic.algorithm.Optimizer;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -11,8 +12,11 @@ import org.logistic.util.WriteLogUtil;
 
 import java.util.*;
 
+/**
+ * Thuật toán Simulated Annealing
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SimulatedAnnealing {
+public class SimulatedAnnealing implements Optimizer {
     static final double INITIAL_TEMPERATURE = 100.0;
     static double COOLING_RATE = 0.95;
     static final double FINAL_TEMPERATURE = 0.1;
@@ -29,7 +33,9 @@ public class SimulatedAnnealing {
         this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.SA.getPath());
     }
 
-    public Solution[] run(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
+    @Override
+    public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil, 
+                      CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
         // Ghi lại các tham số ban đầu
         writeLogUtil.info("Initial temperature: " + INITIAL_TEMPERATURE);
         writeLogUtil.info("Cooling rate: " + COOLING_RATE);
@@ -93,6 +99,37 @@ public class SimulatedAnnealing {
         writeLogUtil.info(bestSolution.toString());
         writeLogUtil.info("Best energy: " + bestEnergy);
 
+        // Trả về giải pháp tốt nhất thay vì toàn bộ quần thể
+        return bestSolution;
+    }
+    
+    /**
+     * Phương thức này được giữ lại để tương thích ngược với code cũ
+     */
+    public Solution[] runAndGetPopulation(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil, 
+                                        Location[] locations, int currentTarget) {
+        run(new Solution[]{solution}, fitnessUtil, checkConditionUtil, locations, currentTarget);
+        
+        Set<Solution> population = new HashSet<>();
+        population.add(solution);
+        double temperature = INITIAL_TEMPERATURE;
+        Solution currentSolution = solution;
+        
+        while (temperature > FINAL_TEMPERATURE) {
+            for (int i = 0; i < MAX_ITERATIONS; i++) {
+                Solution newSolution = perturbSolution(currentSolution.copy(), checkConditionUtil, locations, currentTarget);
+                double currentEnergy = calculateEnergy(fitnessUtil, currentSolution.getRoutes(), locations);
+                double newEnergy = calculateEnergy(fitnessUtil, newSolution.getRoutes(), locations);
+                double deltaEnergy = newEnergy - currentEnergy;
+
+                if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
+                    currentSolution = newSolution.copy();
+                }
+            }
+            population.add(currentSolution);
+            temperature *= COOLING_RATE;
+        }
+        
         return population.toArray(new Solution[0]);
     }
 

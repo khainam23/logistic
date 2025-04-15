@@ -2,6 +2,7 @@ package org.logistic.algorithm.gwo;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -11,16 +12,15 @@ import org.logistic.util.WriteLogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * Thuật toán Grey Wolf Optimizer
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GreyWolfOptimizer {
+public class GreyWolfOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
     static final int PACK_SIZE = 20; // Kích thước đàn sói
-
-    final Random random;
-    final WriteLogUtil writeLogUtil;
 
     // Danh sách các sói
     List<Wolf> population;
@@ -28,15 +28,8 @@ public class GreyWolfOptimizer {
     Wolf beta;  // Sói beta (tốt thứ hai)
     Wolf delta; // Sói delta (tốt thứ ba)
 
-    // Các tham số khác
-    Location[] locations;
-    FitnessUtil fitnessUtil;
-    CheckConditionUtil checkConditionUtil;
-    int currentTarget;
-
     public GreyWolfOptimizer(WriteLogUtil writeLogUtil) {
-        this.random = new Random();
-        this.writeLogUtil = writeLogUtil;
+        super(writeLogUtil);
         this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.GWO.getPath());
     }
 
@@ -254,107 +247,18 @@ public class GreyWolfOptimizer {
         }
     }
 
-    /**
-     * Áp dụng toán tử ngẫu nhiên cho khám phá
-     */
-    private void applyRandomOperation(Route route) {
-        int operator = random.nextInt(3);
-        switch (operator) {
-            case 0 -> applySwapOperator(route);
-            case 1 -> applyInsertOperator(route);
-            case 2 -> applyReverseOperator(route);
-        }
-    }
-
-    private void applySwapOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return; // Không thể hoán đổi nếu chỉ có 1 phần tử hoặc ít hơn
-        
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-        
-        // Đảm bảo pos1 khác pos2
-        while (pos1 == pos2) {
-            pos2 = random.nextInt(way.length);
-        }
-        
-        // Hoán đổi hai điểm
-        int temp = way[pos1];
-        way[pos1] = way[pos2];
-        way[pos2] = temp;
-        
-        // Đảm bảo giá trị không vượt quá giới hạn
-        int maxLocationIndex = locations.length - 1;
-        if (way[pos1] > maxLocationIndex) way[pos1] = maxLocationIndex;
-        if (way[pos2] > maxLocationIndex) way[pos2] = maxLocationIndex;
-    }
-
-    private void applyInsertOperator(Route route) {
-        // Chọn một điểm để di chuyển
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return; // Không thể chèn nếu chỉ có 1 phần tử hoặc ít hơn
-        
-        int pos = random.nextInt(way.length);
-        
-        // Chọn vị trí mới để chèn điểm
-        int insertPos = random.nextInt(way.length);
-        int posVal = way[Math.max(insertPos, pos)];
-        
-        for (int i = Math.min(insertPos, pos); i <= Math.max(insertPos, pos); i++) {
-            int tempVal = way[i];
-            way[i] = posVal;
-            posVal = tempVal;
-        }
-        
-        // Đảm bảo tất cả các giá trị không vượt quá giới hạn
-        int maxLocationIndex = locations.length - 1;
-        for (int i = 0; i < way.length; i++) {
-            if (way[i] > maxLocationIndex) way[i] = maxLocationIndex;
-        }
-    }
-
-    private void applyReverseOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return; // Không thể đảo ngược nếu chỉ có 1 phần tử hoặc ít hơn
-        
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-        
-        // Đảm bảo pos1 < pos2
-        if (pos1 > pos2) {
-            int temp = pos1;
-            pos1 = pos2;
-            pos2 = temp;
-        }
-        
-        // Đảo ngược đoạn từ pos1 đến pos2
-        while (pos1 < pos2) {
-            int temp = way[pos1];
-            way[pos1] = way[pos2];
-            way[pos2] = temp;
-            pos1++;
-            pos2--;
-        }
-        
-        // Đảm bảo tất cả các giá trị không vượt quá giới hạn
-        int maxLocationIndex = locations.length - 1;
-        for (int i = 0; i < way.length; i++) {
-            if (way[i] > maxLocationIndex) way[i] = maxLocationIndex;
-        }
-    }
+    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
+    // đã được chuyển lên lớp cha AbstractOptimizer
 
     /**
      * Chạy thuật toán Grey Wolf Optimizer
      */
+    @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
-        this.fitnessUtil = fitnessUtil;
-        this.checkConditionUtil = checkConditionUtil;
-        this.locations = locations;
-        this.currentTarget = currentTarget;
+        // Thiết lập các tham số từ lớp cha
+        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
         
         writeLogUtil.info("Starting Grey Wolf Optimizer");
         writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);

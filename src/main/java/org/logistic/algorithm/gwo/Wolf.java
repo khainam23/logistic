@@ -1,15 +1,16 @@
 package org.logistic.algorithm.gwo;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import lombok.AccessLevel;
+import org.logistic.algorithm.Agent;
 import org.logistic.model.Solution;
 
+/**
+ * Đối tượng Wolf trong thuật toán Grey Wolf Optimizer
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Data
-public class Wolf {
-    Solution solution; // Lời giải hiện tại
-    double fitness; // Giá trị fitness của lời giải
+public class Wolf extends Agent {
+    public Wolf(Solution solution, double fitness) {
+        super(solution, fitness);
+    }
 }

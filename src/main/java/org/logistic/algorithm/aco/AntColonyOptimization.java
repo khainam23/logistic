@@ -1,7 +1,9 @@
 package org.logistic.algorithm.aco;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -9,13 +11,14 @@ import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.WriteLogUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 
+/**
+ * Thuật toán Ant Colony Optimization
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AntColonyOptimization {
+public class AntColonyOptimization extends AbstractOptimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
     static final int COLONY_SIZE = 20; // Số lượng kiến trong đàn
@@ -24,9 +27,6 @@ public class AntColonyOptimization {
     static final double RHO = 0.1; // Tốc độ bay hơi pheromone
     static final double Q = 100.0; // Hằng số chất lượng pheromone
 
-    final Random random;
-    final WriteLogUtil writeLogUtil;
-
     // Danh sách các kiến
     List<Ant> colony;
     Ant bestAnt; // Kiến có fitness tốt nhất
@@ -34,17 +34,11 @@ public class AntColonyOptimization {
     // Ma trận pheromone
     double[][] pheromone;
     double[][] heuristic; // Ma trận heuristic (khoảng cách nghịch đảo)
-
-    // Các tham số khác
-    Location[] locations;
-    FitnessUtil fitnessUtil;
-    CheckConditionUtil checkConditionUtil;
-    int currentTarget;
+    
     int numLocations; // Số lượng địa điểm
 
     public AntColonyOptimization(WriteLogUtil writeLogUtil) {
-        this.random = new Random();
-        this.writeLogUtil = writeLogUtil;
+        super(writeLogUtil);
         this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.ACO.getPath());
     }
 
@@ -126,79 +120,8 @@ public class AntColonyOptimization {
         return newSolution;
     }
 
-    /**
-     * Áp dụng toán tử ngẫu nhiên cho khám phá
-     */
-    private void applyRandomOperation(Route route) {
-        int operator = random.nextInt(3);
-        switch (operator) {
-            case 0 -> applySwapOperator(route);
-            case 1 -> applyInsertOperator(route);
-            case 2 -> applyReverseOperator(route);
-        }
-    }
-
-    private void applySwapOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return;
-        
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 khác pos2
-        while (pos1 == pos2) {
-            pos2 = random.nextInt(way.length);
-        }
-
-        // Hoán đổi hai điểm
-        int temp = way[pos1];
-        way[pos1] = way[pos2];
-        way[pos2] = temp;
-    }
-
-    private void applyInsertOperator(Route route) {
-        // Chọn một điểm để di chuyển
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return;
-        
-        int pos = random.nextInt(way.length);
-
-        // Chọn vị trí mới để chèn điểm
-        int insertPos = random.nextInt(way.length);
-        int posVal = way[Math.max(insertPos, pos)];
-
-        for (int i = Math.min(insertPos, pos); i <= Math.max(insertPos, pos); i++) {
-            int tempVal = way[i];
-            way[i] = posVal;
-            posVal = tempVal;
-        }
-    }
-
-    private void applyReverseOperator(Route route) {
-        // Chọn hai vị trí ngẫu nhiên
-        int[] way = route.getIndLocations();
-        if (way.length < 2) return;
-        
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 < pos2
-        if (pos1 > pos2) {
-            int temp = pos1;
-            pos1 = pos2;
-            pos2 = temp;
-        }
-
-        // Đảo ngược đoạn từ pos1 đến pos2
-        while (pos1 < pos2) {
-            int temp = way[pos1];
-            way[pos1] = way[pos2];
-            way[pos2] = temp;
-            pos1++;
-            pos2--;
-        }
-    }
+    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
+    // đã được chuyển lên lớp cha AbstractOptimizer
 
     /**
      * Cập nhật giải pháp của kiến dựa trên pheromone và heuristic
@@ -298,7 +221,7 @@ public class AntColonyOptimization {
             double pheromoneValue = pheromone[current][next];
             double heuristicValue = heuristic[current][next];
             
-            // Công thức ACO: τ^α * η^β
+            // Công thức ACO: phe^α * phe^β
             probabilities[i] = Math.pow(pheromoneValue, ALPHA) * Math.pow(heuristicValue, BETA);
             total += probabilities[i];
         }
@@ -354,13 +277,12 @@ public class AntColonyOptimization {
     /**
      * Chạy thuật toán ACO
      */
+    @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
-        this.fitnessUtil = fitnessUtil;
-        this.checkConditionUtil = checkConditionUtil;
-        this.locations = locations;
-        this.currentTarget = currentTarget;
+        // Thiết lập các tham số từ lớp cha
+        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
 
         writeLogUtil.info("Starting Ant Colony Optimization");
         writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);

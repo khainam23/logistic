@@ -2,6 +2,7 @@ package org.logistic.algorithm.sho;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.logistic.algorithm.Optimizer;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -13,8 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Thuật toán Spotted Hyena Optimizer
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SpottedHyenaOptimizer {
+public class SpottedHyenaOptimizer implements Optimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
     static final int CLUSTER_SIZE = 5; // Kích thước cụm linh cẩu
