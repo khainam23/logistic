@@ -19,8 +19,9 @@ import java.util.List;
  * Lớp tiện ích để xuất dữ liệu ra các định dạng khác nhau như Excel, TXT, CSV
  */
 public class ExportDataUtil {
-    private static ExportDataUtil exportDataUtil;
+    private static ExportDataUtil instance;
     private String exportDirectory;
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     
     /**
      * Enum định nghĩa các định dạng xuất file được hỗ trợ
@@ -73,11 +74,11 @@ public class ExportDataUtil {
      * 
      * @return Instance của ExportDataUtil
      */
-    public static ExportDataUtil getInstance() {
-        if (exportDataUtil == null) {
-            exportDataUtil = new ExportDataUtil();
+    public static synchronized ExportDataUtil getInstance() {
+        if (instance == null) {
+            instance = new ExportDataUtil();
         }
-        return exportDataUtil;
+        return instance;
     }
     
     /**
@@ -146,7 +147,7 @@ public class ExportDataUtil {
      */
     public boolean exportSolution(Solution solution, Location[] locations, ExportFormat format, String directory, String prefix) {
         // Tạo tên file với timestamp
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
         String fileName = directory + "/" + prefix + "_" + timestamp;
         return exportSolution(solution, locations, format, fileName);
     }
@@ -358,7 +359,7 @@ public class ExportDataUtil {
      * @return true nếu xuất thành công, false nếu có lỗi
      */
     public boolean exportSolution(Solution solution, Location[] locations, ExportFormat format) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
         String filePath = ExportPath.SOLUTION.getPath() + "/solution_" + timestamp;
         return exportSolution(solution, locations, format, filePath);
     }

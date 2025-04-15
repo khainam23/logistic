@@ -4,41 +4,88 @@ import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 
+/**
+ * Tiện ích in thông tin cho ứng dụng
+ */
 public class PrintUtil {
-    static PrintUtil printUtil;
+    private static PrintUtil instance;
+    private static final String SEPARATOR = "*".repeat(10);
 
-    private PrintUtil() {}
-
-    public static PrintUtil getInstance() {
-        if (printUtil == null)
-            printUtil = new PrintUtil();
-        return printUtil;
+    /**
+     * Constructor riêng tư để ngăn khởi tạo trực tiếp
+     */
+    private PrintUtil() {
+        // Private constructor
     }
 
+    /**
+     * Lấy instance của PrintUtil (Singleton pattern)
+     * 
+     * @return Instance của PrintUtil
+     */
+    public static synchronized PrintUtil getInstance() {
+        if (instance == null) {
+            instance = new PrintUtil();
+        }
+        return instance;
+    }
+
+    /**
+     * In danh sách các giải pháp
+     * 
+     * @param solutions Mảng các giải pháp cần in
+     */
     public void printSolutions(Solution[] solutions) {
-        for (Solution solution : solutions) {
-            printSolution(solution);
+        if (solutions == null) {
+            System.out.println("Solutions: null");
+            return;
+        }
+        
+        System.out.println("Solutions (count: " + solutions.length + "):");
+        for (int i = 0; i < solutions.length; i++) {
+            System.out.println("Solution #" + (i + 1) + ":");
+            printSolution(solutions[i]);
         }
     }
 
+    /**
+     * In thông tin của một giải pháp
+     * 
+     * @param solution Giải pháp cần in
+     */
     public void printSolution(Solution solution) {
-        System.out.println("Solution: ");
+        if (solution == null) {
+            System.out.println("Solution: null");
+            return;
+        }
+        
+        System.out.println("Solution (fitness: " + solution.getFitness() + "):");
         printRoutes(solution.getRoutes());
-        System.out.println("*".repeat(10));
+        System.out.println(SEPARATOR);
     }
 
+    /**
+     * In danh sách các tuyến đường
+     * 
+     * @param routes Mảng các tuyến đường cần in
+     */
     public void printRoutes(Route[] routes) {
         if (routes == null) {
             System.out.println("Routes: null");
             return;
         }
 
-        System.out.println("Routes");
+        System.out.println("Routes (count: " + routes.length + "):");
         for (int i = 0; i < routes.length; i++) {
             System.out.println((i + 1) + ". " + routes[i]);
         }
     }
 
+    /**
+     * In thông tin của một vị trí
+     * 
+     * @param location Vị trí cần in
+     */
     public void printLocation(Location location) {
         if (location == null) {
             System.out.println("Location: null");
@@ -46,16 +93,14 @@ public class PrintUtil {
         }
 
         System.out.println("Location:");
-        System.out.println("  Point: (" + location.getPoint().getX() + ", " + location.getPoint().getY() + ")");
-        System.out.println("  Service Time Pick: " + location.getServiceTimePick());
-        System.out.println("  Service Time Deliver: " + location.getServiceTimeDeliver());
-        System.out.println("  Demand Pick: " + location.getDemandPick());
-        System.out.println("  Demand Deliver: " + location.getDemandDeliver());
-        System.out.println("  Time Window: [" + location.getLtw() + ", " + location.getUtw() + "]");
-        System.out.println("  Is Pick: " + location.isPick());
-        System.out.println("  Is Deliver: " + location.isDeliver());
+        printLocationDetails(location);
     }
 
+    /**
+     * In danh sách các vị trí
+     * 
+     * @param locations Mảng các vị trí cần in
+     */
     public void printLocations(Location[] locations) {
         if (locations == null) {
             System.out.println("Locations array: null");
@@ -73,16 +118,25 @@ public class PrintUtil {
             if (locations[i] == null) {
                 System.out.println("  null");
             } else {
-                System.out.println("  Point: (" + locations[i].getPoint().getX() + ", " + locations[i].getPoint().getY() + ")");
-                System.out.println("  Service Time Pick: " + locations[i].getServiceTimePick());
-                System.out.println("  Service Time Deliver: " + locations[i].getServiceTimeDeliver());
-                System.out.println("  Demand Pick: " + locations[i].getDemandPick());
-                System.out.println("  Demand Deliver: " + locations[i].getDemandDeliver());
-                System.out.println("  Time Window: [" + locations[i].getLtw() + ", " + locations[i].getUtw() + "]");
-                System.out.println("  Is Pick: " + locations[i].isPick());
-                System.out.println("  Is Deliver: " + locations[i].isDeliver());
+                printLocationDetails(locations[i]);
             }
-            System.out.println(); // Add empty line for better readability
+            System.out.println(); // Thêm dòng trống để dễ đọc
         }
+    }
+    
+    /**
+     * In chi tiết của một vị trí
+     * 
+     * @param location Vị trí cần in chi tiết
+     */
+    private void printLocationDetails(Location location) {
+        System.out.println("  Point: (" + location.getPoint().getX() + ", " + location.getPoint().getY() + ")");
+        System.out.println("  Service Time Pick: " + location.getServiceTimePick());
+        System.out.println("  Service Time Deliver: " + location.getServiceTimeDeliver());
+        System.out.println("  Demand Pick: " + location.getDemandPick());
+        System.out.println("  Demand Deliver: " + location.getDemandDeliver());
+        System.out.println("  Time Window: [" + location.getLtw() + ", " + location.getUtw() + "]");
+        System.out.println("  Is Pick: " + location.isPick());
+        System.out.println("  Is Deliver: " + location.isDeliver());
     }
 }

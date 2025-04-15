@@ -2,29 +2,40 @@ package org.logistic.util;
 
 import org.logistic.model.Location;
 import org.logistic.model.Route;
-import org.logistic.model.Solution;
 
-import java.lang.module.FindException;
-
+/**
+ * Tiện ích tính toán giá trị fitness cho các giải pháp
+ */
 public class FitnessUtil {
-    static FitnessUtil fitnessUtil;
+    private static FitnessUtil instance;
 
     private FitnessUtil() {
-    }
-
-    public static synchronized FitnessUtil getInstance() {
-        if (fitnessUtil == null)
-            fitnessUtil = new FitnessUtil();
-        return fitnessUtil;
+        // Private constructor để ngăn khởi tạo trực tiếp
     }
 
     /**
-     * Tính giá trị của giải pháp.
+     * Lấy instance của FitnessUtil (Singleton pattern)
+     * 
+     * @return Instance của FitnessUtil
+     */
+    public static synchronized FitnessUtil getInstance() {
+        if (instance == null) {
+            instance = new FitnessUtil();
+        }
+        return instance;
+    }
+
+    /**
+     * Tính giá trị fitness của giải pháp dựa trên các tuyến đường và vị trí
      *
-     * @return
+     * @param routes Mảng các tuyến đường
+     * @param locations Mảng các vị trí
+     * @return Giá trị fitness (càng thấp càng tốt)
      */
     public double calculatorFitness(Route[] routes, Location[] locations) {
-        int totalDistances = 0, totalServiceTime = 0, totalWaitingTime = 0;
+        int totalDistances = 0;
+        int totalServiceTime = 0;
+        int totalWaitingTime = 0;
         int numberVehicle = routes.length;  // Đếm số lượng xe
 
         for (Route route : routes) {
@@ -34,19 +45,21 @@ public class FitnessUtil {
                 Location nextLoc = locations[indLocs[j + 1]];
 
                 // Tính khoảng cách
-                totalDistances += currLoc.distance(nextLoc);
+                int distance = currLoc.distance(nextLoc);
+                totalDistances += distance;
 
                 // Tính thời gian phục vụ
                 totalServiceTime += nextLoc.totalServiceTime();
 
                 // Tính thời gian chờ của khách hàng
-                int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
-                if (waitingTime > 0) totalWaitingTime += waitingTime;
+                int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - distance;
+                if (waitingTime > 0) {
+                    totalWaitingTime += waitingTime;
+                }
             }
         }
 
         // Trả về giá trị fitness
         return totalDistances + totalServiceTime + totalWaitingTime + numberVehicle;
     }
-
 }
