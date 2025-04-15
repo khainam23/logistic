@@ -40,3 +40,4 @@ build/
 # Loại bỏ dữ liệu kết quả
 src/main/resources/**/*
 logs/
+exports/
