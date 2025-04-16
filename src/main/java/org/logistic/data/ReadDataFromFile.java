@@ -14,9 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Lớp đọc dữ liệu từ file
@@ -344,5 +347,195 @@ public class ReadDataFromFile {
             System.err.println("Error reading solution from absolute path: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Lấy danh sách các file trong thư mục
+     * 
+     * @param directoryPath Đường dẫn thư mục
+     * @param extension Phần mở rộng của file (ví dụ: ".txt")
+     * @return Danh sách các file
+     */
+    private List<File> getFilesInDirectory(String directoryPath, String extension) {
+        File directory;
+        
+        try {
+            // Thử tìm thư mục từ classpath
+            java.net.URL url = ReadDataFromFile.class.getClassLoader().getResource(directoryPath);
+            if (url != null) {
+                directory = new File(url.toURI());
+            } else {
+                // Nếu không tìm thấy trong classpath, thử đường dẫn tuyệt đối
+                directory = new File(directoryPath);
+            }
+        } catch (Exception e) {
+            // Nếu có lỗi, thử đường dẫn tuyệt đối
+            directory = new File(directoryPath);
+        }
+        
+        if (!directory.exists() || !directory.isDirectory()) {
+            System.err.println("Directory not found or not a directory: " + directoryPath);
+            System.err.println("Absolute path: " + directory.getAbsolutePath());
+            return new ArrayList<>();
+        }
+        
+        System.out.println("Reading files from directory: " + directory.getAbsolutePath());
+        
+        // Lọc và sắp xếp các file theo tên
+        File[] files = directory.listFiles();
+        if (files == null || files.length == 0) {
+            System.err.println("No files found in directory: " + directory.getAbsolutePath());
+            return new ArrayList<>();
+        }
+        
+        return Arrays.stream(files)
+                .filter(file -> file.isFile() && file.getName().endsWith(extension))
+                .sorted(Comparator.comparing(File::getName))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Lấy file solution tương ứng với file src
+     * 
+     * @param srcFile File src
+     * @param solutionDir Thư mục chứa các file solution
+     * @return File solution tương ứng hoặc null nếu không tìm thấy
+     */
+    private File getMatchingSolutionFile(File srcFile, String solutionDir) {
+        String srcName = srcFile.getName();
+        String baseName = srcName.substring(0, srcName.lastIndexOf('.'));
+        
+        // Tìm file solution có tên bắt đầu giống với file src
+        File solutionDirectory;
+        
+        try {
+            // Thử tìm thư mục từ classpath
+            java.net.URL url = ReadDataFromFile.class.getClassLoader().getResource(solutionDir);
+            if (url != null) {
+                solutionDirectory = new File(url.toURI());
+            } else {
+                // Nếu không tìm thấy trong classpath, thử đường dẫn tuyệt đối
+                solutionDirectory = new File(solutionDir);
+            }
+        } catch (Exception e) {
+            // Nếu có lỗi, thử đường dẫn tuyệt đối
+            solutionDirectory = new File(solutionDir);
+        }
+        
+        if (!solutionDirectory.exists() || !solutionDirectory.isDirectory()) {
+            System.err.println("Solution directory not found or not a directory: " + solutionDir);
+            System.err.println("Absolute path: " + solutionDirectory.getAbsolutePath());
+            return null;
+        }
+        
+        System.out.println("Looking for solution file matching '" + baseName + "' in: " + solutionDirectory.getAbsolutePath());
+        
+        File[] matchingFiles = solutionDirectory.listFiles(
+                file -> file.isFile() && file.getName().startsWith(baseName) && file.getName().endsWith(".txt"));
+        
+        if (matchingFiles != null && matchingFiles.length > 0) {
+            // Sắp xếp để lấy file ngắn nhất (thường là file không có hậu tố)
+            Arrays.sort(matchingFiles, Comparator.comparing(File::getName, 
+                    Comparator.comparingInt(String::length)));
+            System.out.println("Found matching solution file: " + matchingFiles[0].getName());
+            return matchingFiles[0];
+        }
+        
+        System.err.println("No matching solution file found for: " + baseName);
+        return null;
+    }
+    
+    /**
+     * Đọc tất cả các file trong thư mục src và solution tương ứng
+     * 
+     * @param srcDirPath Đường dẫn thư mục chứa file src
+     * @param solutionDirPath Đường dẫn thư mục chứa file solution
+     * @param problemType Loại bài toán
+     * @param callback Callback để xử lý sau khi đọc mỗi cặp file
+     */
+    public void processAllFilesInDirectory(String srcDirPath, String solutionDirPath, 
+                                          ProblemType problemType, FileProcessCallback callback) {
+        System.out.println("Attempting to process files from:");
+        System.out.println("Source directory: " + srcDirPath);
+        System.out.println("Solution directory: " + solutionDirPath);
+        
+        // Kiểm tra xem đường dẫn có phải là đường dẫn tương đối từ resources không
+        if (!new File(srcDirPath).isAbsolute()) {
+            // Thử tìm trong resources
+            try {
+                java.net.URL resourceUrl = ReadDataFromFile.class.getClassLoader().getResource(srcDirPath);
+                if (resourceUrl != null) {
+                    System.out.println("Found source directory in resources: " + resourceUrl.getPath());
+                } else {
+                    System.out.println("Source directory not found in resources, using as-is: " + srcDirPath);
+                }
+            } catch (Exception e) {
+                System.out.println("Error checking resources: " + e.getMessage());
+            }
+        }
+        
+        List<File> srcFiles = getFilesInDirectory(srcDirPath, ".txt");
+        if (srcFiles.isEmpty()) {
+            System.err.println("No source files found in directory: " + srcDirPath);
+            return;
+        }
+        
+        System.out.println("Found " + srcFiles.size() + " source files in directory: " + srcDirPath);
+        
+        // Xử lý từng file src và solution tương ứng
+        for (File srcFile : srcFiles) {
+            try {
+                // Reset dữ liệu trước khi đọc file mới
+                locations = null;
+                routes = null;
+                
+                // Đọc file src
+                String srcPath = srcFile.getAbsolutePath();
+                System.out.println("\nProcessing source file: " + srcFile.getName() + " (" + srcPath + ")");
+                dataOfProblemFromAbsolutePath(srcPath, problemType);
+                
+                if (locations == null || locations.length == 0) {
+                    System.err.println("Failed to read locations from: " + srcPath);
+                    continue;
+                }
+                
+                System.out.println("Successfully read " + locations.length + " locations from: " + srcFile.getName());
+                
+                // Tìm và đọc file solution tương ứng
+                File solutionFile = getMatchingSolutionFile(srcFile, solutionDirPath);
+                if (solutionFile == null) {
+                    System.err.println("No matching solution file found for: " + srcFile.getName());
+                    continue;
+                }
+                
+                String solutionPath = solutionFile.getAbsolutePath();
+                System.out.println("Processing solution file: " + solutionFile.getName() + " (" + solutionPath + ")");
+                readSolutionFromAbsolutePath(solutionPath);
+                
+                if (routes == null || routes.length == 0) {
+                    System.err.println("Failed to read routes from: " + solutionPath);
+                    continue;
+                }
+                
+                System.out.println("Successfully read " + routes.length + " routes from: " + solutionFile.getName());
+                
+                // Gọi callback để xử lý dữ liệu
+                callback.process(locations, routes, srcFile.getName());
+                
+                // Giải phóng bộ nhớ sau khi xử lý xong
+                System.gc();
+                
+            } catch (Exception e) {
+                System.err.println("Error processing file " + srcFile.getName() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Interface callback để xử lý sau khi đọc mỗi cặp file
+     */
+    public interface FileProcessCallback {
+        void process(Location[] locations, Route[] routes, String fileName);
     }
 }

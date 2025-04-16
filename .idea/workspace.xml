@@ -8,11 +8,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/SimulatedAnnealing.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/SpottedHyenaOptimizer.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/SpottedHyenaOptimizer.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Location.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Location.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,7 +147,7 @@
       <workItem from="1744631672519" duration="797000" />
       <workItem from="1744632502602" duration="854000" />
       <workItem from="1744679795269" duration="4331000" />
-      <workItem from="1744707616228" duration="554000" />
+      <workItem from="1744707616228" duration="2693000" />
     </task>
     <servers />
   </component>
