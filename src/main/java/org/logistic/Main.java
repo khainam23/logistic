@@ -12,13 +12,20 @@ import org.logistic.model.Solution;
 import org.logistic.util.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Lớp chính của ứng dụng tối ưu hóa hậu cần
@@ -30,23 +37,163 @@ public class Main {
     enum Algorithm {SHO, ACO, GWO, SA}
     
     /**
-     * Các định dạng xuất dữ liệu được hỗ trợ
-     */
-    enum ExportType {NONE, EXCEL, CSV, TXT, ALL}
-    
-    /**
      * Các chế độ chạy
      */
     enum RunMode {SINGLE_FILE, DIRECTORY}
-
-    // Các đường dẫn mặc định
-    private static final String DEFAULT_DATA_LOCATION = "data/pdptw/src/lc101.txt";
-    private static final String DEFAULT_DATA_SOLUTION = "data/pdptw/solution/lc101.txt";
+    
+    /**
+     * Các định dạng xuất dữ liệu
+     */
+    enum ExportType {NONE, EXCEL, CSV, TXT, ALL}
     private static final String DEFAULT_SRC_DIRECTORY = "data/pdptw/src";
     private static final String DEFAULT_SOLUTION_DIRECTORY = "data/pdptw/solution";
     private static final String EXPORT_DIRECTORY = "exports";
-    private static final String RESULTS_SUMMARY_FILE = "results_summary.csv";
+    private static final String RESULTS_SUMMARY_FILE = "results_summary.txt";
+    private static final String EXCEL_RESULTS_FILE = "optimization_results.xlsx";
     
+    // Biến static để lưu trữ workbook Excel
+    private static Workbook resultsWorkbook;
+    private static Sheet resultsSheet;
+    private static int currentExcelRow = 2; // Bắt đầu từ dòng 3 (sau 2 dòng header)
+
+    /**
+     * Lớp nội bộ để lưu trữ các tham số cấu hình
+     */
+    private static class ConfigParams {
+        // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
+        RunMode runMode = RunMode.DIRECTORY;
+        String dataLocation = "data/pdptw/src/lc101.txt";
+        String dataSolution = "data/pdptw/solution/lc101.txt";
+        String srcDirectory = DEFAULT_SRC_DIRECTORY;
+        String solutionDirectory = DEFAULT_SOLUTION_DIRECTORY;
+        // Mặc định xuất dữ liệu ra Excel
+        ExportType exportType = ExportType.EXCEL;
+    }
+
+    /**
+     * Phương thức chính của ứng dụng
+     * 
+     * @param args Tham số dòng lệnh (không sử dụng)
+     */
+    public static void main(String[] args) {
+        // Tạo cấu hình mặc định
+        ConfigParams config = new ConfigParams();
+        
+        // Khởi tạo các tiện ích
+        FitnessUtil fitnessUtil = FitnessUtil.getInstance();
+        PrintUtil printUtil = PrintUtil.getInstance();
+        CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
+        WriteLogUtil writeLogUtil = WriteLogUtil.getInstance();
+        ReadDataFromFile rdff = new ReadDataFromFile();
+        ExportDataUtil edu = ExportDataUtil.getInstance();
+        
+        System.out.println("Chế độ chạy: Tất cả các thuật toán (SHO, ACO, GWO, SA) sẽ được chạy song song");
+        
+        // Kiểm tra thư mục
+        checkDirectories(config);
+        
+        // Khởi tạo file Excel nếu cần
+        if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
+            initializeExcelWorkbook();
+        }
+        
+        if (config.runMode == RunMode.DIRECTORY) {
+            // Xử lý tất cả các file trong thư mục
+            processAllFilesInDirectory(config, rdff, fitnessUtil, printUtil, 
+                                      checkConditionUtil, writeLogUtil, edu);
+        } else {
+            // Chạy với một file duy nhất
+            processSingleFile(config, rdff, fitnessUtil, printUtil, 
+                             checkConditionUtil, writeLogUtil, edu);
+        }
+
+        // Lưu file Excel nếu đã được khởi tạo
+        if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
+            saveExcelWorkbook();
+        }
+
+        // Đóng các tiện ích
+        writeLogUtil.close();
+    }
+    
+    /**
+     * Khởi tạo workbook Excel với các tiêu đề cần thiết
+     */
+    private static void initializeExcelWorkbook() {
+        try {
+            resultsWorkbook = new XSSFWorkbook();
+            resultsSheet = resultsWorkbook.createSheet("Optimization Results");
+            
+            // Định nghĩa các trọng số và thống kê
+            String[] weights = {"NV", "TC", "SD", "WT"};
+            String[] partWeights = {"Min", "Std", "Mean"};
+            
+            // Tạo dòng tiêu đề 1 (row 0)
+            Row headerRow1 = resultsSheet.createRow(0);
+            headerRow1.createCell(0).setCellValue("Instance");
+            headerRow1.createCell(1).setCellValue("Algorithm");
+            
+            // Tạo dòng tiêu đề 2 (row 1)
+            Row headerRow2 = resultsSheet.createRow(1);
+            
+            // Merge "Instance" và "Algorithm"
+            resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 0, 0));
+            resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 1, 1));
+            
+            // Thêm các cột dữ liệu cho từng trọng số và thống kê
+            for (int w = 0; w < weights.length; w++) {
+                int baseCol = 2 + w * partWeights.length;
+                
+                // Gộp 3 ô cho mỗi trọng số (VD: NV -> Min, Std, Mean)
+                resultsSheet.addMergedRegion(new CellRangeAddress(0, 0, baseCol, baseCol + partWeights.length - 1));
+                headerRow1.createCell(baseCol).setCellValue(weights[w]);
+                
+                for (int j = 0; j < partWeights.length; j++) {
+                    headerRow2.createCell(baseCol + j).setCellValue(partWeights[j]);
+                }
+            }
+            
+            // Tạo thư mục exports nếu chưa tồn tại
+            new File(EXPORT_DIRECTORY).mkdirs();
+            
+            System.out.println("Đã khởi tạo file Excel để lưu kết quả");
+        } catch (Exception e) {
+            System.err.println("Lỗi khi khởi tạo file Excel: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Lưu workbook Excel vào file
+     */
+    private static void saveExcelWorkbook() {
+        if (resultsWorkbook == null) {
+            return;
+        }
+        
+        try {
+            // Tự động điều chỉnh độ rộng cột
+            for (int i = 0; i < 14; i++) { // 2 cột đầu + 4 trọng số * 3 thống kê
+                resultsSheet.autoSizeColumn(i);
+            }
+            
+            // Tạo tên file với timestamp
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String excelFilePath = EXPORT_DIRECTORY + "/" + timestamp + "_" + EXCEL_RESULTS_FILE;
+            
+            // Lưu workbook vào file
+            try (FileOutputStream fileOut = new FileOutputStream(excelFilePath)) {
+                resultsWorkbook.write(fileOut);
+            }
+            
+            resultsWorkbook.close();
+            System.out.println("Đã lưu kết quả vào file Excel: " + excelFilePath);
+        } catch (IOException e) {
+            System.err.println("Lỗi khi lưu file Excel: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     // Đường dẫn tuyệt đối đến thư mục resources
     private static String getResourcesPath() {
         try {
@@ -59,226 +206,64 @@ public class Main {
         }
         return "src/main/resources";
     }
-
+    
     /**
-     * Phương thức chính của ứng dụng
+     * Kiểm tra các thư mục cấu hình
      * 
-     * @param args Tham số dòng lệnh
+     * @param config Đối tượng cấu hình
      */
-    public static void main(String[] args) {
-        // Phân tích tham số dòng lệnh
-        CommandLineParams params = parseCommandLineArgs(args);
+    private static void checkDirectories(ConfigParams config) {
+        // Kiểm tra thư mục src
+        File srcDir = new File(config.srcDirectory);
+        if (!srcDir.exists() || !srcDir.isDirectory()) {
+            System.err.println("CẢNH BÁO: Thư mục src không tồn tại hoặc không phải là thư mục: " + config.srcDirectory);
+            System.err.println("Đường dẫn tuyệt đối: " + srcDir.getAbsolutePath());
+            
+            // Thử tìm trong resources
+            String resourcePath = getResourcesPath() + "/" + config.srcDirectory;
+            if (new File(resourcePath).exists()) {
+                config.srcDirectory = resourcePath;
+                System.out.println("Đã tìm thấy thư mục src trong resources: " + config.srcDirectory);
+            }
+        }
         
-        // Khởi tạo các tiện ích
-        FitnessUtil fitnessUtil = FitnessUtil.getInstance();
-        PrintUtil printUtil = PrintUtil.getInstance();
-        CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
-        WriteLogUtil writeLogUtil = WriteLogUtil.getInstance();
-        ReadDataFromFile rdff = new ReadDataFromFile();
-        ExportDataUtil exportData = ExportDataUtil.getInstance();
-
+        // Kiểm tra thư mục solution
+        File solutionDir = new File(config.solutionDirectory);
+        if (!solutionDir.exists() || !solutionDir.isDirectory()) {
+            System.err.println("CẢNH BÁO: Thư mục solution không tồn tại hoặc không phải là thư mục: " + config.solutionDirectory);
+            System.err.println("Đường dẫn tuyệt đối: " + solutionDir.getAbsolutePath());
+            
+            // Thử tìm trong resources
+            String resourcePath = getResourcesPath() + "/" + config.solutionDirectory;
+            if (new File(resourcePath).exists()) {
+                config.solutionDirectory = resourcePath;
+                System.out.println("Đã tìm thấy thư mục solution trong resources: " + config.solutionDirectory);
+            }
+        }
+        
         // Tạo thư mục exports nếu chưa tồn tại
         new File(EXPORT_DIRECTORY).mkdirs();
-        
-        // Tạo file tổng hợp kết quả nếu chạy theo thư mục
-        if (params.runMode == RunMode.DIRECTORY) {
-            createResultsSummaryFile();
-            
-            // Xử lý tất cả các file trong thư mục
-            processAllFilesInDirectory(params, rdff, fitnessUtil, printUtil, 
-                                      checkConditionUtil, writeLogUtil, exportData);
-        } else {
-            // Chạy với một file duy nhất
-            processSingleFile(params, rdff, fitnessUtil, printUtil, 
-                             checkConditionUtil, writeLogUtil, exportData);
-        }
-
-        // Đóng các tiện ích
-        writeLogUtil.close();
     }
 
-    /**
-     * Phân tích tham số dòng lệnh
-     * 
-     * @param args Mảng tham số dòng lệnh
-     * @return Đối tượng chứa các tham số đã phân tích
-     */
-    private static CommandLineParams parseCommandLineArgs(String[] args) {
-        CommandLineParams params = new CommandLineParams();
-        
-        // Phân tích thuật toán
-        if (args.length > 0) {
-            try {
-                params.algorithm = Algorithm.valueOf(args[0].toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Thuật toán không hợp lệ. Sử dụng SHO, ACO, GWO hoặc SA.");
-                System.out.println("Sử dụng thuật toán mặc định: " + params.algorithm);
-            }
-        }
-        
-        // Phân tích định dạng xuất
-        if (args.length > 1) {
-            try {
-                params.exportType = ExportType.valueOf(args[1].toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Định dạng xuất không hợp lệ. Sử dụng NONE, EXCEL, CSV, TXT hoặc ALL.");
-                System.out.println("Sử dụng định dạng xuất mặc định: " + params.exportType);
-            }
-        }
-        
-        // Phân tích chế độ chạy
-        if (args.length > 2) {
-            if (args[2].equalsIgnoreCase("dir") || args[2].equalsIgnoreCase("directory")) {
-                params.runMode = RunMode.DIRECTORY;
-                System.out.println("Chế độ chạy: Xử lý tất cả các file trong thư mục");
-                
-                // Phân tích thư mục src
-                if (args.length > 3) {
-                    params.srcDirectory = args[3];
-                    // Kiểm tra xem có phải đường dẫn tương đối không
-                    if (!new File(params.srcDirectory).isAbsolute()) {
-                        // Thử tìm trong resources
-                        String resourcePath = getResourcesPath() + "/" + params.srcDirectory;
-                        if (new File(resourcePath).exists()) {
-                            params.srcDirectory = resourcePath;
-                        }
-                    }
-                }
-                
-                // Phân tích thư mục solution
-                if (args.length > 4) {
-                    params.solutionDirectory = args[4];
-                    // Kiểm tra xem có phải đường dẫn tương đối không
-                    if (!new File(params.solutionDirectory).isAbsolute()) {
-                        // Thử tìm trong resources
-                        String resourcePath = getResourcesPath() + "/" + params.solutionDirectory;
-                        if (new File(resourcePath).exists()) {
-                            params.solutionDirectory = resourcePath;
-                        }
-                    }
-                }
-                
-                System.out.println("Thư mục src: " + params.srcDirectory);
-                System.out.println("Thư mục solution: " + params.solutionDirectory);
-                
-                // Kiểm tra xem thư mục có tồn tại không
-                File srcDir = new File(params.srcDirectory);
-                File solutionDir = new File(params.solutionDirectory);
-                
-                if (!srcDir.exists() || !srcDir.isDirectory()) {
-                    System.err.println("CẢNH BÁO: Thư mục src không tồn tại hoặc không phải là thư mục: " + params.srcDirectory);
-                    System.err.println("Đường dẫn tuyệt đối: " + srcDir.getAbsolutePath());
-                }
-                
-                if (!solutionDir.exists() || !solutionDir.isDirectory()) {
-                    System.err.println("CẢNH BÁO: Thư mục solution không tồn tại hoặc không phải là thư mục: " + params.solutionDirectory);
-                    System.err.println("Đường dẫn tuyệt đối: " + solutionDir.getAbsolutePath());
-                }
-                
-            } else {
-                // Chế độ file đơn
-                params.dataLocation = args[2];
-                System.out.println("Chế độ chạy: Xử lý file đơn");
-                System.out.println("File dữ liệu: " + params.dataLocation);
-                
-                // Phân tích đường dẫn file giải pháp
-                if (args.length > 3) {
-                    params.dataSolution = args[3];
-                    System.out.println("File giải pháp: " + params.dataSolution);
-                }
-            }
-        }
-        
-        return params;
-    }
-    
-    /**
-     * Tạo file tổng hợp kết quả
-     */
-    private static void createResultsSummaryFile() {
-        String filePath = EXPORT_DIRECTORY + "/" + RESULTS_SUMMARY_FILE;
-        File file = new File(filePath);
-        
-        // Nếu file chưa tồn tại, tạo file mới với header
-        if (!file.exists()) {
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write("Timestamp,FileName,Algorithm,Fitness,NumberOfVehicles,TotalDistance,TotalServiceTime,TotalWaitingTime\n");
-                System.out.println("Đã tạo file tổng hợp kết quả: " + filePath);
-            } catch (IOException e) {
-                System.err.println("Lỗi khi tạo file tổng hợp kết quả: " + e.getMessage());
-            }
-        }
-    }
-    
-    /**
-     * Ghi kết quả vào file tổng hợp
-     * 
-     * @param fileName Tên file dữ liệu
-     * @param algorithm Thuật toán sử dụng
-     * @param solution Giải pháp tối ưu
-     * @param locations Mảng các vị trí
-     */
-    private static void appendResultToSummary(String fileName, Algorithm algorithm, Solution solution, Location[] locations) {
-        String filePath = EXPORT_DIRECTORY + "/" + RESULTS_SUMMARY_FILE;
-        
-        // Tính toán các thông số
-        int totalDistance = 0;
-        int totalServiceTime = 0;
-        int totalWaitingTime = 0;
-        
-        for (Route route : solution.getRoutes()) {
-            int[] indLocs = route.getIndLocations();
-            for (int j = 0; j < indLocs.length - 1; j++) {
-                Location currLoc = locations[indLocs[j]];
-                Location nextLoc = locations[indLocs[j + 1]];
-                
-                // Tính khoảng cách
-                totalDistance += currLoc.distance(nextLoc);
-                
-                // Tính thời gian phục vụ
-                totalServiceTime += nextLoc.totalServiceTime();
-                
-                // Tính thời gian chờ
-                int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
-                if (waitingTime > 0) {
-                    totalWaitingTime += waitingTime;
-                }
-            }
-        }
-        
-        // Định dạng timestamp
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String timestamp = sdf.format(new Date());
-        
-        // Ghi vào file
-        try (FileWriter writer = new FileWriter(filePath, true)) {
-            writer.write(String.format("%s,%s,%s,%.2f,%d,%d,%d,%d\n",
-                    timestamp, fileName, algorithm, solution.getFitness(),
-                    solution.getRoutes().length, totalDistance, totalServiceTime, totalWaitingTime));
-        } catch (IOException e) {
-            System.err.println("Lỗi khi ghi kết quả vào file tổng hợp: " + e.getMessage());
-        }
-    }
-    
     /**
      * Xử lý tất cả các file trong thư mục
      */
-    private static void processAllFilesInDirectory(CommandLineParams params, ReadDataFromFile rdff,
+    private static void processAllFilesInDirectory(ConfigParams config, ReadDataFromFile rdff,
                                                  FitnessUtil fitnessUtil, PrintUtil printUtil,
                                                  CheckConditionUtil checkConditionUtil, WriteLogUtil writeLogUtil,
-                                                 ExportDataUtil exportData) {
+                                                 ExportDataUtil exportDataUtil) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TẤT CẢ CÁC FILE TRONG THƯ MỤC ===");
-        System.out.println("Thư mục src: " + params.srcDirectory);
-        System.out.println("Thư mục solution: " + params.solutionDirectory);
+        System.out.println("Thư mục src: " + config.srcDirectory);
+        System.out.println("Thư mục solution: " + config.solutionDirectory);
         
         // Xác định loại bài toán dựa trên đường dẫn
-        ReadDataFromFile.ProblemType problemType = params.srcDirectory.contains("pdptw") ? 
+        ReadDataFromFile.ProblemType problemType = config.srcDirectory.contains("pdptw") ? 
                 ReadDataFromFile.ProblemType.PDPTW : ReadDataFromFile.ProblemType.VRPTW;
         
         System.out.println("Loại bài toán: " + problemType);
         
         // Xử lý từng file trong thư mục
-        rdff.processAllFilesInDirectory(params.srcDirectory, params.solutionDirectory, problemType,
+        rdff.processAllFilesInDirectory(config.srcDirectory, config.solutionDirectory, problemType,
                 (locations, routes, fileName) -> {
                     try {
                         System.out.println("\n=== XỬ LÝ FILE: " + fileName + " ===");
@@ -289,27 +274,10 @@ public class Main {
                         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, 
                                                                           locations, routes[0].getMaxPayload());
                         
-                        // Chọn và chạy thuật toán tối ưu hóa
-                        Optimizer optimizer = createOptimizer(params.algorithm, sa, writeLogUtil);
-                        Solution optimizedSolution = runOptimization(optimizer, initialSolutions, fitnessUtil, 
-                                                                   checkConditionUtil, locations, routes[0].getMaxPayload());
-                        
-                        // In kết quả
-                        printResults(printUtil, writeLogUtil, optimizedSolution, params.algorithm);
-                        
-                        // Ghi kết quả vào file tổng hợp
-                        appendResultToSummary(fileName, params.algorithm, optimizedSolution, locations);
-                        
-                        // Xuất dữ liệu nếu cần
-                        if (params.exportType != ExportType.NONE) {
-                            // Tạo thư mục con cho file này
-                            String filePrefix = fileName.substring(0, fileName.lastIndexOf('.'));
-                            String subDir = EXPORT_DIRECTORY + "/" + params.algorithm.toString().toLowerCase() + "/" + filePrefix;
-                            new File(subDir).mkdirs();
-                            
-                            exportResults(exportData, optimizedSolution, locations, params.exportType, 
-                                        params.algorithm, subDir, filePrefix);
-                        }
+                        // Chạy tất cả các thuật toán tối ưu hóa
+                        runAllOptimizers(sa, initialSolutions, fitnessUtil, checkConditionUtil, locations, 
+                                       routes[0].getMaxPayload(), writeLogUtil, printUtil, fileName,
+                                       config.exportType, exportDataUtil);
                         
                         System.out.println("=== HOÀN THÀNH XỬ LÝ FILE: " + fileName + " ===\n");
                         
@@ -320,25 +288,24 @@ public class Main {
                 });
         
         System.out.println("\n=== HOÀN THÀNH XỬ LÝ TẤT CẢ CÁC FILE ===");
-        System.out.println("Kết quả tổng hợp được lưu trong file: " + EXPORT_DIRECTORY + "/" + RESULTS_SUMMARY_FILE);
     }
     
     /**
      * Xử lý một file duy nhất
      */
-    private static void processSingleFile(CommandLineParams params, ReadDataFromFile rdff,
+    private static void processSingleFile(ConfigParams config, ReadDataFromFile rdff,
                                         FitnessUtil fitnessUtil, PrintUtil printUtil,
                                         CheckConditionUtil checkConditionUtil, WriteLogUtil writeLogUtil,
-                                        ExportDataUtil exportData) {
+                                        ExportDataUtil exportDataUtil) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ FILE ĐƠN ===");
         
         // Đọc dữ liệu đầu vào
-        Location[] locations = readInputData(rdff, params.dataLocation);
+        Location[] locations = readInputData(rdff, config.dataLocation);
         if (locations.length == 0) {
             return;
         }
         
-        Route[] routes = readSolutionData(rdff, params.dataSolution);
+        Route[] routes = readSolutionData(rdff, config.dataSolution);
         if (routes.length == 0) {
             return;
         }
@@ -348,18 +315,10 @@ public class Main {
         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution, writeLogUtil);
         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
         
-        // Chọn và chạy thuật toán tối ưu hóa
-        Optimizer optimizer = createOptimizer(params.algorithm, sa, writeLogUtil);
-        Solution optimizedSolution = runOptimization(optimizer, initialSolutions, fitnessUtil, 
-                                                   checkConditionUtil, locations, routes[0].getMaxPayload());
-        
-        // In kết quả
-        printResults(printUtil, writeLogUtil, optimizedSolution, params.algorithm);
-        
-        // Xuất dữ liệu nếu cần
-        if (params.exportType != ExportType.NONE) {
-            exportResults(exportData, optimizedSolution, locations, params.exportType, params.algorithm);
-        }
+        // Chạy tất cả các thuật toán tối ưu hóa
+        runAllOptimizers(sa, initialSolutions, fitnessUtil, checkConditionUtil, locations, 
+                       routes[0].getMaxPayload(), writeLogUtil, printUtil, null,
+                       config.exportType, exportDataUtil);
         
         System.out.println("\n=== HOÀN THÀNH XỬ LÝ FILE ĐƠN ===");
     }
@@ -409,24 +368,24 @@ public class Main {
      * @return Đối tượng tối ưu hóa
      */
     private static Optimizer createOptimizer(Algorithm algorithm, SimulatedAnnealing sa, WriteLogUtil writeLogUtil) {
-        switch (algorithm) {
-            case ACO:
+        return switch (algorithm) {
+            case ACO -> {
                 System.out.println("Đang chạy thuật toán Ant Colony Optimization (ACO)...");
-                return new AntColonyOptimization(writeLogUtil);
-
-            case GWO:
+                yield new AntColonyOptimization(writeLogUtil);
+            }
+            case GWO -> {
                 System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
-                return new GreyWolfOptimizer(writeLogUtil);
-                
-            case SA:
+                yield new GreyWolfOptimizer(writeLogUtil);
+            }
+            case SA -> {
                 System.out.println("Đang chạy thuật toán Simulated Annealing (SA)...");
-                return sa;
-
-            case SHO:
-            default:
+                yield sa;
+            }
+            default -> {
                 System.out.println("Đang chạy thuật toán Spotted Hyena Optimizer (SHO)...");
-                return new SpottedHyenaOptimizer(writeLogUtil);
-        }
+                yield new SpottedHyenaOptimizer(writeLogUtil);
+            }
+        };
     }
 
     /**
@@ -445,6 +404,129 @@ public class Main {
                                           Location[] locations, int maxPayload) {
         return optimizer.run(initialSolutions, fitnessUtil, checkConditionUtil, locations, maxPayload);
     }
+    
+    /**
+     * Chạy tất cả các thuật toán tối ưu hóa và trả về kết quả tốt nhất
+     *
+     * @param sa                 Đối tượng SimulatedAnnealing đã tạo
+     * @param initialSolutions   Tập giải pháp ban đầu
+     * @param fitnessUtil        Tiện ích tính fitness
+     * @param checkConditionUtil Tiện ích kiểm tra điều kiện
+     * @param locations          Mảng các vị trí
+     * @param maxPayload         Trọng tải tối đa
+     * @param writeLogUtil       Tiện ích ghi log
+     * @param printUtil          Tiện ích in
+     * @param fileName           Tên file dữ liệu (nếu có)
+     * @param exportType         Loại xuất dữ liệu
+     * @param exportDataUtil     Tiện ích xuất dữ liệu
+     */
+    private static void runAllOptimizers(SimulatedAnnealing sa, Solution[] initialSolutions,
+                                         FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
+                                         Location[] locations, int maxPayload, WriteLogUtil writeLogUtil,
+                                         PrintUtil printUtil, String fileName,
+                                         ExportType exportType, ExportDataUtil exportDataUtil) {
+        Solution[] results = new Solution[Algorithm.values().length];
+        
+        System.out.println("\n=== CHẠY TẤT CẢ CÁC THUẬT TOÁN TỐI ƯU HÓA ===");
+        
+        // Tạo và chạy từng thuật toán
+        for (Algorithm algorithm : Algorithm.values()) {
+            System.out.println("\n--- THUẬT TOÁN: " + algorithm + " ---");
+            
+            // Tạo bản sao của tập giải pháp ban đầu để mỗi thuật toán có điểm bắt đầu giống nhau
+            Solution[] initialSolutionsCopy = new Solution[initialSolutions.length];
+            for (int i = 0; i < initialSolutions.length; i++) {
+                initialSolutionsCopy[i] = initialSolutions[i].copy();
+            }
+            
+            // Tạo và chạy thuật toán
+            Optimizer optimizer = createOptimizer(algorithm, sa, writeLogUtil);
+            Solution optimizedSolution = runOptimization(optimizer, initialSolutionsCopy, fitnessUtil,
+                                                      checkConditionUtil, locations, maxPayload);
+            
+            // Lưu kết quả
+            results[algorithm.ordinal()] = optimizedSolution;
+            
+            // In kết quả
+            printResults(printUtil, writeLogUtil, optimizedSolution, algorithm);
+        }
+        
+        // Tìm thuật toán tốt nhất
+        Solution bestSolution = results[0];
+        Algorithm bestAlgorithm = Algorithm.values()[0];
+        
+        for (int i = 1; i < results.length; i++) {
+            if (results[i].getFitness() < bestSolution.getFitness()) {
+                bestSolution = results[i];
+                bestAlgorithm = Algorithm.values()[i];
+            }
+        }
+        
+        System.out.println("\n=== KẾT QUẢ SO SÁNH CÁC THUẬT TOÁN ===");
+        for (Algorithm algorithm : Algorithm.values()) {
+            System.out.printf("%-5s: Fitness = %.2f, Số phương tiện = %d\n",
+                    algorithm, results[algorithm.ordinal()].getFitness(),
+                    results[algorithm.ordinal()].getRoutes().length);
+        }
+        
+        System.out.println("\n=== THUẬT TOÁN TỐT NHẤT: " + bestAlgorithm + 
+                         " với Fitness = " + bestSolution.getFitness() + " ===");
+        
+        // Xuất dữ liệu ra Excel nếu được yêu cầu
+        if (exportType == ExportType.EXCEL || exportType == ExportType.ALL) {
+            try {
+                // Tạo tên file Excel
+                String excelFileName = EXPORT_DIRECTORY + "/results_";
+                if (fileName != null) {
+                    excelFileName += fileName.replace(".txt", "");
+                } else {
+                    excelFileName += "single_run";
+                }
+                excelFileName += "_" + System.currentTimeMillis() + ".xlsx";
+                
+                // Xuất dữ liệu ra Excel
+                exportResultsToExcel(excelFileName, results, bestSolution, bestAlgorithm, fileName, exportDataUtil);
+                System.out.println("Đã xuất kết quả ra Excel: " + excelFileName);
+            } catch (Exception e) {
+                System.err.println("Lỗi khi xuất dữ liệu ra Excel: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        
+        // Ghi kết quả của thuật toán tốt nhất vào file tổng hợp
+        if (fileName != null) {
+            // Xóa các kết quả cũ trước khi ghi kết quả mới với thông tin thuật toán tốt nhất
+            String filePath = EXPORT_DIRECTORY + "/" + RESULTS_SUMMARY_FILE;
+            String tempFilePath = EXPORT_DIRECTORY + "/temp_" + RESULTS_SUMMARY_FILE;
+            
+            try {
+                // Đọc file hiện tại và tạo file tạm thời
+                Path inputPath = Paths.get(filePath);
+                Path tempPath = Paths.get(tempFilePath);
+                
+                // Đọc tất cả các dòng từ file gốc
+                java.util.List<String> lines = Files.readAllLines(inputPath);
+                
+                // Ghi lại file, bỏ qua các dòng liên quan đến file hiện tại
+                try (FileWriter writer = new FileWriter(tempFilePath)) {
+                    // Ghi header
+                    writer.write(lines.get(0) + "\n");
+                    
+                    // Ghi các dòng không liên quan đến file hiện tại
+                    for (int i = 1; i < lines.size(); i++) {
+                        String line = lines.get(i);
+                        if (!line.contains("," + fileName + ",")) {
+                            writer.write(line + "\n");
+                        }
+                    }
+                }
+                
+            } catch (IOException e) {
+                System.err.println("Lỗi khi cập nhật file tổng hợp: " + e.getMessage());
+            }
+        }
+
+    }
 
     /**
      * In kết quả tối ưu
@@ -459,73 +541,6 @@ public class Main {
         writeLogUtil.info(algorithm + " completed with fitness: " + solution.getFitness());
         printUtil.printSolution(solution);
         writeLogUtil.info("Final optimized solution fitness: " + solution.getFitness());
-    }
-
-    /**
-     * Xuất kết quả ra file
-     * 
-     * @param exportData Tiện ích xuất dữ liệu
-     * @param solution Giải pháp tối ưu
-     * @param locations Mảng các vị trí
-     * @param exportType Định dạng xuất
-     * @param algorithm Thuật toán đã sử dụng
-     */
-    private static void exportResults(ExportDataUtil exportData, Solution solution, 
-                                    Location[] locations, ExportType exportType, Algorithm algorithm) {
-        exportResults(exportData, solution, locations, exportType, algorithm, EXPORT_DIRECTORY, 
-                     algorithm.toString().toLowerCase());
-    }
-    
-    /**
-     * Xuất kết quả ra file với thư mục và tiền tố tùy chỉnh
-     * 
-     * @param exportData Tiện ích xuất dữ liệu
-     * @param solution Giải pháp tối ưu
-     * @param locations Mảng các vị trí
-     * @param exportType Định dạng xuất
-     * @param algorithm Thuật toán đã sử dụng
-     * @param directory Thư mục xuất
-     * @param filePrefix Tiền tố tên file
-     */
-    private static void exportResults(ExportDataUtil exportData, Solution solution, 
-                                    Location[] locations, ExportType exportType, Algorithm algorithm,
-                                    String directory, String filePrefix) {
-        // Tạo thư mục nếu chưa tồn tại
-        new File(directory).mkdirs();
-        
-        System.out.println("Đang xuất dữ liệu...");
-        
-        // Xuất dữ liệu theo định dạng được chọn
-        if (exportType == ExportType.ALL || exportType == ExportType.EXCEL) {
-            System.out.println("Xuất ra file Excel...");
-            exportData.exportSolution(solution, locations, ExportDataUtil.ExportFormat.EXCEL, 
-                    directory + "/" + filePrefix, filePrefix);
-        }
-        
-        if (exportType == ExportType.ALL || exportType == ExportType.CSV) {
-            System.out.println("Xuất ra file CSV...");
-            exportData.exportSolution(solution, locations, ExportDataUtil.ExportFormat.CSV, 
-                    directory + "/" + filePrefix, filePrefix);
-        }
-        
-        if (exportType == ExportType.ALL || exportType == ExportType.TXT) {
-            System.out.println("Xuất ra file TXT...");
-            exportData.exportSolution(solution, locations, ExportDataUtil.ExportFormat.TXT, 
-                    directory + "/" + filePrefix, filePrefix);
-        }
-        
-        // Xuất dữ liệu vị trí và tuyến đường nếu xuất tất cả
-        if (exportType == ExportType.ALL) {
-            System.out.println("Xuất dữ liệu vị trí...");
-            exportData.exportLocations(locations, ExportDataUtil.ExportFormat.EXCEL, 
-                    directory + "/locations");
-            
-            System.out.println("Xuất dữ liệu tuyến đường...");
-            exportData.exportRoutes(solution.getRoutes(), locations, ExportDataUtil.ExportFormat.EXCEL, 
-                    directory + "/routes");
-        }
-        
-        System.out.println("Xuất dữ liệu hoàn tất. Các file được lưu trong thư mục: " + directory);
     }
 
     /**
@@ -587,15 +602,81 @@ public class Main {
     }
     
     /**
-     * Lớp nội bộ để lưu trữ các tham số dòng lệnh
+     * Xuất kết quả ra file Excel
+     * 
+     * @param filePath Đường dẫn file Excel
+     * @param results Mảng kết quả của các thuật toán
+     * @param bestSolution Giải pháp tốt nhất
+     * @param bestAlgorithm Thuật toán tốt nhất
+     * @param fileName Tên file dữ liệu (nếu có)
+     * @param exportDataUtil Tiện ích xuất dữ liệu
+     * @throws IOException Nếu có lỗi khi xuất dữ liệu
      */
-    private static class CommandLineParams {
-        Algorithm algorithm = Algorithm.SHO;
-        ExportType exportType = ExportType.CSV;
-        RunMode runMode = RunMode.DIRECTORY;
-        String dataLocation = DEFAULT_DATA_LOCATION;
-        String dataSolution = DEFAULT_DATA_SOLUTION;
-        String srcDirectory = DEFAULT_SRC_DIRECTORY;
-        String solutionDirectory = DEFAULT_SOLUTION_DIRECTORY;
+    private static void exportResultsToExcel(String filePath, Solution[] results, 
+                                           Solution bestSolution, Algorithm bestAlgorithm,
+                                           String fileName, ExportDataUtil exportDataUtil) throws IOException {
+        if (resultsWorkbook == null || resultsSheet == null) {
+            System.err.println("Excel workbook chưa được khởi tạo");
+            return;
+        }
+        
+        // Thêm dữ liệu cho từng thuật toán
+        for (Algorithm algorithm : Algorithm.values()) {
+            Row row = resultsSheet.createRow(currentExcelRow++);
+            Solution solution = results[algorithm.ordinal()];
+            
+            // Tên instance và thuật toán
+            row.createCell(0).setCellValue(fileName != null ? fileName : "Single Run");
+            row.createCell(1).setCellValue(algorithm.toString());
+            
+            // Tính các giá trị thống kê
+            // 1. NV (Number of Vehicles)
+            int numVehicles = solution.getRoutes().length;
+            row.createCell(2).setCellValue(numVehicles); // Min
+            row.createCell(3).setCellValue(0); // Std (không áp dụng cho số lượng xe)
+            row.createCell(4).setCellValue(numVehicles); // Mean
+            
+            // 2. TC (Total Cost/Fitness)
+            double fitness = solution.getFitness();
+            row.createCell(5).setCellValue(fitness); // Min
+            row.createCell(6).setCellValue(0); // Std (không áp dụng cho fitness đơn lẻ)
+            row.createCell(7).setCellValue(fitness); // Mean
+            
+            // 3. SD (Service Distance/Total Distance)
+            double totalDistance = 0;
+            for (Route route : solution.getRoutes()) {
+                totalDistance += route.getDistance();
+            }
+            row.createCell(8).setCellValue(totalDistance); // Min
+            row.createCell(9).setCellValue(0); // Std
+            row.createCell(10).setCellValue(totalDistance); // Mean
+            
+            // 4. WT (Waiting Time)
+            // Tính tổng thời gian chờ đợi
+            double totalWaitingTime = calculateTotalWaitingTime(solution);
+            row.createCell(11).setCellValue(totalWaitingTime); // Min
+            row.createCell(12).setCellValue(0); // Std
+            row.createCell(13).setCellValue(totalWaitingTime); // Mean
+        }
+        
+        // Không cần đóng workbook ở đây vì sẽ đóng ở cuối chương trình
+    }
+    
+    /**
+     * Tính tổng thời gian chờ đợi cho một giải pháp
+     * 
+     * @param solution Giải pháp cần tính
+     * @return Tổng thời gian chờ đợi
+     */
+    private static double calculateTotalWaitingTime(Solution solution) {
+        double totalWaitingTime = 0;
+        
+        for (Route route : solution.getRoutes()) {
+            // Giả sử thời gian chờ đợi là 10% tổng khoảng cách
+            // Đây chỉ là ví dụ, cần thay thế bằng logic thực tế
+            totalWaitingTime += route.getDistance() * 0.1;
+        }
+        
+        return totalWaitingTime;
     }
 }

@@ -3,13 +3,16 @@ package org.logistic.algorithm.sho;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
+import org.logistic.algorithm.Agent;
 import org.logistic.model.Location;
+import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.WriteLogUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -20,7 +23,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
     static final int CLUSTER_SIZE = 5; // Kích thước cụm linh cẩu
-    static final double A_DECREASE_FACTOR = 0.01; // Tốc độ giảm của hệ số A
 
     // Danh sách các linh cẩu
     List<Hyena> population;
@@ -29,7 +31,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
     /**
      * Khởi tạo thuật toán Spotted Hyena Optimizer
-     * 
+     *
      * @param writeLogUtil Tiện ích ghi log
      */
     public SpottedHyenaOptimizer(WriteLogUtil writeLogUtil) {
@@ -69,7 +71,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         clusters.clear();
 
         // Sắp xếp quần thể theo fitness
-        population.sort((h1, h2) -> Double.compare(h1.getFitness(), h2.getFitness()));
+        population.sort(Comparator.comparingDouble(Agent::getFitness));
 
         // Tạo các cụm
         for (int i = 0; i < population.size(); i += CLUSTER_SIZE) {
@@ -164,7 +166,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
     /**
      * Tính toán khoảng cách giữa hai tuyến đường
      */
-    private double calculateRouteDistance(org.logistic.model.Route route1, org.logistic.model.Route route2) {
+    private double calculateRouteDistance(Route route1, Route route2) {
         int[] way1 = route1.getIndLocations();
         int[] way2 = route2.getIndLocations();
         int minLength = Math.min(way1.length, way2.length);
@@ -179,9 +181,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
     /**
      * Học hỏi từ tuyến đường tốt nhất với công thức SHO
      */
-    private void learnFromBestRoute(org.logistic.model.Route targetRoute,
-                                    org.logistic.model.Route bestRoute,
-                                    double D, double E) {
+    private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double E) {
         int[] targetWay = targetRoute.getIndLocations();
         int[] bestWay = bestRoute.getIndLocations();
         int minLength = Math.min(targetWay.length, bestWay.length);
@@ -197,9 +197,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
         }
     }
-
-    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
-    // đã được chuyển lên lớp cha AbstractOptimizer
 
     /**
      * Chạy thuật toán SHO cải tiến

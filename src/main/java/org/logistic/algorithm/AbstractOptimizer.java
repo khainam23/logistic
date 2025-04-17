@@ -124,6 +124,14 @@ public abstract class AbstractOptimizer implements Optimizer {
         // Đảm bảo giá trị không vượt quá giới hạn
         validateLocationIndices(way);
     }
+
+    protected void applyPdShift(Route[] routes) {
+
+    }
+
+    protected void applyPdExchange(Route[] routes) {
+
+    }
     
     /**
      * Áp dụng toán tử ngẫu nhiên cho khám phá

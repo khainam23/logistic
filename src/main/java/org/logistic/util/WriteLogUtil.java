@@ -3,13 +3,15 @@ package org.logistic.util;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Tiện ích ghi log cho ứng dụng
  */
 public class WriteLogUtil {
-    private BufferedWriter writer;
-    private String logFilePath;
+    private Map<String, BufferedWriter> writers = new HashMap<>();
+    private String currentLogFilePath;
     private static WriteLogUtil instance;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -58,14 +60,18 @@ public class WriteLogUtil {
      * @param logFilePath Đường dẫn file log
      */
     public void setLogFilePath(String logFilePath) {
-        this.logFilePath = logFilePath;
-        initWriter();
+        this.currentLogFilePath = logFilePath;
+        if (!writers.containsKey(logFilePath)) {
+            initWriter(logFilePath);
+        }
     }
 
     /**
      * Khởi tạo writer và tạo thư mục nếu cần
+     * 
+     * @param logFilePath Đường dẫn file log
      */
-    private void initWriter() {
+    private void initWriter(String logFilePath) {
         try {
             File file = new File(logFilePath);
             File parent = file.getParentFile();
@@ -73,9 +79,10 @@ public class WriteLogUtil {
                 parent.mkdirs(); // Tạo thư mục cha nếu chưa có
             }
 
-            writer = new BufferedWriter(new FileWriter(file, false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
+            writers.put(logFilePath, writer);
         } catch (IOException e) {
-            System.err.println("Không thể khởi tạo Logger: " + e.getMessage());
+            System.err.println("Không thể khởi tạo Logger cho " + logFilePath + ": " + e.getMessage());
         }
     }
 
@@ -86,17 +93,18 @@ public class WriteLogUtil {
      * @param message Thông điệp cần ghi
      */
     private void log(String level, String message) {
-        if (writer == null) {
+        if (currentLogFilePath == null || !writers.containsKey(currentLogFilePath)) {
             System.err.println("Logger chưa được khởi tạo. Hãy gọi setLogFilePath trước.");
             return;
         }
         
+        BufferedWriter writer = writers.get(currentLogFilePath);
         try {
             String timestamp = LocalDateTime.now().format(DATE_FORMAT);
             writer.write(String.format("[%s] [%s] %s%n", timestamp, level, message));
             writer.flush();
         } catch (IOException e) {
-            System.err.println("Lỗi khi ghi log: " + e.getMessage());
+            System.err.println("Lỗi khi ghi log vào " + currentLogFilePath + ": " + e.getMessage());
         }
     }
 
@@ -137,16 +145,17 @@ public class WriteLogUtil {
     }
 
     /**
-     * Đóng writer và giải phóng tài nguyên
+     * Đóng tất cả các writer và giải phóng tài nguyên
      */
     public void close() {
-        try {
-            if (writer != null) {
-                writer.close();
-                writer = null;
+        for (Map.Entry<String, BufferedWriter> entry : writers.entrySet()) {
+            try {
+                entry.getValue().close();
+            } catch (IOException e) {
+                System.err.println("Lỗi khi đóng Logger " + entry.getKey() + ": " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.err.println("Lỗi khi đóng Logger: " + e.getMessage());
         }
+        writers.clear();
+        currentLogFilePath = null;
     }
 }
