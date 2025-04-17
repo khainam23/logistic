@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.logistic.algorithm.AbstractOptimizer;
-import org.logistic.annotation.LogLevel;
-import org.logistic.annotation.LogMethod;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -312,8 +310,8 @@ public class AntColonyOptimization extends AbstractOptimizer {
      * Chạy thuật toán ACO
      */
     @Override
-    @LogMethod(
-        level = LogLevel.INFO,
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
         message = "Thực thi thuật toán Ant Colony Optimization",
         logParams = true,
         logReturn = true

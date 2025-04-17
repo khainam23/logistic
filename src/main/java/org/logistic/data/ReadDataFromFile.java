@@ -179,7 +179,7 @@ public class ReadDataFromFile {
             String line;
             int count = 0;
             while ((line = reader.readLine()) != null) {
-                if (count >= 7 && line.contains(":")) {
+                if (count >= 5 && line.contains(":")) {
                     try {
                         String[] parts = line.substring(line.indexOf(':') + 1).trim().split("\\s+");
                         int[] indLocs = new int[parts.length];
@@ -314,7 +314,7 @@ public class ReadDataFromFile {
                 int count = 0;
                 
                 while ((line = reader.readLine()) != null) {
-                    if (count >= 7 && line.contains(":")) {
+                    if (count >= 5 && line.contains(":")) {
                         try {
                             String[] parts = line.substring(line.indexOf(':') + 1).trim().split("\\s+");
                             int[] indLocs = new int[parts.length];

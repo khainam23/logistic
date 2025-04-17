@@ -5,6 +5,7 @@ import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
 import org.logistic.algorithm.sa.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
+import org.logistic.config.SpringContextInitializer;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
@@ -33,9 +34,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class Main {
     /**
-     * Các thuật toán tối ưu hóa được hỗ trợ
+     * Các thuật toán tối ưu hóa được hỗ trợ, không cần thêm SA vì chỉ dùng nó để tạo nhiều giải pháp ban đầu
      */
-    enum Algorithm {SHO, ACO, GWO, SA}
+    enum Algorithm {SHO, ACO, GWO}
 
     /**
      * Các chế độ chạy
@@ -80,7 +81,7 @@ public class Main {
      */
     public static void main(String[] args) {
         // Khởi tạo Spring Context cho AOP
-        org.logistic.config.SpringContextInitializer.initialize();
+        SpringContextInitializer.initialize();
         
         // Tạo cấu hình mặc định
         ConfigParams config = new ConfigParams();
@@ -122,7 +123,7 @@ public class Main {
         writeLogUtil.close();
         
         // Đóng Spring Context
-        org.logistic.config.SpringContextInitializer.close();
+        SpringContextInitializer.close();
     }
 
     /**
@@ -383,10 +384,6 @@ public class Main {
             case GWO -> {
                 System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
                 yield new GreyWolfOptimizer(writeLogUtil);
-            }
-            case SA -> {
-                System.out.println("Đang chạy thuật toán Simulated Annealing (SA)...");
-                yield sa;
             }
             default -> {
                 System.out.println("Đang chạy thuật toán Spotted Hyena Optimizer (SHO)...");

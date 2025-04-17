@@ -3,6 +3,8 @@ package org.logistic.algorithm.sa;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
+import org.logistic.annotation.LogLevel;
+import org.logistic.annotation.LogMethod;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -39,8 +41,8 @@ public class SimulatedAnnealing extends AbstractOptimizer {
     }
 
     @Override
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.INFO,
+    @LogMethod(
+        level = LogLevel.INFO,
         message = "Thực thi thuật toán Simulated Annealing",
         logParams = true,
         logReturn = true

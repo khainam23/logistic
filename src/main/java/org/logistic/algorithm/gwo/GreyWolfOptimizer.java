@@ -3,6 +3,8 @@ package org.logistic.algorithm.gwo;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
+import org.logistic.annotation.LogLevel;
+import org.logistic.annotation.LogMethod;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -268,8 +270,8 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
      * Chạy thuật toán Grey Wolf Optimizer
      */
     @Override
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.INFO,
+    @LogMethod(
+        level = LogLevel.INFO,
         message = "Thực thi thuật toán Grey Wolf Optimizer",
         logParams = true,
         logReturn = true
