@@ -1,5 +1,7 @@
 package org.logistic.util;
 
+import lombok.Getter;
+
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,7 +12,7 @@ import java.util.Map;
  * Tiện ích ghi log cho ứng dụng
  */
 public class WriteLogUtil {
-    private Map<String, BufferedWriter> writers = new HashMap<>();
+    private final Map<String, BufferedWriter> writers = new HashMap<>();
     private String currentLogFilePath;
     private static WriteLogUtil instance;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -18,6 +20,7 @@ public class WriteLogUtil {
     /**
      * Đường dẫn log cho các thuật toán khác nhau
      */
+    @Getter
     public enum PathLog {
         SA("logs/SimulatedAnnealing.log"),
         SHO("logs/SpottedHyenaOptimizer.log"),
@@ -28,10 +31,6 @@ public class WriteLogUtil {
 
         PathLog(String path) {
             this.path = path;
-        }
-
-        public String getPath() {
-            return path;
         }
     }
 
@@ -79,7 +78,7 @@ public class WriteLogUtil {
                 parent.mkdirs(); // Tạo thư mục cha nếu chưa có
             }
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file, true)); // Tạm thời để là ghi đè
             writers.put(logFilePath, writer);
         } catch (IOException e) {
             System.err.println("Không thể khởi tạo Logger cho " + logFilePath + ": " + e.getMessage());

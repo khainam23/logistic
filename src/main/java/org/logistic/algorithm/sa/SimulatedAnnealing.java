@@ -161,27 +161,49 @@ public class SimulatedAnnealing extends AbstractOptimizer {
      * @return Giải pháp mới sau khi biến đổi
      */
     private Solution perturbSolution(Solution solution) {
-        // Chọn ngẫu nhiên một toán tử biến đổi: swap, insert, hoặc reverse
-        int operator = random.nextInt(3);
-
         // Lấy các tuyến đường từ giải pháp
         Route[] routes = solution.getRoutes();
+        
+        // Quyết định áp dụng toán tử đơn tuyến hoặc đa tuyến
+        boolean useMultiRouteOperator = random.nextDouble() < 0.3 && routes.length >= 2;
+        
+        if (useMultiRouteOperator) {
+            // Áp dụng toán tử đa tuyến (PD-Shift hoặc PD-Exchange)
+            applyRandomMultiRouteOperation(routes);
+            
+            // Kiểm tra tính khả thi của tất cả các tuyến đường
+            for (int i = 0; i < routes.length; i++) {
+                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations, 
+                        routes[i].getMaxPayload(), currentTarget)) {
+                    // Khôi phục tuyến đường không khả thi
+                    routes[i] = solution.getRoutes()[i].copy();
+                }
+            }
+        } else {
+            // Chọn ngẫu nhiên một toán tử biến đổi đơn tuyến: swap, insert, hoặc reverse
+            int operator = random.nextInt(3);
 
-        // Chọn ngẫu nhiên một tuyến đường để biến đổi
-        int routeIndex = random.nextInt(routes.length);
-        Route cloneRoute = routes[routeIndex].copy();
+            // Chọn ngẫu nhiên một tuyến đường để biến đổi
+            int routeIndex = random.nextInt(routes.length);
+            Route cloneRoute = routes[routeIndex].copy();
 
-        // Áp dụng toán tử biến đổi
-        switch (operator) {
-            case 0 -> applySwapOperator(cloneRoute);
-            case 1 -> applyInsertOperator(cloneRoute);
-            case 2 -> applyReverseOperator(cloneRoute);
-            default -> throw new IllegalStateException("Unexpected value: " + operator);
+            // Áp dụng toán tử biến đổi
+            switch (operator) {
+                case 0 -> applySwapOperator(cloneRoute);
+                case 1 -> applyInsertOperator(cloneRoute);
+                case 2 -> applyReverseOperator(cloneRoute);
+                default -> throw new IllegalStateException("Unexpected value: " + operator);
+            }
+
+            // Kiểm tra tính khả thi của tuyến đường mới
+            if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload(), currentTarget)) {
+                routes[routeIndex] = cloneRoute; // Cập nhật tuyến đường
+            }
         }
-
-        // Kiểm tra tính khả thi của tuyến đường mới
-        if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload(), currentTarget)) {
-            routes[routeIndex] = cloneRoute; // Cập nhật tuyến đường
+        
+        // Cập nhật khoảng cách cho tất cả các tuyến đường
+        for (Route route : routes) {
+            route.calculateDistance(locations);
         }
 
         return solution;

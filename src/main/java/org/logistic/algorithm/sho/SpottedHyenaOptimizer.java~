@@ -112,10 +112,9 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
         // Tạo giải pháp mới
         Solution newSolution = currentSolution.copy();
-        Route[] routes = newSolution.getRoutes();
 
         // Số chiều (số tuyến đường)
-        int dimensions = routes.length;
+        int dimensions = newSolution.getRoutes().length;
 
         // Tính toán vector B và E
         double[] B = calculateBVector(dimensions);
@@ -126,42 +125,29 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             // Pha 1: Tìm kiếm (dựa vào vector B)
             if (Math.abs(B[i]) > 1) {
                 // Khám phá: thực hiện biến đổi ngẫu nhiên
-                applyRandomOperation(routes[i]);
+                applyRandomOperation(newSolution.getRoutes()[i]);
             }
             // Pha 2 & 3: Bao vây và tấn công (dựa vào vector E)
             else {
                 // Tính toán khoảng cách đến giải pháp tốt nhất
-                double D = calculateRouteDistance(routes[i], bestSolution.getRoutes()[i]);
+                double D = calculateRouteDistance(newSolution.getRoutes()[i], bestSolution.getRoutes()[i]);
 
                 // Cập nhật vị trí theo công thức SHO
                 if (Math.abs(E[i]) < 1) {
                     // Khai thác: di chuyển về phía giải pháp tốt nhất
-                    learnFromBestRoute(routes[i], bestSolution.getRoutes()[i], D, E[i]);
+                    learnFromBestRoute(newSolution.getRoutes()[i], bestSolution.getRoutes()[i], D, E[i]);
                 }
             }
 
             // Kiểm tra tính khả thi
-            if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                    routes[i].getMaxPayload(), currentTarget)) {
-                routes[i] = currentSolution.getRoutes()[i].copy();
-            }
-        }
-        
-        // Áp dụng các toán tử đa tuyến với xác suất 30%
-        if (random.nextDouble() < 0.3) {
-            applyRandomMultiRouteOperation(routes);
-            
-            // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
-            for (int i = 0; i < dimensions; i++) {
-                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                        routes[i].getMaxPayload(), currentTarget)) {
-                    routes[i] = currentSolution.getRoutes()[i].copy();
-                }
+            if (!checkConditionUtil.isInsertionFeasible(newSolution.getRoutes()[i], locations,
+                    newSolution.getRoutes()[i].getMaxPayload(), currentTarget)) {
+                newSolution.getRoutes()[i] = currentSolution.getRoutes()[i].copy();
             }
         }
 
         // Tính toán fitness mới
-        double newFitness = fitnessUtil.calculatorFitness(routes, locations);
+        double newFitness = fitnessUtil.calculatorFitness(newSolution.getRoutes(), locations);
         newSolution.setFitness(newFitness);
 
         // Cập nhật nếu tốt hơn
@@ -230,7 +216,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
         // Vòng lặp chính
         for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-            // Hệ số a giảm tuyến tính từ 5 về 0
+            // Hệ số a giảm tuyến tính từ 2 về 0
             double a = 5 * (1 - (double) iteration / MAX_ITERATIONS);
 
             // Cập nhật vị trí từng linh cẩu
@@ -282,25 +268,13 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      */
     private Solution createDiversifiedSolution(Solution original) {
         Solution newSolution = original.copy();
-        Route[] routes = newSolution.getRoutes();
-        
-        // Áp dụng các toán tử đơn tuyến
-        for (Route route : routes) {
-            int operations = 1 + random.nextInt(2);
+
+        // Áp dụng nhiều toán tử biến đổi
+        for (org.logistic.model.Route route : newSolution.getRoutes()) {
+            int operations = 1 + random.nextInt(3);
             for (int i = 0; i < operations; i++) {
                 applyRandomOperation(route);
             }
-        }
-        
-        // Áp dụng các toán tử đa tuyến (PD-Shift và PD-Exchange)
-        int multiRouteOperations = 1 + random.nextInt(2);
-        for (int i = 0; i < multiRouteOperations; i++) {
-            applyRandomMultiRouteOperation(routes);
-        }
-        
-        // Cập nhật khoảng cách cho tất cả các tuyến đường
-        for (Route route : routes) {
-            route.calculateDistance(locations);
         }
 
         return newSolution;

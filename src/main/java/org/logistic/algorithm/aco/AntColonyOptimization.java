@@ -108,13 +108,27 @@ public class AntColonyOptimization extends AbstractOptimizer {
      */
     private Solution createRandomSolution(Solution template) {
         Solution newSolution = template.copy();
+        Route[] routes = newSolution.getRoutes();
         
-        // Áp dụng các toán tử ngẫu nhiên cho mỗi tuyến đường
-        for (Route route : newSolution.getRoutes()) {
-            int operations = 2 + random.nextInt(3);
+        // Áp dụng các toán tử đơn tuyến
+        for (Route route : routes) {
+            int operations = 1 + random.nextInt(2);
             for (int i = 0; i < operations; i++) {
                 applyRandomOperation(route);
             }
+        }
+        
+        // Áp dụng các toán tử đa tuyến nếu có đủ tuyến đường
+        if (routes.length >= 2) {
+            int multiRouteOperations = 1 + random.nextInt(2);
+            for (int i = 0; i < multiRouteOperations; i++) {
+                applyRandomMultiRouteOperation(routes);
+            }
+        }
+        
+        // Cập nhật khoảng cách cho tất cả các tuyến đường
+        for (Route route : routes) {
+            route.calculateDistance(locations);
         }
         
         return newSolution;
@@ -129,11 +143,11 @@ public class AntColonyOptimization extends AbstractOptimizer {
     private void updateAntSolution(Ant ant) {
         Solution currentSolution = ant.getSolution();
         Solution newSolution = currentSolution.copy();
+        Route[] routes = newSolution.getRoutes();
 
         // Cập nhật từng tuyến đường
-        for (int routeIndex = 0; routeIndex < newSolution.getRoutes().length; routeIndex++) {
-            Route route = newSolution.getRoutes()[routeIndex];
-            int[] way = route.getIndLocations();
+        for (int routeIndex = 0; routeIndex < routes.length; routeIndex++) {
+            Route route = routes[routeIndex];
             
             // Tạo một tuyến đường mới dựa trên pheromone và heuristic
             if (random.nextDouble() < 0.7) { // 70% cơ hội áp dụng ACO
@@ -147,12 +161,30 @@ public class AntColonyOptimization extends AbstractOptimizer {
             if (!checkConditionUtil.isInsertionFeasible(route, locations, 
                     route.getMaxPayload(), currentTarget)) {
                 // Nếu không khả thi, quay lại tuyến đường cũ
-                newSolution.getRoutes()[routeIndex] = currentSolution.getRoutes()[routeIndex].copy();
+                routes[routeIndex] = currentSolution.getRoutes()[routeIndex].copy();
             }
+        }
+        
+        // Áp dụng các toán tử đa tuyến với xác suất 20%
+        if (random.nextDouble() < 0.2 && routes.length >= 2) {
+            applyRandomMultiRouteOperation(routes);
+            
+            // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
+            for (int i = 0; i < routes.length; i++) {
+                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
+                        routes[i].getMaxPayload(), currentTarget)) {
+                    routes[i] = currentSolution.getRoutes()[i].copy();
+                }
+            }
+        }
+        
+        // Cập nhật khoảng cách cho tất cả các tuyến đường
+        for (Route route : routes) {
+            route.calculateDistance(locations);
         }
 
         // Tính toán fitness mới
-        double newFitness = fitnessUtil.calculatorFitness(newSolution.getRoutes(), locations);
+        double newFitness = fitnessUtil.calculatorFitness(routes, locations);
         newSolution.setFitness(newFitness);
 
         // Cập nhật nếu tốt hơn
@@ -345,15 +377,29 @@ public class AntColonyOptimization extends AbstractOptimizer {
      */
     private Solution createDiversifiedSolution(Solution original) {
         Solution newSolution = original.copy();
-
-        // Áp dụng nhiều toán tử biến đổi
-        for (Route route : newSolution.getRoutes()) {
-            int operations = 2 + random.nextInt(3);
+        Route[] routes = newSolution.getRoutes();
+        
+        // Áp dụng các toán tử đơn tuyến
+        for (Route route : routes) {
+            int operations = 1 + random.nextInt(2);
             for (int i = 0; i < operations; i++) {
                 applyRandomOperation(route);
             }
         }
-
+        
+        // Áp dụng các toán tử đa tuyến (PD-Shift và PD-Exchange)
+        if (routes.length >= 2) {
+            int multiRouteOperations = 1 + random.nextInt(2);
+            for (int i = 0; i < multiRouteOperations; i++) {
+                applyRandomMultiRouteOperation(routes);
+            }
+        }
+        
+        // Cập nhật khoảng cách cho tất cả các tuyến đường
+        for (Route route : routes) {
+            route.calculateDistance(locations);
+        }
+        
         return newSolution;
     }
 }

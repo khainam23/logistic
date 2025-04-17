@@ -20,7 +20,6 @@ import java.util.List;
 public class GreyWolfOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
     static final int MAX_ITERATIONS = 100;
-    static final int PACK_SIZE = 20; // Kích thước đàn sói
 
     // Danh sách các sói
     List<Wolf> population;
@@ -101,9 +100,10 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
         
         // Tạo giải pháp mới
         Solution newSolution = currentSolution.copy();
+        Route[] routes = newSolution.getRoutes();
         
         // Số chiều (số tuyến đường)
-        int dimensions = newSolution.getRoutes().length;
+        int dimensions = routes.length;
         
         // Tính toán vector A và C
         double[] A1 = calculateAVector(dimensions, a);
@@ -116,7 +116,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
         
         // Cập nhật từng tuyến đường (từng chiều)
         for (int i = 0; i < dimensions; i++) {
-            Route currentRoute = newSolution.getRoutes()[i];
+            Route currentRoute = routes[i];
             
             // Tính toán khoảng cách đến sói alpha, beta và delta
             double D_alpha = calculateRouteDistance(currentRoute, alpha.getSolution().getRoutes()[i], C1[i]);
@@ -134,12 +134,25 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             // Kiểm tra tính khả thi
             if (!checkConditionUtil.isInsertionFeasible(currentRoute, locations,
                     currentRoute.getMaxPayload(), currentTarget)) {
-                newSolution.getRoutes()[i] = currentSolution.getRoutes()[i].copy();
+                routes[i] = currentSolution.getRoutes()[i].copy();
+            }
+        }
+        
+        // Áp dụng các toán tử đa tuyến với xác suất 30%
+        if (random.nextDouble() < 0.3) {
+            applyRandomMultiRouteOperation(routes);
+            
+            // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
+            for (int i = 0; i < dimensions; i++) {
+                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
+                        routes[i].getMaxPayload(), currentTarget)) {
+                    routes[i] = currentSolution.getRoutes()[i].copy();
+                }
             }
         }
         
         // Tính toán fitness mới
-        double newFitness = fitnessUtil.calculatorFitness(newSolution.getRoutes(), locations);
+        double newFitness = fitnessUtil.calculatorFitness(routes, locations);
         newSolution.setFitness(newFitness);
         
         // Cập nhật nếu tốt hơn
@@ -247,9 +260,6 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
         }
     }
 
-    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
-    // đã được chuyển lên lớp cha AbstractOptimizer
-
     /**
      * Chạy thuật toán Grey Wolf Optimizer
      */
@@ -329,13 +339,25 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
         }
         
         Solution newSolution = leader.getSolution().copy();
+        Route[] routes = newSolution.getRoutes();
         
-        // Áp dụng nhiều toán tử biến đổi
-        for (Route route : newSolution.getRoutes()) {
-            int operations = 1 + random.nextInt(3);
+        // Áp dụng các toán tử đơn tuyến
+        for (Route route : routes) {
+            int operations = 1 + random.nextInt(2);
             for (int i = 0; i < operations; i++) {
                 applyRandomOperation(route);
             }
+        }
+        
+        // Áp dụng các toán tử đa tuyến (PD-Shift và PD-Exchange)
+        int multiRouteOperations = 1 + random.nextInt(2);
+        for (int i = 0; i < multiRouteOperations; i++) {
+            applyRandomMultiRouteOperation(routes);
+        }
+        
+        // Cập nhật khoảng cách cho tất cả các tuyến đường
+        for (Route route : routes) {
+            route.calculateDistance(locations);
         }
         
         return newSolution;

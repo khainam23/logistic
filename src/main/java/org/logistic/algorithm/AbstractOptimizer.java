@@ -125,12 +125,120 @@ public abstract class AbstractOptimizer implements Optimizer {
         validateLocationIndices(way);
     }
 
+    /**
+     * Áp dụng toán tử PD-Shift: Di chuyển một điểm từ một tuyến đường sang tuyến đường khác
+     * 
+     * @param routes Mảng các tuyến đường cần áp dụng toán tử
+     */
     protected void applyPdShift(Route[] routes) {
-
+        if (routes.length < 2) {
+            return; // Cần ít nhất 2 tuyến đường để thực hiện shift
+        }
+        
+        // Chọn ngẫu nhiên 2 tuyến đường khác nhau
+        int routeIndex1 = random.nextInt(routes.length);
+        int routeIndex2;
+        do {
+            routeIndex2 = random.nextInt(routes.length);
+        } while (routeIndex1 == routeIndex2);
+        
+        Route route1 = routes[routeIndex1];
+        Route route2 = routes[routeIndex2];
+        
+        int[] way1 = route1.getIndLocations();
+        int[] way2 = route2.getIndLocations();
+        
+        // Kiểm tra nếu một trong hai tuyến đường không có điểm nào
+        if (way1.length == 0 || way2.length == 0) {
+            return;
+        }
+        
+        // Chọn một điểm ngẫu nhiên từ tuyến đường 1 để di chuyển sang tuyến đường 2
+        int posToMove = random.nextInt(way1.length);
+        int locationToMove = way1[posToMove];
+        
+        // Chọn vị trí ngẫu nhiên trên tuyến đường 2 để chèn điểm
+        int insertPos = way2.length > 0 ? random.nextInt(way2.length + 1) : 0;
+        
+        // Tạo mảng mới cho tuyến đường 1 (loại bỏ điểm được di chuyển)
+        int[] newWay1 = new int[way1.length - 1];
+        for (int i = 0, j = 0; i < way1.length; i++) {
+            if (i != posToMove) {
+                newWay1[j++] = way1[i];
+            }
+        }
+        
+        // Tạo mảng mới cho tuyến đường 2 (thêm điểm mới)
+        int[] newWay2 = new int[way2.length + 1];
+        for (int i = 0; i < insertPos; i++) {
+            newWay2[i] = way2[i];
+        }
+        newWay2[insertPos] = locationToMove;
+        for (int i = insertPos; i < way2.length; i++) {
+            newWay2[i + 1] = way2[i];
+        }
+        
+        // Cập nhật các tuyến đường
+        route1.setIndLocations(newWay1);
+        route2.setIndLocations(newWay2);
+        
+        // Đảm bảo giá trị không vượt quá giới hạn
+        validateLocationIndices(newWay1);
+        validateLocationIndices(newWay2);
+        
+        // Cập nhật khoảng cách nếu có thông tin về locations
+        if (locations != null) {
+            route1.calculateDistance(locations);
+            route2.calculateDistance(locations);
+        }
     }
 
+    /**
+     * Áp dụng toán tử PD-Exchange: Trao đổi các điểm giữa hai tuyến đường
+     * 
+     * @param routes Mảng các tuyến đường cần áp dụng toán tử
+     */
     protected void applyPdExchange(Route[] routes) {
-
+        if (routes.length < 2) {
+            return; // Cần ít nhất 2 tuyến đường để thực hiện exchange
+        }
+        
+        // Chọn ngẫu nhiên 2 tuyến đường khác nhau
+        int routeIndex1 = random.nextInt(routes.length);
+        int routeIndex2;
+        do {
+            routeIndex2 = random.nextInt(routes.length);
+        } while (routeIndex1 == routeIndex2);
+        
+        Route route1 = routes[routeIndex1];
+        Route route2 = routes[routeIndex2];
+        
+        int[] way1 = route1.getIndLocations();
+        int[] way2 = route2.getIndLocations();
+        
+        // Kiểm tra nếu một trong hai tuyến đường không có điểm nào
+        if (way1.length == 0 || way2.length == 0) {
+            return;
+        }
+        
+        // Chọn một điểm ngẫu nhiên từ mỗi tuyến đường để trao đổi
+        int pos1 = random.nextInt(way1.length);
+        int pos2 = random.nextInt(way2.length);
+        
+        // Trao đổi hai điểm
+        int temp = way1[pos1];
+        way1[pos1] = way2[pos2];
+        way2[pos2] = temp;
+        
+        // Đảm bảo giá trị không vượt quá giới hạn
+        validateLocationIndices(way1);
+        validateLocationIndices(way2);
+        
+        // Cập nhật khoảng cách nếu có thông tin về locations
+        if (locations != null) {
+            route1.calculateDistance(locations);
+            route2.calculateDistance(locations);
+        }
     }
     
     /**
@@ -144,6 +252,23 @@ public abstract class AbstractOptimizer implements Optimizer {
             case 0 -> applySwapOperator(route);
             case 1 -> applyInsertOperator(route);
             case 2 -> applyReverseOperator(route);
+        }
+    }
+    
+    /**
+     * Áp dụng toán tử ngẫu nhiên cho nhiều tuyến đường
+     * 
+     * @param routes Mảng các tuyến đường cần áp dụng toán tử
+     */
+    protected void applyRandomMultiRouteOperation(Route[] routes) {
+        if (routes.length < 2) {
+            return; // Cần ít nhất 2 tuyến đường để thực hiện các toán tử đa tuyến
+        }
+        
+        int operator = random.nextInt(2);
+        switch (operator) {
+            case 0 -> applyPdShift(routes);
+            case 1 -> applyPdExchange(routes);
         }
     }
     
