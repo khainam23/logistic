@@ -12615,3 +12615,957 @@
 [2025-04-18 02:34:08] [INFO] Best solution fitness: 18400.0
 [2025-04-18 02:34:08] [INFO] ACO completed with fitness: 18400.0
 [2025-04-18 02:34:08] [INFO] Final optimized solution fitness: 18400.0
+[2025-04-18 02:46:34] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:34] [INFO] Best initial ant fitness: 44788.0
+[2025-04-18 02:46:34] [INFO] New best solution found with fitness: 36740.0
+[2025-04-18 02:46:34] [INFO] New best solution found with fitness: 36656.0
+[2025-04-18 02:46:34] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:34] [INFO] New best solution found with fitness: 36590.0
+[2025-04-18 02:46:34] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:34] [INFO] New best solution found with fitness: 36546.0
+[2025-04-18 02:46:34] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:34] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:34] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 36376.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 35658.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 35508.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 34887.0
+[2025-04-18 02:46:35] [INFO] ACO completed with fitness: 34887.0
+[2025-04-18 02:46:35] [INFO] Final optimized solution fitness: 34887.0
+[2025-04-18 02:46:35] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:35] [INFO] Best initial ant fitness: 56337.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 49260.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 49216.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 48839.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 48602.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 48479.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 48282.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 48203.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 47138.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 46543.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 45916.0
+[2025-04-18 02:46:35] [INFO] New best solution found with fitness: 45872.0
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:35] [INFO] ACO completed with fitness: 45872.0
+[2025-04-18 02:46:35] [INFO] Final optimized solution fitness: 45872.0
+[2025-04-18 02:46:36] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:36] [INFO] Best initial ant fitness: 56183.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 53346.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 53284.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 52846.0
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 52255.0
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 52254.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 51270.0
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] ACO completed with fitness: 51270.0
+[2025-04-18 02:46:36] [INFO] Final optimized solution fitness: 51270.0
+[2025-04-18 02:46:36] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:36] [INFO] Best initial ant fitness: 75565.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 72636.0
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 71597.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 71588.0
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 71578.0
+[2025-04-18 02:46:36] [INFO] New best solution found with fitness: 71024.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 71007.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 70955.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 70947.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 70372.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 69815.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 68744.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] ACO completed with fitness: 68744.0
+[2025-04-18 02:46:37] [INFO] Final optimized solution fitness: 68744.0
+[2025-04-18 02:46:37] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:37] [INFO] Best initial ant fitness: 47041.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39803.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39376.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39320.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39256.0
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39173.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] New best solution found with fitness: 39162.0
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:37] [INFO] ACO completed with fitness: 39162.0
+[2025-04-18 02:46:37] [INFO] Final optimized solution fitness: 39162.0
+[2025-04-18 02:46:38] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:38] [INFO] Best initial ant fitness: 48457.0
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 40736.0
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 40563.0
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 40550.0
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] ACO completed with fitness: 40550.0
+[2025-04-18 02:46:38] [INFO] Final optimized solution fitness: 40550.0
+[2025-04-18 02:46:38] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:38] [INFO] Best initial ant fitness: 49771.0
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 42399.0
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 42287.0
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 42127.0
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 41866.0
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] New best solution found with fitness: 41710.0
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:38] [INFO] ACO completed with fitness: 41710.0
+[2025-04-18 02:46:38] [INFO] Final optimized solution fitness: 41710.0
+[2025-04-18 02:46:39] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:39] [INFO] Best initial ant fitness: 50061.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 43049.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 43006.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42810.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42749.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42734.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42707.0
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42412.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 42040.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 41727.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 40936.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 40540.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 39808.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] New best solution found with fitness: 39038.0
+[2025-04-18 02:46:39] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:39] [INFO] ACO completed with fitness: 39038.0
+[2025-04-18 02:46:39] [INFO] Final optimized solution fitness: 39038.0
+[2025-04-18 02:46:40] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:40] [INFO] Best initial ant fitness: 49706.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 44399.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 44280.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 44129.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 44112.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43822.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43800.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43755.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43733.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43731.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43648.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43047.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 43025.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 42905.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 42743.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 42533.0
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 41891.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] New best solution found with fitness: 41716.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] ACO completed with fitness: 41716.0
+[2025-04-18 02:46:40] [INFO] Final optimized solution fitness: 41716.0
+[2025-04-18 02:46:40] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:40] [INFO] Best initial ant fitness: 52267.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] ACO completed with fitness: 52267.0
+[2025-04-18 02:46:40] [INFO] Final optimized solution fitness: 52267.0
+[2025-04-18 02:46:40] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:40] [INFO] Best initial ant fitness: 62775.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] ACO completed with fitness: 62775.0
+[2025-04-18 02:46:40] [INFO] Final optimized solution fitness: 62775.0
+[2025-04-18 02:46:40] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:40] [INFO] Best initial ant fitness: 79719.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] ACO completed with fitness: 79719.0
+[2025-04-18 02:46:40] [INFO] Final optimized solution fitness: 79719.0
+[2025-04-18 02:46:40] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:40] [INFO] Best initial ant fitness: 83259.0
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:40] [INFO] ACO completed with fitness: 83259.0
+[2025-04-18 02:46:40] [INFO] Final optimized solution fitness: 83259.0
+[2025-04-18 02:46:41] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:41] [INFO] Best initial ant fitness: 56036.0
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] ACO completed with fitness: 56036.0
+[2025-04-18 02:46:41] [INFO] Final optimized solution fitness: 56036.0
+[2025-04-18 02:46:41] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:41] [INFO] Best initial ant fitness: 61668.0
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] ACO completed with fitness: 61668.0
+[2025-04-18 02:46:41] [INFO] Final optimized solution fitness: 61668.0
+[2025-04-18 02:46:41] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:41] [INFO] Best initial ant fitness: 64995.0
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] ACO completed with fitness: 64995.0
+[2025-04-18 02:46:41] [INFO] Final optimized solution fitness: 64995.0
+[2025-04-18 02:46:41] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:41] [INFO] Best initial ant fitness: 61059.0
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] ACO completed with fitness: 61059.0
+[2025-04-18 02:46:41] [INFO] Final optimized solution fitness: 61059.0
+[2025-04-18 02:46:41] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:41] [INFO] Best initial ant fitness: 10226.0
+[2025-04-18 02:46:41] [INFO] New best solution found with fitness: 9275.0
+[2025-04-18 02:46:41] [INFO] New best solution found with fitness: 9236.0
+[2025-04-18 02:46:41] [INFO] New best solution found with fitness: 8008.0
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:41] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] ACO completed with fitness: 8008.0
+[2025-04-18 02:46:42] [INFO] Final optimized solution fitness: 8008.0
+[2025-04-18 02:46:42] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:42] [INFO] Best initial ant fitness: 11582.0
+[2025-04-18 02:46:42] [INFO] New best solution found with fitness: 10225.0
+[2025-04-18 02:46:42] [INFO] New best solution found with fitness: 10147.0
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] New best solution found with fitness: 10145.0
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] New best solution found with fitness: 10135.0
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:42] [INFO] ACO completed with fitness: 10135.0
+[2025-04-18 02:46:42] [INFO] Final optimized solution fitness: 10135.0
+[2025-04-18 02:46:43] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:43] [INFO] Best initial ant fitness: 12518.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 12256.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 11757.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 11746.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 11445.0
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 11307.0
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] ACO completed with fitness: 11307.0
+[2025-04-18 02:46:43] [INFO] Final optimized solution fitness: 11307.0
+[2025-04-18 02:46:43] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:43] [INFO] Best initial ant fitness: 13655.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 13148.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 12948.0
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 12851.0
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 12842.0
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] New best solution found with fitness: 12723.0
+[2025-04-18 02:46:43] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:43] [INFO] ACO completed with fitness: 12723.0
+[2025-04-18 02:46:43] [INFO] Final optimized solution fitness: 12723.0
+[2025-04-18 02:46:44] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:44] [INFO] Best initial ant fitness: 10555.0
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 8779.0
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 8778.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 8768.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 8758.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 8744.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] ACO completed with fitness: 8744.0
+[2025-04-18 02:46:44] [INFO] Final optimized solution fitness: 8744.0
+[2025-04-18 02:46:44] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:44] [INFO] Best initial ant fitness: 11565.0
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 11147.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 11135.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 11134.0
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 11130.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] New best solution found with fitness: 11095.0
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:44] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] ACO completed with fitness: 11095.0
+[2025-04-18 02:46:45] [INFO] Final optimized solution fitness: 11095.0
+[2025-04-18 02:46:45] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:45] [INFO] Best initial ant fitness: 13028.0
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12243.0
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12222.0
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12194.0
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12063.0
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] ACO completed with fitness: 12063.0
+[2025-04-18 02:46:45] [INFO] Final optimized solution fitness: 12063.0
+[2025-04-18 02:46:45] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:45] [INFO] Best initial ant fitness: 13351.0
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12688.0
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:45] [INFO] New best solution found with fitness: 12454.0
+[2025-04-18 02:46:45] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 12399.0
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 12333.0
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 12166.0
+[2025-04-18 02:46:46] [INFO] ACO completed with fitness: 12166.0
+[2025-04-18 02:46:46] [INFO] Final optimized solution fitness: 12166.0
+[2025-04-18 02:46:46] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:46] [INFO] Best initial ant fitness: 11118.0
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 9767.0
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 9536.0
+[2025-04-18 02:46:46] [INFO] New best solution found with fitness: 9504.0
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:46] [INFO] ACO completed with fitness: 9504.0
+[2025-04-18 02:46:46] [INFO] Final optimized solution fitness: 9504.0
+[2025-04-18 02:46:47] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:47] [INFO] Best initial ant fitness: 11430.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 11013.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10976.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10956.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10952.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10951.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10918.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 10688.0
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] ACO completed with fitness: 10688.0
+[2025-04-18 02:46:47] [INFO] Final optimized solution fitness: 10688.0
+[2025-04-18 02:46:47] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:47] [INFO] Best initial ant fitness: 12593.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 11783.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 11781.0
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 11780.0
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] New best solution found with fitness: 11680.0
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:47] [INFO] ACO completed with fitness: 11680.0
+[2025-04-18 02:46:47] [INFO] Final optimized solution fitness: 11680.0
+[2025-04-18 02:46:48] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:48] [INFO] Best initial ant fitness: 13181.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 13130.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 12575.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 12494.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 12466.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 12325.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 12215.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] ACO completed with fitness: 12215.0
+[2025-04-18 02:46:48] [INFO] Final optimized solution fitness: 12215.0
+[2025-04-18 02:46:48] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:48] [INFO] Best initial ant fitness: 25875.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 24308.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 24272.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 24154.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 23926.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 23697.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 22946.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 22915.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 22331.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 21820.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 21797.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 21791.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 21666.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 21317.0
+[2025-04-18 02:46:48] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 20973.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 20954.0
+[2025-04-18 02:46:48] [INFO] New best solution found with fitness: 20944.0
+[2025-04-18 02:46:48] [INFO] ACO completed with fitness: 20944.0
+[2025-04-18 02:46:48] [INFO] Final optimized solution fitness: 20944.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 24626.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 24626.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 24626.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 19711.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 19711.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 19711.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 24248.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 24248.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 24248.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 17234.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 17234.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 17234.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 18542.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 18542.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 18542.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 12761.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:49] [INFO] ACO completed with fitness: 12761.0
+[2025-04-18 02:46:49] [INFO] Final optimized solution fitness: 12761.0
+[2025-04-18 02:46:49] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:49] [INFO] Best initial ant fitness: 10816.0
+[2025-04-18 02:46:49] [INFO] New best solution found with fitness: 9475.0
+[2025-04-18 02:46:49] [INFO] New best solution found with fitness: 9438.0
+[2025-04-18 02:46:49] [INFO] New best solution found with fitness: 9045.0
+[2025-04-18 02:46:49] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] New best solution found with fitness: 8875.0
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] ACO completed with fitness: 8875.0
+[2025-04-18 02:46:50] [INFO] Final optimized solution fitness: 8875.0
+[2025-04-18 02:46:50] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:50] [INFO] Best initial ant fitness: 12449.0
+[2025-04-18 02:46:50] [INFO] New best solution found with fitness: 11237.0
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] New best solution found with fitness: 11187.0
+[2025-04-18 02:46:50] [INFO] New best solution found with fitness: 11099.0
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] New best solution found with fitness: 11049.0
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:50] [INFO] ACO completed with fitness: 11049.0
+[2025-04-18 02:46:50] [INFO] Final optimized solution fitness: 11049.0
+[2025-04-18 02:46:51] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:51] [INFO] Best initial ant fitness: 13229.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 12825.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 12614.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 12084.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 11937.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 11699.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 11607.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 11498.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 11457.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] ACO completed with fitness: 11457.0
+[2025-04-18 02:46:51] [INFO] Final optimized solution fitness: 11457.0
+[2025-04-18 02:46:51] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:51] [INFO] Best initial ant fitness: 14959.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 14193.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 14192.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 14045.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 13835.0
+[2025-04-18 02:46:51] [INFO] New best solution found with fitness: 13796.0
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:51] [INFO] ACO completed with fitness: 13796.0
+[2025-04-18 02:46:51] [INFO] Final optimized solution fitness: 13796.0
+[2025-04-18 02:46:52] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:52] [INFO] Best initial ant fitness: 12227.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 11316.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 11158.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 11146.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 11039.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10955.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10913.0
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10698.0
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] ACO completed with fitness: 10698.0
+[2025-04-18 02:46:52] [INFO] Final optimized solution fitness: 10698.0
+[2025-04-18 02:46:52] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:52] [INFO] Best initial ant fitness: 11387.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10557.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10263.0
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10260.0
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10206.0
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] New best solution found with fitness: 10147.0
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:52] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 10098.0
+[2025-04-18 02:46:53] [INFO] ACO completed with fitness: 10098.0
+[2025-04-18 02:46:53] [INFO] Final optimized solution fitness: 10098.0
+[2025-04-18 02:46:53] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:53] [INFO] Best initial ant fitness: 12739.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 12141.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11888.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11877.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11875.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11874.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11872.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11871.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11612.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 11536.0
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] ACO completed with fitness: 11536.0
+[2025-04-18 02:46:53] [INFO] Final optimized solution fitness: 11536.0
+[2025-04-18 02:46:53] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:53] [INFO] Best initial ant fitness: 13294.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 12687.0
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 12413.0
+[2025-04-18 02:46:53] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:53] [INFO] New best solution found with fitness: 12356.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 12298.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] ACO completed with fitness: 12298.0
+[2025-04-18 02:46:54] [INFO] Final optimized solution fitness: 12298.0
+[2025-04-18 02:46:54] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:54] [INFO] Best initial ant fitness: 27589.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 26043.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 25899.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 25703.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 25654.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 25471.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 24815.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 24668.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 24620.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 24173.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 24151.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 23554.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 23252.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 23205.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 22514.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 22380.0
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 22302.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] New best solution found with fitness: 21732.0
+[2025-04-18 02:46:54] [INFO] ACO completed with fitness: 21732.0
+[2025-04-18 02:46:54] [INFO] Final optimized solution fitness: 21732.0
+[2025-04-18 02:46:54] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:54] [INFO] Best initial ant fitness: 18624.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] ACO completed with fitness: 18624.0
+[2025-04-18 02:46:54] [INFO] Final optimized solution fitness: 18624.0
+[2025-04-18 02:46:54] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:54] [INFO] Best initial ant fitness: 22373.0
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:54] [INFO] ACO completed with fitness: 22373.0
+[2025-04-18 02:46:54] [INFO] Final optimized solution fitness: 22373.0
+[2025-04-18 02:46:55] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:55] [INFO] Best initial ant fitness: 24535.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] ACO completed with fitness: 24535.0
+[2025-04-18 02:46:55] [INFO] Final optimized solution fitness: 24535.0
+[2025-04-18 02:46:55] [INFO] Initialized colony with 136 ants
+[2025-04-18 02:46:55] [INFO] Best initial ant fitness: 27243.0
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 25840.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 25392.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 24649.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 23816.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 23509.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 22828.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 22555.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 22469.0
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 22090.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] New best solution found with fitness: 21303.0
+[2025-04-18 02:46:55] [INFO] ACO completed with fitness: 21303.0
+[2025-04-18 02:46:55] [INFO] Final optimized solution fitness: 21303.0
+[2025-04-18 02:46:55] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:55] [INFO] Best initial ant fitness: 16945.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] ACO completed with fitness: 16945.0
+[2025-04-18 02:46:55] [INFO] Final optimized solution fitness: 16945.0
+[2025-04-18 02:46:55] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:55] [INFO] Best initial ant fitness: 20564.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] ACO completed with fitness: 20564.0
+[2025-04-18 02:46:55] [INFO] Final optimized solution fitness: 20564.0
+[2025-04-18 02:46:55] [INFO] Initialized colony with 20 ants
+[2025-04-18 02:46:55] [INFO] Best initial ant fitness: 18390.0
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] Colony diversified. Elite count: 6
+[2025-04-18 02:46:55] [INFO] ACO completed with fitness: 18390.0
+[2025-04-18 02:46:55] [INFO] Final optimized solution fitness: 18390.0

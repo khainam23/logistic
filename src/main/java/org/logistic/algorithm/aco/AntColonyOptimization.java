@@ -310,15 +310,17 @@ public class AntColonyOptimization extends AbstractOptimizer {
      * Chạy thuật toán ACO
      */
     @Override
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Thực thi thuật toán Ant Colony Optimization",
+        logParams = true,
+        logReturn = true
+    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
-
-        writeLogUtil.info("Starting Ant Colony Optimization");
-        writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);
-        writeLogUtil.info("Colony size: " + COLONY_SIZE);
 
         // Khởi tạo đàn kiến
         initialize(initialSolutions);
@@ -337,12 +339,7 @@ public class AntColonyOptimization extends AbstractOptimizer {
             if (iteration % 10 == 0) {
                 diversifyColony();
             }
-
-            writeLogUtil.info("Iteration " + iteration + ", Best fitness: " + bestAnt.getFitness());
         }
-
-        writeLogUtil.info("ACO completed");
-        writeLogUtil.info("Best solution fitness: " + bestAnt.getFitness());
 
         return bestAnt.getSolution();
     }

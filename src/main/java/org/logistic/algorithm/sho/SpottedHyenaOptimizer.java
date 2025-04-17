@@ -42,6 +42,10 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
     /**
      * Khởi tạo quần thể linh cẩu từ các giải pháp ban đầu
      */
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Khởi tạo quần thể linh cẩu"
+    )
     private void initialize(Solution[] initialSolutions) {
         population = new ArrayList<>();
         clusters = new ArrayList<>();
@@ -59,9 +63,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
         // Phân cụm quần thể
         formClusters();
-
-        writeLogUtil.info("Initialized population with " + population.size() + " hyenas");
-        writeLogUtil.info("Best initial hyena fitness: " + bestHyena.getFitness());
     }
 
     /**
@@ -216,14 +217,17 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Chạy thuật toán SHO cải tiến
      */
     @Override
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Thực thi thuật toán Spotted Hyena Optimizer",
+        logParams = true,
+        logReturn = true
+    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
-
-        writeLogUtil.info("Starting Improved Spotted Hyena Optimizer");
-        writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);
 
         // Khởi tạo quần thể
         initialize(initialSolutions);
@@ -243,12 +247,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                 formClusters();
                 diversifyClusters();
             }
-
-            writeLogUtil.info("Iteration " + iteration + ", Best fitness: " + bestHyena.getFitness());
         }
-
-        writeLogUtil.info("Improved SHO completed");
-        writeLogUtil.info("Best solution fitness: " + bestHyena.getFitness());
 
         return bestHyena.getSolution();
     }
@@ -260,7 +259,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         for (List<Hyena> cluster : clusters) {
             // Chọn linh cẩu tốt nhất trong cụm
             Hyena bestInCluster = cluster.stream()
-                    .min((h1, h2) -> Double.compare(h1.getFitness(), h2.getFitness()))
+                    .min(Comparator.comparingDouble(Agent::getFitness))
                     .orElse(null);
 
             if (bestInCluster != null) {

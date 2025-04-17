@@ -35,6 +35,10 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     /**
      * Khởi tạo quần thể sói từ các giải pháp ban đầu
      */
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Khởi tạo quần thể sói"
+    )
     private void initialize(Solution[] initialSolutions) {
         population = new ArrayList<>();
 
@@ -63,9 +67,6 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
                 delta = beta;
             }
         }
-
-        writeLogUtil.info("Initialized population with " + population.size() + " wolves");
-        writeLogUtil.info("Alpha wolf fitness: " + alpha.getFitness());
     }
 
     /**
@@ -95,6 +96,9 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     /**
      * Cập nhật vị trí của sói theo thuật toán GWO
      */
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.DEBUG
+    )
     private void updateWolfPosition(Wolf wolf, double a) {
         Solution currentSolution = wolf.getSolution();
         
@@ -264,14 +268,17 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
      * Chạy thuật toán Grey Wolf Optimizer
      */
     @Override
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Thực thi thuật toán Grey Wolf Optimizer",
+        logParams = true,
+        logReturn = true
+    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
-        
-        writeLogUtil.info("Starting Grey Wolf Optimizer");
-        writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);
         
         // Khởi tạo quần thể
         initialize(initialSolutions);
@@ -290,12 +297,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             if (iteration % 10 == 0) {
                 diversifyPopulation();
             }
-            
-            writeLogUtil.info("Iteration " + iteration + ", Alpha fitness: " + alpha.getFitness());
         }
-        
-        writeLogUtil.info("Grey Wolf Optimizer completed");
-        writeLogUtil.info("Best solution fitness: " + alpha.getFitness());
         
         return alpha.getSolution();
     }
@@ -303,6 +305,10 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     /**
      * Đa dạng hóa quần thể
      */
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Đa dạng hóa quần thể sói"
+    )
     private void diversifyPopulation() {
         // Sắp xếp quần thể theo fitness
         population.sort((w1, w2) -> Double.compare(w1.getFitness(), w2.getFitness()));

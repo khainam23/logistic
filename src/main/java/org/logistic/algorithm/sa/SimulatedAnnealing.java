@@ -39,27 +39,22 @@ public class SimulatedAnnealing extends AbstractOptimizer {
     }
 
     @Override
+    @org.logistic.annotation.LogMethod(
+        level = org.logistic.annotation.LogLevel.INFO,
+        message = "Thực thi thuật toán Simulated Annealing",
+        logParams = true,
+        logReturn = true
+    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil, 
                       CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
-        
-        // Ghi lại các tham số ban đầu
-        writeLogUtil.info("Starting Simulated Annealing");
-        writeLogUtil.info("Initial temperature: " + INITIAL_TEMPERATURE);
-        writeLogUtil.info("Cooling rate: " + COOLING_RATE);
-        writeLogUtil.info("Final temperature: " + FINAL_TEMPERATURE);
-        writeLogUtil.info("Max iterations: " + MAX_ITERATIONS);
 
         // Sử dụng giải pháp ban đầu từ constructor hoặc từ tham số nếu có
         Solution startSolution = initialSolution;
         if (initialSolutions != null && initialSolutions.length > 0) {
             startSolution = initialSolutions[0];
         }
-        
-        // Ghi lại tập giải pháp ban đầu
-        writeLogUtil.info("Initial solution: ");
-        writeLogUtil.info(startSolution.toString());
 
         Set<Solution> population = new HashSet<>();
         population.add(startSolution);
@@ -69,21 +64,11 @@ public class SimulatedAnnealing extends AbstractOptimizer {
         Solution bestSolution = currentSolution.copy();
         double bestEnergy = calculateEnergy(bestSolution.getRoutes());
 
-        writeLogUtil.info("*".repeat(20));
-
         while (temperature > FINAL_TEMPERATURE) {
-            // Ghi lại từng quá trình
-            writeLogUtil.info("Temperature: " + temperature);
-
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 Solution newSolution = perturbSolution(currentSolution.copy());
 
-               if(!newSolution.equals(currentSolution)) { // Không nên kiểm tra trùng vì có thể giảm khả năng khám phá
-                   // Ghi lại nếu có sự thay đổi
-                   writeLogUtil.warn("New solution is different from current solution");
-                   writeLogUtil.info("New solution: ");
-                   writeLogUtil.info(newSolution.toString());
-
+               if(!newSolution.equals(currentSolution)) {
                    double currentEnergy = calculateEnergy(currentSolution.getRoutes());
                    double newEnergy = calculateEnergy(newSolution.getRoutes());
                    double deltaEnergy = newEnergy - currentEnergy;
@@ -93,11 +78,6 @@ public class SimulatedAnnealing extends AbstractOptimizer {
                        if (newEnergy < bestEnergy) {
                            bestSolution = newSolution.copy();
                            bestEnergy = newEnergy;
-
-                           // Ghi lại giải pháp tốt nhất của vòng này
-                           writeLogUtil.info("New best solution: ");
-                           writeLogUtil.info(bestSolution.toString());
-                           writeLogUtil.info("New best energy: " + bestEnergy);
                        }
                    }
                }
@@ -106,14 +86,6 @@ public class SimulatedAnnealing extends AbstractOptimizer {
             population.add(currentSolution);
             temperature *= COOLING_RATE;
         }
-
-        writeLogUtil.info("*".repeat(20));
-
-        // Ghi lại kết quả tìm được
-        writeLogUtil.info("Simulated Annealing completed");
-        writeLogUtil.info("Best solution: ");
-        writeLogUtil.info(bestSolution.toString());
-        writeLogUtil.info("Best energy: " + bestEnergy);
 
         // Trả về giải pháp tốt nhất thay vì toàn bộ quần thể
         return bestSolution;

@@ -79,6 +79,9 @@ public class Main {
      * @param args Tham số dòng lệnh (không sử dụng)
      */
     public static void main(String[] args) {
+        // Khởi tạo Spring Context cho AOP
+        org.logistic.config.SpringContextInitializer.initialize();
+        
         // Tạo cấu hình mặc định
         ConfigParams config = new ConfigParams();
 
@@ -117,6 +120,9 @@ public class Main {
 
         // Đóng các tiện ích
         writeLogUtil.close();
+        
+        // Đóng Spring Context
+        org.logistic.config.SpringContextInitializer.close();
     }
 
     /**
