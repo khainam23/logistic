@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/aco/AntColonyOptimization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/aco/AntColonyOptimization.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/gwo/GreyWolfOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/gwo/GreyWolfOptimizer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sa/SimulatedAnnealing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sa/SimulatedAnnealing.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" afterDir="false" />
-    </list>
+    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -146,7 +138,7 @@
       <workItem from="1744876694672" duration="594000" />
       <workItem from="1744888197951" duration="3428000" />
       <workItem from="1744906739723" duration="8649000" />
-      <workItem from="1744918078122" duration="1014000" />
+      <workItem from="1744918078122" duration="1417000" />
     </task>
     <servers />
   </component>
