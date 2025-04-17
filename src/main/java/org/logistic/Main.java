@@ -71,7 +71,7 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán
-        int iterations = 1;
+        int iterations = 30;
     }
 
     /**
@@ -284,7 +284,7 @@ public class Main {
                                                                           locations, routes[0].getMaxPayload());
 
                         // Chạy tất cả các thuật toán tối ưu hóa
-                        runAllOptimizers(sa, initialSolutions, fitnessUtil, checkConditionUtil, locations,
+                        runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                                        routes[0].getMaxPayload(), writeLogUtil, printUtil, fileName,
                                        config.exportType, config.iterations);
 
@@ -324,7 +324,7 @@ public class Main {
         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
 
         // Chạy tất cả các thuật toán tối ưu hóa
-        runAllOptimizers(sa, initialSolutions, fitnessUtil, checkConditionUtil, locations,
+        runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                        routes[0].getMaxPayload(), writeLogUtil, printUtil, null,
                        config.exportType, config.iterations);
 
@@ -371,11 +371,10 @@ public class Main {
      * Tạo đối tượng tối ưu hóa dựa trên thuật toán được chọn
      *
      * @param algorithm Thuật toán được chọn
-     * @param sa Đối tượng SimulatedAnnealing đã tạo
      * @param writeLogUtil Tiện ích ghi log
      * @return Đối tượng tối ưu hóa
      */
-    private static Optimizer createOptimizer(Algorithm algorithm, SimulatedAnnealing sa, WriteLogUtil writeLogUtil) {
+    private static Optimizer createOptimizer(Algorithm algorithm, WriteLogUtil writeLogUtil) {
         return switch (algorithm) {
             case ACO -> {
                 System.out.println("Đang chạy thuật toán Ant Colony Optimization (ACO)...");
@@ -412,7 +411,6 @@ public class Main {
     /**
      * Chạy tất cả các thuật toán tối ưu hóa và trả về kết quả tốt nhất
      *
-     * @param sa                 Đối tượng SimulatedAnnealing đã tạo
      * @param initialSolutions   Tập giải pháp ban đầu
      * @param fitnessUtil        Tiện ích tính fitness
      * @param checkConditionUtil Tiện ích kiểm tra điều kiện
@@ -424,7 +422,7 @@ public class Main {
      * @param exportType         Loại xuất dữ liệu
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
      */
-    private static void runAllOptimizers(SimulatedAnnealing sa, Solution[] initialSolutions,
+    private static void runAllOptimizers(Solution[] initialSolutions,
                                          FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
                                          Location[] locations, int maxPayload, WriteLogUtil writeLogUtil,
                                          PrintUtil printUtil, String fileName,
@@ -453,7 +451,7 @@ public class Main {
                 }
 
                 // Tạo và chạy thuật toán
-                Optimizer optimizer = createOptimizer(algorithm, sa, writeLogUtil);
+                Optimizer optimizer = createOptimizer(algorithm, writeLogUtil);
                 Solution optimizedSolution = runOptimization(optimizer, initialSolutionsCopy, fitnessUtil,
                                                           checkConditionUtil, locations, maxPayload);
 
