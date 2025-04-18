@@ -75,7 +75,7 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán
-        int iterations = 2;
+        int iterations = 30;
     }
 
     /**
