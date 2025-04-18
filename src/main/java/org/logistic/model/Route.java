@@ -36,12 +36,12 @@ public class Route {
 
     /**
      * Tính khoảng cách của tuyến đường
+     *
      * @param locations Mảng các địa điểm
-     * @return Khoảng cách của tuyến đường
      */
-    public double calculateDistance(Location[] locations) {
+    public void calculateDistance(Location[] locations) {
         if (indLocations.length <= 1) {
-            return 0;
+            return;
         }
         
         double totalDistance = 0;
@@ -53,17 +53,8 @@ public class Route {
                 totalDistance += locations[currentIndex].distance(locations[nextIndex]);
             }
         }
-        
-        this.distance = totalDistance;
-        return totalDistance;
-    }
 
-    /**
-     * Lấy khoảng cách của tuyến đường
-     * @return Khoảng cách của tuyến đường
-     */
-    public double getDistance() {
-        return distance;
+        this.distance = totalDistance;
     }
 
     @Override

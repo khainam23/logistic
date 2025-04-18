@@ -1,16 +1,19 @@
 package org.logistic.util;
 
+import lombok.Getter;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 
 /**
  * Tiện ích tính toán giá trị fitness cho các giải pháp
  */
+@Getter
 public class FitnessUtil {
     private static FitnessUtil instance;
+    private int[] tempWeights;
 
     private FitnessUtil() {
-        // Private constructor để ngăn khởi tạo trực tiếp
+        this.tempWeights = new int[4];
     }
 
     /**
@@ -36,11 +39,14 @@ public class FitnessUtil {
         int totalDistances = 0;
         int totalServiceTime = 0;
         int totalWaitingTime = 0;
-        int numberVehicle = routes.length;  // Đếm số lượng xe
+        int numberVehicle = 0;
 
         for (Route route : routes) {
             int[] indLocs = route.getIndLocations();
             for (int j = 0; j < indLocs.length - 1; j++) {
+                // Nếu route có giải pháp dựa trên cạnh trên thì tăng số xe tài
+                if(j == 0) ++numberVehicle;
+
                 Location currLoc = locations[indLocs[j]];
                 Location nextLoc = locations[indLocs[j + 1]];
 
@@ -59,7 +65,13 @@ public class FitnessUtil {
             }
         }
 
+        tempWeights[0] = numberVehicle;
+        tempWeights[1] = totalDistances;
+        tempWeights[2] = totalServiceTime;
+        tempWeights[3] = totalWaitingTime;
+
         // Trả về giá trị fitness
         return totalDistances + totalServiceTime + totalWaitingTime + numberVehicle;
     }
+
 }

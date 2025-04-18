@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -462,7 +463,7 @@ public class ReadDataFromFile {
         if (!new File(srcDirPath).isAbsolute()) {
             // Thử tìm trong resources
             try {
-                java.net.URL resourceUrl = ReadDataFromFile.class.getClassLoader().getResource(srcDirPath);
+                URL resourceUrl = ReadDataFromFile.class.getClassLoader().getResource(srcDirPath);
                 if (resourceUrl != null) {
                     System.out.println("Found source directory in resources: " + resourceUrl.getPath());
                 } else {
