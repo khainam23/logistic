@@ -71,3 +71,12 @@ Truy cập [Data for Logistic](https://github.com/khainam23/logistic/blob/data/d
 ### 4. Mở dự án bằng IDE
 - Cài đặt các lib tại file ***pom.xml***.
 - Chạy dự án ở file ***Main.java***
+
+## 🛠️ Đóng góp
+Chúng tôi luôn chào đón sự đóng góp từ cộng đồng. Nếu bạn quan tâm đến lĩnh vực logistics và có ý tưởng hoặc cải tiến.
+
+## 📬 Liên hệ
+Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, vui lòng mở một Issue hoặc liên hệ trực tiếp với chúng tôi qua email: khainam23@example.com
+
+## 🌟 Ghi chú
+Dự án này là một phần trong hành trình khám phá và ứng dụng công nghệ vào lĩnh vực logistics. Chúng tôi tin rằng, với sự chung tay của cộng đồng, chúng ta có thể tạo ra những giải pháp đột phá, góp phần nâng cao hiệu quả và bền vững cho chuỗi cung ứng toàn cầu.
