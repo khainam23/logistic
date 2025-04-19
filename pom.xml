@@ -76,6 +76,18 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>run-main</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.logistic.Main</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!-- Optional: default configuration if needed -->
                 <configuration>
                     <mainClass>org.logistic.Main</mainClass>
                 </configuration>
