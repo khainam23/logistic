@@ -51,8 +51,8 @@ public class Main {
      */
     enum ExportType {NONE, EXCEL, CSV, TXT, ALL}
 
-    private static final String DEFAULT_SRC_DIRECTORY = "data/pdptw/src";
-    private static final String DEFAULT_SOLUTION_DIRECTORY = "data/pdptw/solution";
+    private static final String DEFAULT_SRC_DIRECTORY = "data/vrptw/src";
+    private static final String DEFAULT_SOLUTION_DIRECTORY = "data/vrptw/solution";
     private static final String EXPORT_DIRECTORY = "exports";
     private static final String RESULTS_SUMMARY_FILE = "results_summary.txt";
     private static final String EXCEL_RESULTS_FILE = "optimization_results.xlsx";
