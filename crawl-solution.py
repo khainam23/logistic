@@ -1,7 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin  # Thêm thư viện này
+from urllib.parse import urljoin
 
 def crawl():
     url = "https://www.sintef.no/projectweb/top/pdptw/100-customers/" # Thay đổi URL ở đây
