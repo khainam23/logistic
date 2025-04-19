@@ -2,6 +2,12 @@
 
 **Nghiên cứu và triển khai các thuật toán tối ưu trong lĩnh vực logistics, hướng đến xây dựng hệ thống vận hành thông minh và hiệu quả.**
 
+Mẫu chạy thử:
+
+Bạn có thể chạy thử với các mẫu của chúng tôi tại
+
+💁‍♂️ [Kaggle](https://www.kaggle.com/code/nkn2310/logistic)
+
 ---
 
 ## 📌 Giới thiệu
