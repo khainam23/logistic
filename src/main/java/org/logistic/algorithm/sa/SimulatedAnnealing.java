@@ -30,8 +30,8 @@ public class SimulatedAnnealing extends AbstractOptimizer {
 
     /**
      * Khởi tạo thuật toán Simulated Annealing với giải pháp ban đầu
-     * 
-     * @param solution Giải pháp ban đầu
+     *
+     * @param solution     Giải pháp ban đầu
      * @param writeLogUtil Tiện ích ghi log
      */
     public SimulatedAnnealing(Solution solution, WriteLogUtil writeLogUtil) {
@@ -42,13 +42,13 @@ public class SimulatedAnnealing extends AbstractOptimizer {
 
     @Override
     @LogMethod(
-        level = LogLevel.INFO,
-        message = "Thực thi thuật toán Simulated Annealing",
-        logParams = true,
-        logReturn = true
+            level = LogLevel.INFO,
+            message = "Thực thi thuật toán Simulated Annealing",
+            logParams = true,
+            logReturn = true
     )
-    public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil, 
-                      CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
+    public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
+                        CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
 
@@ -70,19 +70,19 @@ public class SimulatedAnnealing extends AbstractOptimizer {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 Solution newSolution = perturbSolution(currentSolution.copy());
 
-               if(!newSolution.equals(currentSolution)) {
-                   double currentEnergy = calculateEnergy(currentSolution.getRoutes());
-                   double newEnergy = calculateEnergy(newSolution.getRoutes());
-                   double deltaEnergy = newEnergy - currentEnergy;
+                if (!newSolution.equals(currentSolution)) {
+                    double currentEnergy = calculateEnergy(currentSolution.getRoutes());
+                    double newEnergy = calculateEnergy(newSolution.getRoutes());
+                    double deltaEnergy = newEnergy - currentEnergy;
 
-                   if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
-                       currentSolution = newSolution.copy();
-                       if (newEnergy < bestEnergy) {
-                           bestSolution = newSolution.copy();
-                           bestEnergy = newEnergy;
-                       }
-                   }
-               }
+                    if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
+                        currentSolution = newSolution.copy();
+                        if (newEnergy < bestEnergy) {
+                            bestSolution = newSolution.copy();
+                            bestEnergy = newEnergy;
+                        }
+                    }
+                }
             }
 
             population.add(currentSolution);
@@ -92,24 +92,24 @@ public class SimulatedAnnealing extends AbstractOptimizer {
         // Trả về giải pháp tốt nhất thay vì toàn bộ quần thể
         return bestSolution;
     }
-    
+
     /**
      * Phương thức này được giữ lại để tương thích ngược với code cũ
      */
-    public Solution[] runAndGetPopulation(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil, 
-                                        Location[] locations, int currentTarget) {
+    public Solution[] runAndGetPopulation(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
+                                          Location[] locations, int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
-        
+
         // Chạy thuật toán để tìm giải pháp tốt nhất
         run(new Solution[]{initialSolution}, fitnessUtil, checkConditionUtil, locations, currentTarget);
-        
+
         // Tạo tập quần thể
         Set<Solution> population = new HashSet<>();
         population.add(initialSolution);
         double temperature = INITIAL_TEMPERATURE;
         Solution currentSolution = initialSolution;
-        
+
         while (temperature > FINAL_TEMPERATURE) {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 Solution newSolution = perturbSolution(currentSolution.copy());
@@ -124,30 +124,30 @@ public class SimulatedAnnealing extends AbstractOptimizer {
             population.add(currentSolution);
             temperature *= COOLING_RATE;
         }
-        
+
         return population.toArray(new Solution[0]);
     }
 
     /**
      * Biến đổi giải pháp bằng cách áp dụng một toán tử ngẫu nhiên
-     * 
+     *
      * @param solution Giải pháp cần biến đổi
      * @return Giải pháp mới sau khi biến đổi
      */
     private Solution perturbSolution(Solution solution) {
         // Lấy các tuyến đường từ giải pháp
         Route[] routes = solution.getRoutes();
-        
+
         // Quyết định áp dụng toán tử đơn tuyến hoặc đa tuyến
         boolean useMultiRouteOperator = random.nextDouble() < 0.3 && routes.length >= 2;
-        
+
         if (useMultiRouteOperator) {
             // Áp dụng toán tử đa tuyến (PD-Shift hoặc PD-Exchange)
             applyRandomMultiRouteOperation(routes);
-            
+
             // Kiểm tra tính khả thi của tất cả các tuyến đường
             for (int i = 0; i < routes.length; i++) {
-                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations, 
+                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
                         routes[i].getMaxPayload(), currentTarget)) {
                     // Khôi phục tuyến đường không khả thi
                     routes[i] = solution.getRoutes()[i].copy();
@@ -188,7 +188,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
 
     /**
      * Tính toán năng lượng (fitness) của một tập tuyến đường
-     * 
+     *
      * @param routes Tập tuyến đường cần tính năng lượng
      * @return Giá trị năng lượng
      */
@@ -198,7 +198,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
 
     /**
      * Tính xác suất chấp nhận một giải pháp tệ hơn
-     * 
+     *
      * @param deltaEnergy Chênh lệch năng lượng
      * @param temperature Nhiệt độ hiện tại
      * @return Xác suất chấp nhận

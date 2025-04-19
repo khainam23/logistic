@@ -304,6 +304,8 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             route.calculateDistance(locations);
         }
 
+        newSolution.setFitness(fitnessUtil.calculatorFitness(routes, locations));
+
         return newSolution;
     }
 }

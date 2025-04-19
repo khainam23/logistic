@@ -41,6 +41,7 @@ public class Route {
      */
     public void calculateDistance(Location[] locations) {
         if (indLocations.length <= 1) {
+            this.distance = 0;
             return;
         }
         

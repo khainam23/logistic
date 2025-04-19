@@ -1,9 +1,11 @@
 package org.logistic.algorithm.aco;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.logistic.algorithm.AbstractOptimizer;
+import org.logistic.algorithm.Agent;
 import org.logistic.annotation.LogLevel;
 import org.logistic.annotation.LogMethod;
 import org.logistic.model.Location;
@@ -47,6 +49,10 @@ public class AntColonyOptimization extends AbstractOptimizer {
     /**
      * Khởi tạo đàn kiến từ các giải pháp ban đầu
      */
+    @org.logistic.annotation.LogMethod(
+            level = org.logistic.annotation.LogLevel.INFO,
+            message = "Khởi tạo quần thể kiến"
+    )
     private void initialize(Solution[] initialSolutions) {
         colony = new ArrayList<>();
         numLocations = locations.length;
@@ -79,9 +85,6 @@ public class AntColonyOptimization extends AbstractOptimizer {
                 bestAnt = new Ant(newSolution.copy(), newFitness);
             }
         }
-
-        writeLogUtil.info("Initialized colony with " + colony.size() + " ants");
-        writeLogUtil.info("Best initial ant fitness: " + bestAnt.getFitness());
     }
 
     /**
@@ -135,9 +138,6 @@ public class AntColonyOptimization extends AbstractOptimizer {
         
         return newSolution;
     }
-
-    // Các phương thức applyRandomOperation, applySwapOperator, applyInsertOperator, applyReverseOperator
-    // đã được chuyển lên lớp cha AbstractOptimizer
 
     /**
      * Cập nhật giải pháp của kiến dựa trên pheromone và heuristic
@@ -351,7 +351,7 @@ public class AntColonyOptimization extends AbstractOptimizer {
      */
     private void diversifyColony() {
         // Sắp xếp đàn kiến theo fitness
-        colony.sort((a1, a2) -> Double.compare(a1.getFitness(), a2.getFitness()));
+        colony.sort(Comparator.comparingDouble(Agent::getFitness));
         
         // Giữ lại 30% kiến tốt nhất
         int eliteCount = (int) (COLONY_SIZE * 0.3);
