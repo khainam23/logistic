@@ -40,12 +40,13 @@ public class Route {
      * @param locations Mảng các địa điểm
      */
     public void calculateDistance(Location[] locations) {
-        if (indLocations.length <= 1) {
+        if (indLocations.length < 1) {
             this.distance = 0;
             return;
         }
         
         double totalDistance = 0;
+
         for (int i = 0; i < indLocations.length - 1; i++) {
             int currentIndex = indLocations[i];
             int nextIndex = indLocations[i + 1];
@@ -54,6 +55,7 @@ public class Route {
                 totalDistance += locations[currentIndex].distance(locations[nextIndex]);
             }
         }
+        totalDistance += locations[indLocations[indLocations.length - 1]].distance(locations[0]); // Về kho
 
         this.distance = totalDistance;
     }

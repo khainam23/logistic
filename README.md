@@ -71,6 +71,8 @@ Truy cập [Data for Logistic](https://github.com/khainam23/logistic/blob/data/d
 ### 4. Mở dự án bằng IDE
 - Cài đặt các lib tại file ***pom.xml***.
 - Chạy dự án ở file ***Main.java***
+- Hãy điều chỉnh các thông số mà bạn muốn tại 
+![img.png](img.png)
 
 ## 🛠️ Đóng góp
 Chúng tôi luôn chào đón sự đóng góp từ cộng đồng. Nếu bạn quan tâm đến lĩnh vực logistics và có ý tưởng hoặc cải tiến.

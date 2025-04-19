@@ -63,6 +63,7 @@ public class FitnessUtil {
                     totalWaitingTime += waitingTime;
                 }
             }
+            totalDistances += indLocs.length == 0 ? 0 : locations[indLocs[indLocs.length - 1]].distance(locations[0]); // Về kho
         }
 
         tempWeights[0] = numberVehicle;
