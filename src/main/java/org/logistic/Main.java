@@ -67,7 +67,7 @@ public class Main {
      */
     private static class ConfigParams {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
-        RunMode runMode = RunMode.DIRECTORY;
+        RunMode runMode = RunMode.SINGLE_FILE;
         String dataLocation = "data/pdptw/src/lc101.txt";
         String dataSolution = "data/pdptw/solution/lc101.txt";
         String srcDirectory = DEFAULT_SRC_DIRECTORY;
@@ -75,7 +75,7 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán
-        int iterations = 30;
+        int iterations = 1;
     }
 
     /**
@@ -146,6 +146,7 @@ public class Main {
             Row headerRow1 = resultsSheet.createRow(0);
             headerRow1.createCell(0).setCellValue("Instance");
             headerRow1.createCell(1).setCellValue("Algorithm");
+            headerRow1.createCell(14).setCellValue("Time (ms)");
 
             // Tạo dòng tiêu đề 2 (row 1)
             Row headerRow2 = resultsSheet.createRow(1);
@@ -153,6 +154,7 @@ public class Main {
             // Merge "Instance" và "Algorithm"
             resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 0, 0));
             resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 1, 1));
+            resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 14, 14));
 
             // Thêm các cột dữ liệu cho từng trọng số và thống kê
             for (int w = 0; w < weights.length; w++) {
@@ -187,7 +189,7 @@ public class Main {
 
         try {
             // Tự động điều chỉnh độ rộng cột
-            for (int i = 0; i < 14; i++) { // 2 cột đầu + 4 trọng số * 3 thống kê
+            for (int i = 0; i < 15; i++) { // 2 cột đầu + 4 trọng số * 3 thống kê + 1 cột thời gian
                 resultsSheet.autoSizeColumn(i);
             }
 
@@ -437,6 +439,7 @@ public class Main {
         System.out.println("\n=== CHẠY TẤT CẢ CÁC THUẬT TOÁN TỐI ƯU HÓA ===");
         System.out.println("Số lần chạy lặp lại cho mỗi thuật toán: " + iterations);
         double[][][] totalWeights = new double[Algorithm.values().length][4][3];
+        long[] timeAvgs = new long[Algorithm.values().length];
 
         // Tạo và chạy từng thuật toán
         for (Algorithm algorithm : Algorithm.values()) {
@@ -458,8 +461,12 @@ public class Main {
 
                 // Tạo và chạy thuật toán
                 Optimizer optimizer = createOptimizer(algorithm, writeLogUtil);
+                // Ghi thời gian chạy (ms)
+                long startTime = System.currentTimeMillis();
                 Solution optimizedSolution = runOptimization(optimizer, initialSolutionsCopy, fitnessUtil,
                         checkConditionUtil, locations, maxPayload);
+                // Thời gian kết thúc (ms)
+                timeAvgs[algorithm.ordinal()] += System.currentTimeMillis() - startTime;
 
                 // Cập nhật giải pháp tốt nhất nếu cần
                 if (bestSolutionForAlgorithm == null ||
@@ -485,6 +492,9 @@ public class Main {
                 // In kết quả của lần chạy hiện tại
                 System.out.println("Kết quả lần chạy " + iter + ": Fitness = " + optimizedSolution.getFitness());
             }
+
+            // Thời gian chạy
+            timeAvgs[algorithm.ordinal()] /= iterations;
 
             // Cập nhật trọng số trung bình
             for (int i = 0; i < partsWeights.length; i++) {
@@ -542,7 +552,7 @@ public class Main {
                 excelFileName += "_" + System.currentTimeMillis() + ".xlsx";
 
                 // Xuất dữ liệu ra Excel
-                exportResultsToExcel(locations, totalWeights, fileName);
+                exportResultsToExcel(totalWeights, timeAvgs, fileName);
                 System.out.println("Đã xuất kết quả ra Excel: " + excelFileName);
             } catch (Exception e) {
                 System.err.println("Lỗi khi xuất dữ liệu ra Excel: " + e.getMessage());
@@ -663,7 +673,7 @@ public class Main {
      * @param fileName Tên file dữ liệu (nếu có)
      * @throws IOException Nếu có lỗi khi xuất dữ liệu
      */
-    private static void exportResultsToExcel(Location[] locations, double[][][] totalWeights, String fileName) {
+    private static void exportResultsToExcel( double[][][] totalWeights, long[] timeAvgs, String fileName) {
         if (resultsWorkbook == null || resultsSheet == null) {
             System.err.println("Excel workbook chưa được khởi tạo");
             return;
@@ -698,6 +708,9 @@ public class Main {
             row.createCell(11).setCellValue(partsWeights[3][0]); // Min
             row.createCell(12).setCellValue(partsWeights[3][1]); // Std
             row.createCell(13).setCellValue(partsWeights[3][2]); // Mean
+
+            // Thời gian chạy
+            row.createCell(14).setCellValue(timeAvgs[algorithm.ordinal()]);
         }
     }
 }
