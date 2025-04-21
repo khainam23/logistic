@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/woa/Whale.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/woa/WhaleOptimizationAlgorithm.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/Hyena.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/Hyena.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +148,11 @@
       <workItem from="1744918078122" duration="1799000" />
       <workItem from="1744938277592" duration="5720000" />
       <workItem from="1745049599080" duration="10043000" />
-      <workItem from="1745114929192" duration="1372000" />
+      <workItem from="1745114929192" duration="2089000" />
+      <workItem from="1745140317705" duration="82000" />
+      <workItem from="1745140864517" duration="1730000" />
+      <workItem from="1745223984912" duration="4072000" />
+      <workItem from="1745235005804" duration="1416000" />
     </task>
     <servers />
   </component>

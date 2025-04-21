@@ -10,6 +10,7 @@ import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
 import org.logistic.algorithm.sa.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
+import org.logistic.algorithm.woa.WhaleOptimizationAlgorithm;
 import org.logistic.config.SpringContextInitializer;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
@@ -39,7 +40,7 @@ public class Main {
     /**
      * Các thuật toán tối ưu hóa được hỗ trợ, không cần thêm SA vì chỉ dùng nó để tạo nhiều giải pháp ban đầu
      */
-    enum Algorithm {SHO, ACO, GWO}
+    enum Algorithm {SHO, ACO, GWO, WOA}
 
     /**
      * Các chế độ chạy
@@ -390,9 +391,17 @@ public class Main {
                 System.out.println("Đang chạy thuật toán Grey Wolf Optimizer (GWO)...");
                 yield new GreyWolfOptimizer(writeLogUtil);
             }
-            default -> {
+            case WOA -> {
+                System.out.println("Đang chạy thuật toán Whale Optimization Algorithm (WOA)...");
+                yield new WhaleOptimizationAlgorithm(writeLogUtil);
+            }
+            case SHO -> {
                 System.out.println("Đang chạy thuật toán Spotted Hyena Optimizer (SHO)...");
                 yield new SpottedHyenaOptimizer(writeLogUtil);
+            }
+            default -> {
+                System.out.println("Thuật toán chưa được định nghĩa");
+                yield null;
             }
         };
     }
