@@ -68,7 +68,7 @@ public class Main {
      */
     private static class ConfigParams {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
-        RunMode runMode = RunMode.SINGLE_FILE;
+        RunMode runMode = RunMode.DIRECTORY;
         String dataLocation = "data/pdptw/src/lc101.txt";
         String dataSolution = "data/pdptw/solution/lc101.txt";
         String srcDirectory = DEFAULT_SRC_DIRECTORY;
@@ -76,7 +76,7 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán
-        int iterations = 1;
+        int iterations = 30;
     }
 
     /**
