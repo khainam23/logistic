@@ -4,14 +4,13 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.algorithm.Agent;
-import org.logistic.annotation.LogLevel;
-import org.logistic.annotation.LogMethod;
+
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,21 +32,15 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
     /**
      * Khởi tạo thuật toán Spotted Hyena Optimizer
-     *
-     * @param writeLogUtil Tiện ích ghi log
      */
-    public SpottedHyenaOptimizer(WriteLogUtil writeLogUtil) {
-        super(writeLogUtil);
-        this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.SHO.getPath());
+    public SpottedHyenaOptimizer() {
+        super();
     }
 
     /**
      * Khởi tạo quần thể linh cẩu từ các giải pháp ban đầu
      */
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.INFO,
-        message = "Khởi tạo quần thể linh cẩu"
-    )
+
     private void initialize(Solution[] initialSolutions) {
         population = new ArrayList<>();
         clusters = new ArrayList<>();
@@ -175,7 +168,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             // Cập nhật linh cẩu tốt nhất
             if (newFitness < bestHyena.getFitness()) {
                 bestHyena = new Hyena(newSolution.copy(), newFitness);
-                writeLogUtil.info("New best solution found with fitness: " + newFitness);
+                System.out.println("New best solution found with fitness: " + newFitness);
             }
         }
     }
@@ -219,12 +212,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Chạy thuật toán SHO cải tiến
      */
     @Override
-    @LogMethod(
-        level = LogLevel.INFO,
-        message = "Thực thi thuật toán Spotted Hyena Optimizer",
-        logParams = true,
-        logReturn = true
-    )
+
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {

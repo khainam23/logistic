@@ -7,7 +7,6 @@ import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
 
 import java.util.Random;
 
@@ -19,7 +18,6 @@ public abstract class AbstractOptimizer implements Optimizer {
 
     // Các tham số chung
     final Random random = new Random();
-    final WriteLogUtil writeLogUtil;
 
     // Các tham số được thiết lập trong quá trình chạy
     Location[] locations;
@@ -28,12 +26,10 @@ public abstract class AbstractOptimizer implements Optimizer {
     int currentTarget;
 
     /**
-     * Khởi tạo optimizer với WriteLogUtil
-     *
-     * @param writeLogUtil Tiện ích ghi log
+     * Khởi tạo optimizer
      */
-    public AbstractOptimizer(WriteLogUtil writeLogUtil) {
-        this.writeLogUtil = writeLogUtil;
+    public AbstractOptimizer() {
+        // Constructor không tham số
     }
 
     /**

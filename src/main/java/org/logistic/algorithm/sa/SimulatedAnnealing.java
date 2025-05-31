@@ -3,14 +3,11 @@ package org.logistic.algorithm.sa;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
-import org.logistic.annotation.LogLevel;
-import org.logistic.annotation.LogMethod;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
 
 import java.util.*;
 
@@ -31,22 +28,14 @@ public class SimulatedAnnealing extends AbstractOptimizer {
     /**
      * Khởi tạo thuật toán Simulated Annealing với giải pháp ban đầu
      *
-     * @param solution     Giải pháp ban đầu
-     * @param writeLogUtil Tiện ích ghi log
+     * @param solution Giải pháp ban đầu
      */
-    public SimulatedAnnealing(Solution solution, WriteLogUtil writeLogUtil) {
-        super(writeLogUtil);
+    public SimulatedAnnealing(Solution solution) {
+        super();
         this.initialSolution = solution;
-        this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.SA.getPath());
     }
 
     @Override
-    @LogMethod(
-            level = LogLevel.INFO,
-            message = "Thực thi thuật toán Simulated Annealing",
-            logParams = true,
-            logReturn = true
-    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
         // Thiết lập các tham số từ lớp cha

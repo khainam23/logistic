@@ -6,14 +6,13 @@ import java.util.List;
 
 import org.logistic.algorithm.AbstractOptimizer;
 import org.logistic.algorithm.Agent;
-import org.logistic.annotation.LogLevel;
-import org.logistic.annotation.LogMethod;
+
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
+
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -41,18 +40,16 @@ public class AntColonyOptimization extends AbstractOptimizer {
     
     int numLocations; // Số lượng địa điểm
 
-    public AntColonyOptimization(WriteLogUtil writeLogUtil) {
-        super(writeLogUtil);
-        this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.ACO.getPath());
+    /**
+     * Khởi tạo thuật toán Ant Colony Optimization
+     */
+    public AntColonyOptimization() {
+        super();
     }
 
     /**
      * Khởi tạo đàn kiến từ các giải pháp ban đầu
      */
-    @org.logistic.annotation.LogMethod(
-            level = org.logistic.annotation.LogLevel.INFO,
-            message = "Khởi tạo quần thể kiến"
-    )
     private void initialize(Solution[] initialSolutions) {
         colony = new ArrayList<>();
         numLocations = locations.length;
@@ -197,7 +194,7 @@ public class AntColonyOptimization extends AbstractOptimizer {
             // Cập nhật kiến tốt nhất
             if (newFitness < bestAnt.getFitness()) {
                 bestAnt = new Ant(newSolution.copy(), newFitness);
-                writeLogUtil.info("New best solution found with fitness: " + newFitness);
+                System.out.println("New best solution found with fitness: " + newFitness);
             }
         }
     }
@@ -312,12 +309,6 @@ public class AntColonyOptimization extends AbstractOptimizer {
      * Chạy thuật toán ACO
      */
     @Override
-    @LogMethod(
-        level = LogLevel.INFO,
-        message = "Thực thi thuật toán Ant Colony Optimization",
-        logParams = true,
-        logReturn = true
-    )
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
@@ -368,7 +359,7 @@ public class AntColonyOptimization extends AbstractOptimizer {
             }
         }
         
-        writeLogUtil.info("Colony diversified. Elite count: " + eliteCount);
+        System.out.println("Colony diversified. Elite count: " + eliteCount);
     }
 
     /**

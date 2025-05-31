@@ -38,7 +38,7 @@ public class ReadDataFromFile {
     @Getter
     public enum ProblemType {
         // Định nghĩa chỉ số cột: [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
-        VRPTW(false, 4, 9, 0, 1, 2, 3, 4, 5, 6),  // Vehicle Routing Problem with Time Windows
+        VRPTW(false, 4, 9, 1, 2, 3, 4, 5, 6, 7, -1),  // Vehicle Routing Problem with Time Windows
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8);   // Pickup and Delivery Problem with Time Windows
         
         private final boolean isPickupDelivery;
@@ -183,6 +183,7 @@ public class ReadDataFromFile {
                 // Đọc dung lượng tối đa
                 if (count == problemType.getCapacityLineIndex()) {
                     String[] parts = line.trim().split("\\s+");
+                    System.out.println(Arrays.toString(parts));
                     maxCapacity = Integer.parseInt(parts[1]);
                     System.out.println("Max capacity: " + maxCapacity);
                 }

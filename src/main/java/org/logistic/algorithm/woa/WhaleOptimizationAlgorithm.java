@@ -7,7 +7,7 @@ import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +20,10 @@ public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
     List<Whale> population;
 
     /**
-     * Khởi tạo optimizer với WriteLogUtil
-     *
-     * @param writeLogUtil Tiện ích ghi log
+     * Khởi tạo optimizer
      */
-    public WhaleOptimizationAlgorithm(WriteLogUtil writeLogUtil) {
-        super(writeLogUtil);
+    public WhaleOptimizationAlgorithm() {
+        super();
     }
 
     @Override
@@ -107,7 +105,7 @@ public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
             // Cập nhật linh cẩu tốt nhất
             if (newFitness < bestWhale.getFitness()) {
                 bestWhale = new Whale(newSolution.copy(), newFitness);
-                writeLogUtil.info("New best solution found with fitness: " + newFitness);
+                System.out.println("New best solution found with fitness: " + newFitness);
             }
         }
     }

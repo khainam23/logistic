@@ -3,14 +3,13 @@ package org.logistic.algorithm.gwo;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.logistic.algorithm.AbstractOptimizer;
-import org.logistic.annotation.LogLevel;
-import org.logistic.annotation.LogMethod;
+
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import org.logistic.util.WriteLogUtil;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,18 +28,17 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     Wolf beta;  // Sói beta (tốt thứ hai)
     Wolf delta; // Sói delta (tốt thứ ba)
 
-    public GreyWolfOptimizer(WriteLogUtil writeLogUtil) {
-        super(writeLogUtil);
-        this.writeLogUtil.setLogFilePath(WriteLogUtil.PathLog.GWO.getPath());
+    /**
+     * Khởi tạo thuật toán Grey Wolf Optimizer
+     */
+    public GreyWolfOptimizer() {
+        super();
     }
 
     /**
      * Khởi tạo quần thể sói từ các giải pháp ban đầu
      */
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.INFO,
-        message = "Khởi tạo quần thể sói"
-    )
+
     private void initialize(Solution[] initialSolutions) {
         population = new ArrayList<>();
 
@@ -98,9 +96,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     /**
      * Cập nhật vị trí của sói theo thuật toán GWO
      */
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.DEBUG
-    )
+
     private void updateWolfPosition(Wolf wolf, double a) {
         Solution currentSolution = wolf.getSolution();
         
@@ -179,7 +175,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             delta = beta;
             beta = alpha;
             alpha = new Wolf(wolf.getSolution().copy(), wolf.getFitness());
-            writeLogUtil.info("New alpha wolf with fitness: " + alpha.getFitness());
+            System.out.println("New alpha wolf with fitness: " + alpha.getFitness());
         } else if (wolf.getFitness() < beta.getFitness()) {
             delta = beta;
             beta = new Wolf(wolf.getSolution().copy(), wolf.getFitness());
@@ -270,12 +266,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
      * Chạy thuật toán Grey Wolf Optimizer
      */
     @Override
-    @LogMethod(
-        level = LogLevel.INFO,
-        message = "Thực thi thuật toán Grey Wolf Optimizer",
-        logParams = true,
-        logReturn = true
-    )
+
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {
@@ -307,10 +298,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     /**
      * Đa dạng hóa quần thể
      */
-    @org.logistic.annotation.LogMethod(
-        level = org.logistic.annotation.LogLevel.INFO,
-        message = "Đa dạng hóa quần thể sói"
-    )
+
     private void diversifyPopulation() {
         // Sắp xếp quần thể theo fitness
         population.sort((w1, w2) -> Double.compare(w1.getFitness(), w2.getFitness()));
