@@ -3,6 +3,8 @@ package org.logistic.util;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.logistic.model.Location;
 import org.logistic.model.Route;
@@ -35,48 +37,55 @@ public class FitnessUtil {
     /**
      * Tính giá trị fitness của giải pháp dựa trên các tuyến đường và vị trí
      *
-     * @param routes Mảng các tuyến đường
+     * @param routes    Mảng các tuyến đường
      * @param locations Mảng các vị trí
      * @return Giá trị fitness (càng thấp càng tốt)
      */
     public double calculatorFitness(Route[] routes, Location[] locations) {
-        int totalDistances = 0;
-        int totalServiceTime = 0;
-        int totalWaitingTime = 0;
-        int numberVehicle = 0;
+        AtomicInteger totalDistances = new AtomicInteger(0);
+        AtomicInteger totalServiceTime = new AtomicInteger(0);
+        AtomicInteger totalWaitingTime = new AtomicInteger(0);
+        AtomicInteger numberVehicle = new AtomicInteger(0);
 
-        for (Route route : routes) {
+        Arrays.stream(routes).parallel().forEach(route -> {
             int[] indLocs = route.getIndLocations();
-            for (int j = 0; j < indLocs.length - 1; j++) {
-                // Nếu route có giải pháp dựa trên cạnh trên thì tăng số xe tài
-                if(j == 0) ++numberVehicle;
 
-                Location currLoc = locations[indLocs[j]];
-                Location nextLoc = locations[indLocs[j + 1]];
+            if (indLocs.length > 0) {
+                numberVehicle.incrementAndGet();
 
-                // Tính khoảng cách
-                int distance = currLoc.distance(nextLoc);
-                totalDistances += distance;
+                for (int j = 0; j < indLocs.length - 1; j++) {
+                    Location currLoc = locations[indLocs[j]];
+                    Location nextLoc = locations[indLocs[j + 1]];
 
-                // Tính thời gian phục vụ
-                totalServiceTime += nextLoc.totalServiceTime();
+                    // Tính khoảng cách
+                    totalDistances.addAndGet(currLoc.distance(nextLoc));
 
-                // Tính thời gian chờ của khách hàng
-                int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - distance;
-                if (waitingTime > 0) {
-                    totalWaitingTime += waitingTime;
+                    // Tính thời gian phục vụ
+                    totalServiceTime.addAndGet(nextLoc.totalServiceTime());
+
+                    // Tính thời gian chờ của khách hàng
+                    int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
+                    if (waitingTime > 0) {
+                        totalWaitingTime.addAndGet(waitingTime);
+                    }
                 }
-            }
-            totalDistances += indLocs.length == 0 ? 0 : locations[indLocs[indLocs.length - 1]].distance(locations[0]); // Về kho
-        }
 
-        tempWeights[0] = numberVehicle;
-        tempWeights[1] = totalDistances;
-        tempWeights[2] = totalServiceTime;
-        tempWeights[3] = totalWaitingTime;
+                // Thêm khoảng cách về kho
+                totalDistances.addAndGet(
+                        locations[indLocs[indLocs.length - 1]].distance(locations[0]));
+            }
+        });
+
+        tempWeights[0] = numberVehicle.get();
+        tempWeights[1] = totalDistances.get();
+        tempWeights[2] = totalServiceTime.get();
+        tempWeights[3] = totalWaitingTime.get();
 
         // Trả về giá trị fitness
-        return totalDistances + totalServiceTime + totalWaitingTime + numberVehicle;
+        double alpha = 1.0, beta = 1.0, gamma = 1.0, delta = 1.0;
+        return alpha * totalDistances.get() + beta * totalServiceTime.get() +
+                gamma * totalWaitingTime.get() + delta * numberVehicle.get();
+
     }
 
 }
