@@ -1,14 +1,14 @@
 package org.logistic.algorithm;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import java.util.Random;
+
 import org.logistic.model.Location;
 import org.logistic.model.Route;
-import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
 
-import java.util.Random;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Lớp trừu tượng cung cấp các phương thức chung cho các thuật toán tối ưu hóa

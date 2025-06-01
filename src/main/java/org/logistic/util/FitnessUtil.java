@@ -1,6 +1,9 @@
 package org.logistic.util;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
+
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 
@@ -8,9 +11,10 @@ import org.logistic.model.Route;
  * Tiện ích tính toán giá trị fitness cho các giải pháp
  */
 @Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FitnessUtil {
-    private static FitnessUtil instance;
-    private int[] tempWeights;
+    static FitnessUtil instance;
+    int[] tempWeights;
 
     private FitnessUtil() {
         this.tempWeights = new int[4];

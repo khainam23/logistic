@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/AbstractOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/AbstractOptimizer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/aco/AntColonyOptimization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/aco/AntColonyOptimization.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/gwo/GreyWolfOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/gwo/GreyWolfOptimizer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sa/SimulatedAnnealing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sa/SimulatedAnnealing.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/SpottedHyenaOptimizer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/Hyena.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/sho/Hyena.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/woa/WhaleOptimizationAlgorithm.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/algorithm/woa/WhaleOptimizationAlgorithm.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
     </list>
@@ -194,7 +187,7 @@
       <workItem from="1747835018060" duration="20000" />
       <workItem from="1748057161343" duration="157000" />
       <workItem from="1748057474612" duration="6000" />
-      <workItem from="1748674149409" duration="1711000" />
+      <workItem from="1748674149409" duration="2328000" />
     </task>
     <servers />
   </component>

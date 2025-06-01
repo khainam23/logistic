@@ -18,33 +18,37 @@ import org.logistic.model.Location;
 import org.logistic.model.Point;
 import org.logistic.model.Route;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Lớp đọc dữ liệu từ file
  */
 @Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReadDataFromFile {
-    private Location[] locations;
-    private Route[] routes;
-    private int maxCapacity;
-    private Random rd = new Random();
+    Location[] locations;
+    Route[] routes;
+    int maxCapacity;
+    Random rd = new Random();
 
     /**
      * Enum định nghĩa các loại bài toán và cấu hình đọc dữ liệu tương ứng
      */
     @Getter
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public enum ProblemType {
         // Định nghĩa chỉ số cột: [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
         VRPTW(false, 4, 9, 0, 1, 2, 3, 4, 5, 6),  // Vehicle Routing Problem with Time Windows
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8);   // Pickup and Delivery Problem with Time Windows
         
-        private final boolean isPickupDelivery;
-        private final int capacityLineIndex;
-        private final int dataStartLineIndex;
-        private final int[] columnIndices; // [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
+        boolean isPickupDelivery;
+        int capacityLineIndex;
+        int dataStartLineIndex;
+        int[] columnIndices; // [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
         
         ProblemType(boolean isPickupDelivery, int capacityLineIndex, int dataStartLineIndex, 
                    int... columnIndices) {
@@ -70,10 +74,11 @@ public class ReadDataFromFile {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SolutionFormat {
-        private int headerLines = 5;
-        private String routePrefix = ":";
-        private String delimiter = "\\s+";
+        int headerLines = 5;
+        String routePrefix = ":";
+        String delimiter = "\\s+";
     }
 
     /**
@@ -215,7 +220,7 @@ public class ReadDataFromFile {
                         }
                         
                         // Đọc dữ liệu từ các cột
-                        int id = Integer.parseInt(parts[idIdx]);
+                        // int id = Integer.parseInt(parts[idIdx]);
                         int x = Integer.parseInt(parts[xIdx]);
                         int y = Integer.parseInt(parts[yIdx]);
                         int demand = Integer.parseInt(parts[demandIdx]);

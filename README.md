@@ -1,3 +1,8 @@
+MultiObjectiveSolution - để lưu trữ solution với 4 objective values
+ParetoOptimizer - để quản lý Pareto front và parallel processing
+ObjectiveFunction - enum cho 4 objectives
+ParallelMultiObjectiveOptimizer - main class để chạy parallel optimization
+
 # 🚚 Logistic Algorithms Research
 
 **Nghiên cứu và triển khai các thuật toán tối ưu trong lĩnh vực logistics, hướng đến xây dựng hệ thống vận hành thông minh và hiệu quả.**

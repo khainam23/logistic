@@ -1,7 +1,5 @@
 package org.logistic.algorithm.sho;
 
-import lombok.experimental.FieldDefaults;
-import lombok.AccessLevel;
 import org.logistic.algorithm.Agent;
 import org.logistic.model.Solution;
 

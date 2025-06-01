@@ -1,12 +1,13 @@
 package org.logistic;
 
+import java.util.Arrays;
+
 import org.logistic.algorithm.Optimizer;
 import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
 import org.logistic.algorithm.sa.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.algorithm.woa.WhaleOptimizationAlgorithm;
-import org.logistic.config.SpringContextInitializer;
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
@@ -16,41 +17,42 @@ import org.logistic.util.ExcelUtil;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.PrintUtil;
 
-import java.io.File;
-
 /**
  * Lớp chính của ứng dụng tối ưu hóa hậu cần
  */
 public class Main {
     /**
-     * Các thuật toán tối ưu hóa được hỗ trợ, không cần thêm SA vì chỉ dùng nó để tạo nhiều giải pháp ban đầu
+     * Các thuật toán tối ưu hóa được hỗ trợ, không cần thêm SA vì chỉ dùng nó để
+     * tạo nhiều giải pháp ban đầu
      */
-    public enum Algorithm {SHO, ACO, GWO, WOA}
+    public enum Algorithm {
+        SHO, ACO, GWO, WOA
+    }
 
     /**
      * Các chế độ chạy
      */
-    enum RunMode {SINGLE_FILE, DIRECTORY}
+    enum RunMode {
+        SINGLE_FILE, DIRECTORY
+    }
 
     /**
      * Các định dạng xuất dữ liệu
      */
-    enum ExportType {NONE, EXCEL, CSV, TXT, ALL}
-
-    private static final String DEFAULT_SRC_DIRECTORY = "data/vrptw/src";
-    private static final String DEFAULT_SOLUTION_DIRECTORY = "data/vrptw/solution";
-    private static final String EXPORT_DIRECTORY = "exports";
+    enum ExportType {
+        NONE, EXCEL, CSV, TXT, ALL
+    }
 
     /**
      * Lớp nội bộ để lưu trữ các tham số cấu hình
      */
     private static class ConfigParams {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
-        RunMode runMode = RunMode.DIRECTORY;
+        RunMode runMode = RunMode.SINGLE_FILE;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
-        String srcDirectory = DEFAULT_SRC_DIRECTORY;
-        String solutionDirectory = DEFAULT_SOLUTION_DIRECTORY;
+        String srcDirectory = "data/vrptw/src";
+        String solutionDirectory = "data/vrptw/solution";
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán
@@ -63,9 +65,6 @@ public class Main {
      * @param args Tham số dòng lệnh (không sử dụng)
      */
     public static void main(String[] args) {
-        // Khởi tạo Spring Context cho AOP
-        SpringContextInitializer.initialize();
-
         // Tạo cấu hình mặc định
         ConfigParams config = new ConfigParams();
 
@@ -78,47 +77,50 @@ public class Main {
         System.out.println("Chế độ chạy: Tất cả các thuật toán (SHO, ACO, GWO, WOA) sẽ được chạy song song");
         System.out.println("Số lần chạy lặp lại cho mỗi thuật toán: " + config.iterations);
 
-        // Tạo thư mục exports nếu chưa tồn tại
-        new File(EXPORT_DIRECTORY).mkdirs();
-
         // Khởi tạo ExcelUtil và file Excel nếu cần
         ExcelUtil excelUtil = ExcelUtil.getInstance();
         if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
             excelUtil.initializeExcelWorkbook();
         }
 
+        // Xác định loại bài toán dựa trên đường dẫn
+        ReadDataFromFile.ProblemType problemType = Arrays.stream(ReadDataFromFile.ProblemType.values())
+                .filter(type -> config.srcDirectory.toLowerCase().contains(type.name().toLowerCase()))
+                .findFirst()
+                .orElse(null);
+
+        // Không làm nếu không có chỉ định loại bài toán
+        if(problemType == null) {
+            System.err.println("Không xác định được loại bài toán từ thư mục: " + config.srcDirectory);
+            return;
+        }
+
+        System.out.println("Loại bài toán: " + problemType);
+
         if (config.runMode == RunMode.DIRECTORY) {
             // Xử lý tất cả các file trong thư mục
-            processAllFilesInDirectory(config, rdff, fitnessUtil, printUtil, checkConditionUtil);
+            processAllFilesInDirectory(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType);
         } else {
             // Chạy với một file duy nhất
-            processSingleFile(config, rdff, fitnessUtil, printUtil, checkConditionUtil);
+            processSingleFile(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType);
         }
 
         // Lưu file Excel nếu đã được khởi tạo
         if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
             excelUtil.saveExcelWorkbook();
         }
-
-        // Đóng Spring Context
-        SpringContextInitializer.close();
     }
 
     /**
      * Xử lý tất cả các file trong thư mục
      */
     private static void processAllFilesInDirectory(ConfigParams config, ReadDataFromFile rdff,
-                                                   FitnessUtil fitnessUtil, PrintUtil printUtil,
-                                                   CheckConditionUtil checkConditionUtil) {
+            FitnessUtil fitnessUtil, PrintUtil printUtil,
+            CheckConditionUtil checkConditionUtil,
+            ReadDataFromFile.ProblemType problemType) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TẤT CẢ CÁC FILE TRONG THƯ MỤC ===");
         System.out.println("Thư mục src: " + config.srcDirectory);
         System.out.println("Thư mục solution: " + config.solutionDirectory);
-
-        // Xác định loại bài toán dựa trên đường dẫn
-        ReadDataFromFile.ProblemType problemType = config.srcDirectory.contains("pdptw") ?
-                ReadDataFromFile.ProblemType.PDPTW : ReadDataFromFile.ProblemType.VRPTW;
-
-        System.out.println("Loại bài toán: " + problemType);
 
         // Xử lý từng file trong thư mục
         rdff.processAllFilesInDirectory(config.srcDirectory, config.solutionDirectory, problemType,
@@ -152,16 +154,17 @@ public class Main {
      * Xử lý một file duy nhất
      */
     private static void processSingleFile(ConfigParams config, ReadDataFromFile rdff,
-                                          FitnessUtil fitnessUtil, PrintUtil printUtil,
-                                          CheckConditionUtil checkConditionUtil) {
+            FitnessUtil fitnessUtil, PrintUtil printUtil,
+            CheckConditionUtil checkConditionUtil,
+            ReadDataFromFile.ProblemType problemType) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ FILE ĐƠN ===");
 
         try {
             // Đọc dữ liệu đầu vào
             System.out.println("Đang đọc dữ liệu từ file: " + config.dataLocation);
-            rdff.readProblemData(config.dataLocation, ReadDataFromFile.ProblemType.VRPTW);
+            rdff.readProblemData(config.dataLocation, problemType);
             Location[] locations = rdff.getLocations();
-            
+
             if (locations == null || locations.length == 0) {
                 System.err.println("Không thể đọc dữ liệu từ file: " + config.dataLocation);
                 return;
@@ -171,7 +174,7 @@ public class Main {
             System.out.println("Đang đọc giải pháp từ file: " + config.dataSolution);
             rdff.readSolution(config.dataSolution);
             Route[] routes = rdff.getRoutes();
-            
+
             if (routes == null || routes.length == 0) {
                 System.err.println("Không thể đọc giải pháp từ file: " + config.dataSolution);
                 return;
@@ -180,7 +183,8 @@ public class Main {
             // Tạo giải pháp ban đầu và tập giải pháp
             Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
             SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
-            Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, routes[0].getMaxPayload());
+            Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations,
+                    routes[0].getMaxPayload());
 
             // Chạy tất cả các thuật toán tối ưu hóa
             runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
@@ -240,9 +244,9 @@ public class Main {
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
      */
     private static void runAllOptimizers(Solution[] initialSolutions,
-                                         FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-                                         Location[] locations, int maxPayload, PrintUtil printUtil, 
-                                         String fileName, ExportType exportType, int iterations) {
+            FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
+            Location[] locations, int maxPayload, PrintUtil printUtil,
+            String fileName, ExportType exportType, int iterations) {
         Solution[] results = new Solution[Algorithm.values().length];
 
         System.out.println("\n=== CHẠY TẤT CẢ CÁC THUẬT TOÁN TỐI ƯU HÓA ===");
@@ -262,7 +266,8 @@ public class Main {
             for (int iter = 1; iter <= iterations; iter++) {
                 System.out.println("Lần chạy thứ " + iter + "/" + iterations);
 
-                // Tạo bản sao của tập giải pháp ban đầu để mỗi thuật toán có điểm bắt đầu giống nhau
+                // Tạo bản sao của tập giải pháp ban đầu để mỗi thuật toán có điểm bắt đầu giống
+                // nhau
                 Solution[] initialSolutionsCopy = new Solution[initialSolutions.length];
                 for (int i = 0; i < initialSolutions.length; i++) {
                     initialSolutionsCopy[i] = initialSolutions[i].copy();
@@ -270,8 +275,9 @@ public class Main {
 
                 // Tạo và chạy thuật toán
                 Optimizer optimizer = createOptimizer(algorithm);
-                if (optimizer == null) continue;
-                
+                if (optimizer == null)
+                    continue;
+
                 // Ghi thời gian chạy (ms)
                 long startTime = System.currentTimeMillis();
                 Solution optimizedSolution = optimizer.run(initialSolutionsCopy, fitnessUtil,
@@ -283,13 +289,14 @@ public class Main {
                 if (bestSolutionForAlgorithm == null ||
                         optimizedSolution.getFitness() < bestSolutionForAlgorithm.getFitness()) {
                     bestSolutionForAlgorithm = optimizedSolution.copy();
-                    System.out.println("Cập nhật giải pháp tốt nhất với fitness = " + bestSolutionForAlgorithm.getFitness());
+                    System.out.println(
+                            "Cập nhật giải pháp tốt nhất với fitness = " + bestSolutionForAlgorithm.getFitness());
                 }
 
                 // Cập nhật trọng số trung bình
                 for (int i = 0; i < partsWeights.length; i++) {
                     int[] tempWeights = fitnessUtil.getTempWeights();
-                    if(partsWeights[i][0] > tempWeights[i] || partsWeights[i][0] == 0) { // Số lượng nhỏ nhất
+                    if (partsWeights[i][0] > tempWeights[i] || partsWeights[i][0] == 0) { // Số lượng nhỏ nhất
                         partsWeights[i][0] = tempWeights[i];
                     }
 
@@ -315,7 +322,8 @@ public class Main {
                 partsWeights[i][2] = totalX / iterations;
 
                 // Tính phương sai
-                partsWeights[i][1] = (partsWeights[i][1] - 2 * partsWeights[i][2] * totalX + iterations * Math.pow(partsWeights[i][2], 2)) / iterations;
+                partsWeights[i][1] = (partsWeights[i][1] - 2 * partsWeights[i][2] * totalX
+                        + iterations * Math.pow(partsWeights[i][2], 2)) / iterations;
             }
 
             // Lưu các trọng số
@@ -363,7 +371,7 @@ public class Main {
             }
         }
     }
-    
+
     /**
      * In kết quả tối ưu
      *

@@ -1,16 +1,14 @@
 package org.logistic.algorithm.woa;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.logistic.algorithm.AbstractOptimizer;
-import org.logistic.algorithm.sho.Hyena;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
     // Các tham số của thuật toán

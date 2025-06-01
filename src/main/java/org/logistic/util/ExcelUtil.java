@@ -26,7 +26,7 @@ public class ExcelUtil {
     // Biến để lưu trữ workbook Excel
     private Workbook resultsWorkbook;
     private Sheet resultsSheet;
-    private int currentExcelRow = 2; // Bắt đầu từ dòng 3 (sau 2 dòng header)
+    private int currentExcelRow = 2;
 
     /**
      * Constructor riêng tư cho singleton pattern

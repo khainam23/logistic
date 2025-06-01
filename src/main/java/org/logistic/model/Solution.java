@@ -1,13 +1,12 @@
 package org.logistic.model;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.logistic.util.FitnessUtil;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 @Data
 @Getter
