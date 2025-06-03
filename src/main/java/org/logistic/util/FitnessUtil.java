@@ -87,5 +87,13 @@ public class FitnessUtil {
                 gamma * totalWaitingTime.get() + delta * numberVehicle.get();
 
     }
+    
+    /**
+     * Lấy các giá trị weights tạm thời
+     * @return mảng [numberVehicle, totalDistances, totalServiceTime, totalWaitingTime]
+     */
+    public int[] getTempWeights() {
+        return tempWeights.clone();
+    }
 
 }

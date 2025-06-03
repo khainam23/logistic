@@ -1,6 +1,7 @@
 package org.logistic;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.logistic.algorithm.Optimizer;
 import org.logistic.algorithm.aco.AntColonyOptimization;
@@ -12,6 +13,8 @@ import org.logistic.data.ReadDataFromFile;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
+import org.logistic.parallel.ParallelExecutionManager;
+import org.logistic.parallel.PerformanceMonitor;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.ExcelUtil;
 import org.logistic.util.FitnessUtil;
@@ -55,8 +58,8 @@ public class Main {
         String solutionDirectory = "data/vrptw/solution";
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
-        // Số lần chạy lặp lại cho mỗi thuật toán
-        int iterations = 1;
+        // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
+        int iterations = 5;
     }
 
     /**
@@ -67,6 +70,16 @@ public class Main {
     public static void main(String[] args) {
         // Tạo cấu hình mặc định
         ConfigParams config = new ConfigParams();
+        
+        // Khởi tạo parallel execution manager và performance monitor
+        ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
+        PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+        
+        // Bắt đầu monitoring
+        performanceMonitor.startMonitoring();
+        
+        // In thông tin hệ thống
+        System.out.println(parallelManager.getSystemInfo());
 
         // Khởi tạo các tiện ích
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
@@ -109,6 +122,12 @@ public class Main {
         if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
             excelUtil.saveExcelWorkbook();
         }
+        
+        // Kết thúc monitoring và in báo cáo
+        performanceMonitor.stopMonitoring();
+        
+        // Dọn dẹp tài nguyên
+        parallelManager.shutdown();
     }
 
     /**
@@ -247,124 +266,71 @@ public class Main {
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
             Location[] locations, int maxPayload, PrintUtil printUtil,
             String fileName, ExportType exportType, int iterations) {
-        Solution[] results = new Solution[Algorithm.values().length];
-
-        System.out.println("\n=== CHẠY TẤT CẢ CÁC THUẬT TOÁN TỐI ƯU HÓA ===");
-        System.out.println("Số lần chạy lặp lại cho mỗi thuật toán: " + iterations);
-        double[][][] totalWeights = new double[Algorithm.values().length][4][3];
-        long[] timeAvgs = new long[Algorithm.values().length];
-
-        // Tạo và chạy từng thuật toán
-        for (Algorithm algorithm : Algorithm.values()) {
-            double[][] partsWeights = new double[4][3]; // Lưu trữ tính toán giá trị min, std, mean của 4 trọng số
-            System.out.println("\n--- THUẬT TOÁN: " + algorithm + " ---");
-
-            // Biến lưu giải pháp tốt nhất sau nhiều lần chạy
-            Solution bestSolutionForAlgorithm = null;
-
-            // Chạy thuật toán nhiều lần theo số lần lặp lại được chỉ định
-            for (int iter = 1; iter <= iterations; iter++) {
-                System.out.println("Lần chạy thứ " + iter + "/" + iterations);
-
-                // Tạo bản sao của tập giải pháp ban đầu để mỗi thuật toán có điểm bắt đầu giống
-                // nhau
-                Solution[] initialSolutionsCopy = new Solution[initialSolutions.length];
-                for (int i = 0; i < initialSolutions.length; i++) {
-                    initialSolutionsCopy[i] = initialSolutions[i].copy();
-                }
-
-                // Tạo và chạy thuật toán
-                Optimizer optimizer = createOptimizer(algorithm);
-                if (optimizer == null)
-                    continue;
-
-                // Ghi thời gian chạy (ms)
-                long startTime = System.currentTimeMillis();
-                Solution optimizedSolution = optimizer.run(initialSolutionsCopy, fitnessUtil,
-                        checkConditionUtil, locations, maxPayload);
-                // Thời gian kết thúc (ms)
-                timeAvgs[algorithm.ordinal()] += System.currentTimeMillis() - startTime;
-
-                // Cập nhật giải pháp tốt nhất nếu cần
-                if (bestSolutionForAlgorithm == null ||
-                        optimizedSolution.getFitness() < bestSolutionForAlgorithm.getFitness()) {
-                    bestSolutionForAlgorithm = optimizedSolution.copy();
-                    System.out.println(
-                            "Cập nhật giải pháp tốt nhất với fitness = " + bestSolutionForAlgorithm.getFitness());
-                }
-
-                // Cập nhật trọng số trung bình
-                for (int i = 0; i < partsWeights.length; i++) {
-                    int[] tempWeights = fitnessUtil.getTempWeights();
-                    if (partsWeights[i][0] > tempWeights[i] || partsWeights[i][0] == 0) { // Số lượng nhỏ nhất
-                        partsWeights[i][0] = tempWeights[i];
-                    }
-
-                    // Tính phương sai, tạm thời tổng giá trị lại
-                    partsWeights[i][1] += Math.pow(tempWeights[i], 2);
-
-                    // Tính trung bình, tạm thời tổng giá trị lại
-                    partsWeights[i][2] += tempWeights[i];
-                }
-
-                // In kết quả của lần chạy hiện tại
-                System.out.println("Kết quả lần chạy " + iter + ": Fitness = " + optimizedSolution.getFitness());
-            }
-
-            // Thời gian chạy
-            timeAvgs[algorithm.ordinal()] /= iterations;
-
-            // Cập nhật trọng số trung bình
-            for (int i = 0; i < partsWeights.length; i++) {
-                double totalX = partsWeights[i][2];
-
-                // Tính trung bình
-                partsWeights[i][2] = totalX / iterations;
-
-                // Tính phương sai
-                partsWeights[i][1] = (partsWeights[i][1] - 2 * partsWeights[i][2] * totalX
-                        + iterations * Math.pow(partsWeights[i][2], 2)) / iterations;
-            }
-
-            // Lưu các trọng số
-            totalWeights[algorithm.ordinal()] = partsWeights;
-
-            // Lưu kết quả tốt nhất sau nhiều lần chạy
-            results[algorithm.ordinal()] = bestSolutionForAlgorithm;
-
-            // In kết quả tốt nhất
-            System.out.println("\nKết quả tốt nhất sau " + iterations + " lần chạy:");
-            printResults(printUtil, bestSolutionForAlgorithm, algorithm);
-        }
+        
+        // Khởi tạo parallel execution manager và performance monitor
+        ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
+        PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+        
+        // Tạo optimizer factory
+        ParallelExecutionManager.OptimizerFactory optimizerFactory = algorithm -> createOptimizer(algorithm);
+        
+        // Chạy tất cả thuật toán song song
+        Map<Algorithm, Solution> results = parallelManager.runAllAlgorithmsParallel(
+            Algorithm.values(),
+            initialSolutions,
+            fitnessUtil,
+            checkConditionUtil,
+            locations,
+            maxPayload,
+            iterations,
+            optimizerFactory
+        );
 
         // Tìm thuật toán tốt nhất
-        Solution bestSolution = results[0];
-        Algorithm bestAlgorithm = Algorithm.values()[0];
-
-        for (int i = 1; i < results.length; i++) {
-            if (results[i].getFitness() < bestSolution.getFitness()) {
-                bestSolution = results[i];
-                bestAlgorithm = Algorithm.values()[i];
+        Solution bestSolution = null;
+        Algorithm bestAlgorithm = null;
+        
+        for (Map.Entry<Algorithm, Solution> entry : results.entrySet()) {
+            Solution solution = entry.getValue();
+            if (solution != null && (bestSolution == null || solution.getFitness() < bestSolution.getFitness())) {
+                bestSolution = solution;
+                bestAlgorithm = entry.getKey();
             }
         }
 
         System.out.println("\n=== KẾT QUẢ SO SÁNH CÁC THUẬT TOÁN ===");
         for (Algorithm algorithm : Algorithm.values()) {
-            System.out.printf("%-5s: Fitness = %.2f, Số phương tiện = %d\n",
-                    algorithm, results[algorithm.ordinal()].getFitness(),
-                    results[algorithm.ordinal()].getRoutes().length);
+            Solution solution = results.get(algorithm);
+            if (solution != null) {
+                System.out.printf("%-5s: Fitness = %.2f, Số phương tiện = %d\n",
+                        algorithm, solution.getFitness(), solution.getRoutes().length);
+                
+                // In kết quả chi tiết
+                printResults(printUtil, solution, algorithm);
+            } else {
+                System.out.printf("%-5s: Không có kết quả\n", algorithm);
+            }
         }
 
-        System.out.println("\n=== THUẬT TOÁN TỐT NHẤT: " + bestAlgorithm +
-                " với Fitness = " + bestSolution.getFitness() + " ===");
+        if (bestAlgorithm != null && bestSolution != null) {
+            System.out.println("\n=== THUẬT TOÁN TỐT NHẤT: " + bestAlgorithm +
+                    " với Fitness = " + bestSolution.getFitness() + " ===");
+        }
 
         // Xuất dữ liệu ra Excel nếu được yêu cầu
         if (exportType == ExportType.EXCEL || exportType == ExportType.ALL) {
             try {
-                // Xuất dữ liệu ra Excel
+                // Lấy dữ liệu từ performance monitor
+                double[][][] totalWeights = performanceMonitor.calculateTotalWeights();
+                long[] timeAvgs = new long[Algorithm.values().length];
+                
+                for (Algorithm algorithm : Algorithm.values()) {
+                    timeAvgs[algorithm.ordinal()] = (long) performanceMonitor.getAverageExecutionTime(algorithm);
+                }
+                
                 ExcelUtil excelUtil = ExcelUtil.getInstance();
                 excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName);
-                System.out.println("Đã xuất kết quả ra Excel");
+                System.out.println("Đã xuất kết quả ra Excel với dữ liệu thực tế");
             } catch (Exception e) {
                 System.err.println("Lỗi khi xuất dữ liệu ra Excel: " + e.getMessage());
                 e.printStackTrace();
