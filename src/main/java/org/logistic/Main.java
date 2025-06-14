@@ -83,6 +83,7 @@ public class Main {
 
         // Khởi tạo các tiện ích
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
+        
         PrintUtil printUtil = PrintUtil.getInstance();
         CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
         ReadDataFromFile rdff = new ReadDataFromFile();
