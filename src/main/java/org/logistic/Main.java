@@ -1,8 +1,5 @@
 package org.logistic;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import org.logistic.algorithm.Optimizer;
 import org.logistic.algorithm.aco.AntColonyOptimization;
 import org.logistic.algorithm.gwo.GreyWolfOptimizer;
@@ -19,6 +16,9 @@ import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.ExcelUtil;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.PrintUtil;
+
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Lớp chính của ứng dụng tối ưu hóa hậu cần
@@ -59,7 +59,7 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
-        int iterations = 5;
+        int iterations = 1;
     }
 
     /**
@@ -83,7 +83,8 @@ public class Main {
 
         // Khởi tạo các tiện ích
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
-        
+        fitnessUtil.setFitnessStrategy(FitnessUtil.createStrategyBuilder().useServiceTime(false).useServiceTime(false).build());
+
         PrintUtil printUtil = PrintUtil.getInstance();
         CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
         ReadDataFromFile rdff = new ReadDataFromFile();
