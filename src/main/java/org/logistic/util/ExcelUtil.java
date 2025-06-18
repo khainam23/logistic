@@ -49,29 +49,50 @@ public class ExcelUtil {
 
     /**
      * Khởi tạo workbook Excel với các tiêu đề cần thiết
+     * 
+     * @param fitnessStrategy Strategy fitness để xác định các cột cần thiết
      */
-    public void initializeExcelWorkbook() {
+    public void initializeExcelWorkbook(FitnessStrategy fitnessStrategy) {
         try {
             resultsWorkbook = new XSSFWorkbook();
             resultsSheet = resultsWorkbook.createSheet("Optimization Results");
 
-            // Định nghĩa các trọng số và thống kê
-            String[] weights = {"NV", "TC", "SD", "WT"};
+            // Định nghĩa các trọng số và thống kê dựa trên strategy
+            String[] allWeights = {"NV", "TC", "SD", "WT"};
+            boolean[] useFlags = {
+                fitnessStrategy.needsVehicleCount(),
+                fitnessStrategy.needsDistance(), 
+                fitnessStrategy.needsServiceTime(),
+                fitnessStrategy.needsWaitingTime()
+            };
+            
+            // Chỉ lấy những weights được sử dụng
+            java.util.List<String> activeWeights = new java.util.ArrayList<>();
+            for (int i = 0; i < allWeights.length; i++) {
+                if (useFlags[i]) {
+                    activeWeights.add(allWeights[i]);
+                }
+            }
+            
+            String[] weights = activeWeights.toArray(new String[0]);
             String[] partWeights = {"Min", "Std", "Mean"};
 
             // Tạo dòng tiêu đề 1 (row 0)
             Row headerRow1 = resultsSheet.createRow(0);
             headerRow1.createCell(0).setCellValue("Instance");
             headerRow1.createCell(1).setCellValue("Algorithm");
-            headerRow1.createCell(14).setCellValue("Time (ms)");
+            
+            // Tính vị trí cột Time động
+            int timeColIndex = 2 + weights.length * partWeights.length;
+            headerRow1.createCell(timeColIndex).setCellValue("Time (ms)");
 
             // Tạo dòng tiêu đề 2 (row 1)
             Row headerRow2 = resultsSheet.createRow(1);
 
-            // Merge "Instance" và "Algorithm"
+            // Merge "Instance" và "Algorithm" và "Time"
             resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 0, 0));
             resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 1, 1));
-            resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, 14, 14));
+            resultsSheet.addMergedRegion(new CellRangeAddress(0, 1, timeColIndex, timeColIndex));
 
             // Thêm các cột dữ liệu cho từng trọng số và thống kê
             for (int w = 0; w < weights.length; w++) {
@@ -105,8 +126,9 @@ public class ExcelUtil {
         }
 
         try {
-            // Tự động điều chỉnh độ rộng cột
-            for (int i = 0; i < 15; i++) { // 2 cột đầu + 4 trọng số * 3 thống kê + 1 cột thời gian
+            // Tự động điều chỉnh độ rộng cột - tính động dựa trên số cột thực tế
+            int totalColumns = resultsSheet.getRow(0).getLastCellNum();
+            for (int i = 0; i < totalColumns; i++) {
                 resultsSheet.autoSizeColumn(i);
             }
 
@@ -130,16 +152,25 @@ public class ExcelUtil {
     /**
      * Xuất kết quả ra file Excel
      *
-     * @param totalWeights Mảng 3 chiều chứa các trọng số
-     * @param timeAvgs     Mảng thời gian chạy trung bình
-     * @param fileName     Tên file dữ liệu (nếu có)
+     * @param totalWeights    Mảng 3 chiều chứa các trọng số
+     * @param timeAvgs        Mảng thời gian chạy trung bình
+     * @param fileName        Tên file dữ liệu (nếu có)
+     * @param fitnessStrategy Strategy fitness để xác định dữ liệu cần xuất
      */
-    public void exportResultsToExcel(double[][][] totalWeights, long[] timeAvgs, String fileName) {
+    public void exportResultsToExcel(double[][][] totalWeights, long[] timeAvgs, String fileName, FitnessStrategy fitnessStrategy) {
         if (resultsWorkbook == null || resultsSheet == null) {
             System.err.println("Excel workbook chưa được khởi tạo");
             return;
         }
 
+        // Xác định mapping giữa chỉ số weights và các flag
+        boolean[] useFlags = {
+            fitnessStrategy.needsVehicleCount(),  // NV
+            fitnessStrategy.needsDistance(),      // TC
+            fitnessStrategy.needsServiceTime(),   // SD
+            fitnessStrategy.needsWaitingTime()    // WT
+        };
+        
         // Thêm dữ liệu cho từng thuật toán
         for (int algorithmIndex = 0; algorithmIndex < totalWeights.length; algorithmIndex++) {
             Row row = resultsSheet.createRow(currentExcelRow++);
@@ -149,30 +180,56 @@ public class ExcelUtil {
             row.createCell(0).setCellValue(fileName != null ? fileName : "Single Run");
             row.createCell(1).setCellValue(Main.Algorithm.values()[algorithmIndex].toString());
 
-            // Tính các giá trị thống kê
-            // 1. NV (Number of Vehicles)
-            row.createCell(2).setCellValue(partsWeights[0][0]); // Min
-            row.createCell(3).setCellValue(partsWeights[0][1]); // Std (không áp dụng cho số lượng xe)
-            row.createCell(4).setCellValue(partsWeights[0][2]); // Mean
+            // Xuất chỉ những thông số được kích hoạt
+            int colIndex = 2;
+            for (int weightIndex = 0; weightIndex < useFlags.length; weightIndex++) {
+                if (useFlags[weightIndex]) {
+                    // Xuất Min, Std, Mean cho weight này
+                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][0]); // Min
+                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][1]); // Std
+                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][2]); // Mean
+                }
+            }
 
-            // 2. TC (Total Distance)
-            row.createCell(5).setCellValue(partsWeights[1][0]); // Min
-            row.createCell(6).setCellValue(partsWeights[1][1]); // Std (không áp dụng cho fitness đơn lẻ)
-            row.createCell(7).setCellValue(partsWeights[1][2]); // Mean
-
-            // 3. SD (Service Time)
-            row.createCell(8).setCellValue(partsWeights[2][0]); // Min
-            row.createCell(9).setCellValue(partsWeights[2][1]); // Std
-            row.createCell(10).setCellValue(partsWeights[2][2]); // Mean
-
-            // 4. WT (Waiting Time)
-            row.createCell(11).setCellValue(partsWeights[3][0]); // Min
-            row.createCell(12).setCellValue(partsWeights[3][1]); // Std
-            row.createCell(13).setCellValue(partsWeights[3][2]); // Mean
-
-            // Thời gian chạy
-            row.createCell(14).setCellValue(timeAvgs[algorithmIndex]);
+            // Thời gian chạy (luôn ở cột cuối)
+            row.createCell(colIndex).setCellValue(timeAvgs[algorithmIndex]);
         }
+    }
+
+    /**
+     * Xuất kết quả ra file Excel (phương thức cũ để tương thích ngược)
+     *
+     * @param totalWeights Mảng 3 chiều chứa các trọng số
+     * @param timeAvgs     Mảng thời gian chạy trung bình
+     * @param fileName     Tên file dữ liệu (nếu có)
+     * @deprecated Sử dụng exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy) để có điều khiển tốt hơn
+     */
+    @Deprecated
+    public void exportResultsToExcel(double[][][] totalWeights, long[] timeAvgs, String fileName) {
+        // Tạo default strategy với tất cả các thông số enabled để tương thích ngược
+        FitnessStrategy defaultStrategy = new FitnessStrategy() {
+            @Override
+            public double calculateFitness(int numberVehicle, int totalDistances, int totalServiceTime, int totalWaitingTime) {
+                return totalDistances + 100.0 * numberVehicle + totalServiceTime + totalWaitingTime;
+            }
+        };
+        exportResultsToExcel(totalWeights, timeAvgs, fileName, defaultStrategy);
+    }
+    
+    /**
+     * Khởi tạo workbook Excel với cấu hình mặc định (phương thức cũ để tương thích ngược)
+     * @deprecated Sử dụng initializeExcelWorkbook(FitnessStrategy) để có điều khiển tốt hơn
+     */
+    @Deprecated
+    public void initializeExcelWorkbook() {
+        // Tạo default strategy với tất cả các thông số enabled để tương thích ngược
+        FitnessStrategy defaultStrategy = new FitnessStrategy() {
+            @Override
+            public double calculateFitness(int numberVehicle, int totalDistances, int totalServiceTime, int totalWaitingTime) {
+                return totalDistances + 100.0 * numberVehicle + totalServiceTime + totalWaitingTime;
+            }
+        };
+        initializeExcelWorkbook(defaultStrategy);
     }
 
     /**

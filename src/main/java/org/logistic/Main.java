@@ -13,7 +13,9 @@ import org.logistic.model.Solution;
 import org.logistic.parallel.ParallelExecutionManager;
 import org.logistic.parallel.PerformanceMonitor;
 import org.logistic.util.CheckConditionUtil;
+import org.logistic.util.DefaultFitnessStrategy;
 import org.logistic.util.ExcelUtil;
+import org.logistic.util.FitnessStrategy;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.PrintUtil;
 
@@ -51,7 +53,7 @@ public class Main {
      */
     private static class ConfigParams {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
-        RunMode runMode = RunMode.SINGLE_FILE;
+        RunMode runMode = RunMode.DIRECTORY;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
         String srcDirectory = "data/vrptw/src";
@@ -83,8 +85,16 @@ public class Main {
 
         // Khởi tạo các tiện ích
         FitnessUtil fitnessUtil = FitnessUtil.getInstance();
-        fitnessUtil.setFitnessStrategy(FitnessUtil.createStrategyBuilder().useServiceTime(false).useServiceTime(false).build());
-
+        FitnessStrategy strategy = new DefaultFitnessStrategy();
+        // FitnessStrategy strategy = FitnessUtil.createStrategyBuilder()
+        //         .useDistance(true)
+        //         .useVehicleCount(true)
+        //         .useServiceTime(false)
+        //         .useWaitingTime(false)
+        //         .withAlpha(1.0)
+        //         .withDelta(100.0)
+        //         .build();
+        fitnessUtil.setFitnessStrategy(strategy);
         PrintUtil printUtil = PrintUtil.getInstance();
         CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
         ReadDataFromFile rdff = new ReadDataFromFile();
@@ -95,7 +105,7 @@ public class Main {
         // Khởi tạo ExcelUtil và file Excel nếu cần
         ExcelUtil excelUtil = ExcelUtil.getInstance();
         if (config.exportType == ExportType.EXCEL || config.exportType == ExportType.ALL) {
-            excelUtil.initializeExcelWorkbook();
+            excelUtil.initializeExcelWorkbook(strategy);
         }
 
         // Xác định loại bài toán dựa trên đường dẫn
@@ -114,10 +124,10 @@ public class Main {
 
         if (config.runMode == RunMode.DIRECTORY) {
             // Xử lý tất cả các file trong thư mục
-            processAllFilesInDirectory(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType);
+            processAllFilesInDirectory(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy);
         } else {
             // Chạy với một file duy nhất
-            processSingleFile(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType);
+            processSingleFile(config, rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy);
         }
 
         // Lưu file Excel nếu đã được khởi tạo
@@ -138,7 +148,7 @@ public class Main {
     private static void processAllFilesInDirectory(ConfigParams config, ReadDataFromFile rdff,
             FitnessUtil fitnessUtil, PrintUtil printUtil,
             CheckConditionUtil checkConditionUtil,
-            ReadDataFromFile.ProblemType problemType) {
+            ReadDataFromFile.ProblemType problemType, FitnessStrategy strategy) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TẤT CẢ CÁC FILE TRONG THƯ MỤC ===");
         System.out.println("Thư mục src: " + config.srcDirectory);
         System.out.println("Thư mục solution: " + config.solutionDirectory);
@@ -158,7 +168,7 @@ public class Main {
                         // Chạy tất cả các thuật toán tối ưu hóa
                         runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                                 routes[0].getMaxPayload(), printUtil, fileName,
-                                config.exportType, config.iterations);
+                                config.exportType, config.iterations, strategy);
 
                         System.out.println("=== HOÀN THÀNH XỬ LÝ FILE: " + fileName + " ===\n");
 
@@ -177,7 +187,7 @@ public class Main {
     private static void processSingleFile(ConfigParams config, ReadDataFromFile rdff,
             FitnessUtil fitnessUtil, PrintUtil printUtil,
             CheckConditionUtil checkConditionUtil,
-            ReadDataFromFile.ProblemType problemType) {
+            ReadDataFromFile.ProblemType problemType, FitnessStrategy strategy) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ FILE ĐƠN ===");
 
         try {
@@ -210,7 +220,7 @@ public class Main {
             // Chạy tất cả các thuật toán tối ưu hóa
             runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                     routes[0].getMaxPayload(), printUtil, null,
-                    config.exportType, config.iterations);
+                    config.exportType, config.iterations, strategy);
 
         } catch (Exception e) {
             System.err.println("Lỗi khi xử lý file đơn: " + e.getMessage());
@@ -263,11 +273,12 @@ public class Main {
      * @param fileName           Tên file dữ liệu (nếu có)
      * @param exportType         Loại xuất dữ liệu
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
+     * @param fitnessStrategy    Strategy fitness để xác định dữ liệu cần xuất
      */
     private static void runAllOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
             Location[] locations, int maxPayload, PrintUtil printUtil,
-            String fileName, ExportType exportType, int iterations) {
+            String fileName, ExportType exportType, int iterations, FitnessStrategy fitnessStrategy) {
         
         // Khởi tạo parallel execution manager và performance monitor
         ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
@@ -331,8 +342,8 @@ public class Main {
                 }
                 
                 ExcelUtil excelUtil = ExcelUtil.getInstance();
-                excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName);
-                System.out.println("Đã xuất kết quả ra Excel với dữ liệu thực tế");
+                excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy);
+                System.out.println("Đã xuất kết quả ra Excel với dữ liệu được lọc theo cấu hình fitness");
             } catch (Exception e) {
                 System.err.println("Lỗi khi xuất dữ liệu ra Excel: " + e.getMessage());
                 e.printStackTrace();

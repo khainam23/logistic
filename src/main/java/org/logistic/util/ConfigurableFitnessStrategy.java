@@ -54,4 +54,24 @@ public class ConfigurableFitnessStrategy implements FitnessStrategy {
         
         return fitness;
     }
+    
+    @Override
+    public boolean needsDistance() {
+        return useDistance;
+    }
+    
+    @Override
+    public boolean needsServiceTime() {
+        return useServiceTime;
+    }
+    
+    @Override
+    public boolean needsWaitingTime() {
+        return useWaitingTime;
+    }
+    
+    @Override
+    public boolean needsVehicleCount() {
+        return useVehicleCount;
+    }
 }
