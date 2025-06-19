@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trực Quan Hóa Tuyến Đường Logistics</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .control-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        select, button {
+            padding: 8px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .main-content {
+            display: flex;
+            height: 70vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        #routeCanvas {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .sidebar {
+            width: 350px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .route-info {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .route-header {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .route-header:hover {
+            opacity: 0.8;
+        }
+        
+        .route-details {
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .route-details.hidden {
+            display: none;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .stat-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .stat-value {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .node-sequence {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .legend {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        .stats-summary {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-summary h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 Trực Quan Hóa Tuyến Đường</h1>
+            <p>Logistics Route Visualization - File: lr209.txt</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="routeSelect">Chọn tuyến đường:</label>
+                <select id="routeSelect">
+                    <option value="all">Tất cả tuyến</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="toggleAnimation()">Bật/Tắt Animation</button>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="resetView()">Reset View</button>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="exportImage()">Xuất hình ảnh</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="routeCanvas"></canvas>
+            </div>
+            
+            <div class="sidebar">
+                <div class="legend">
+                    <h3>Chú thích</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff4444;"></div>
+                        <span>Depot (Kho)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4444ff;"></div>
+                        <span>Khách hàng</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #44ff44;"></div>
+                        <span>Tuyến đường</span>
+                    </div>
+                </div>
+                
+                <div class="stats-summary">
+                    <h3>Thống kê tổng quan</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Tổng số tuyến:</span>
+                        <span class="stat-value" id="totalRoutes">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Tổng khách hàng:</span>
+                        <span class="stat-value" id="totalCustomers">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">TB khách hàng/tuyến:</span>
+                        <span class="stat-value" id="avgCustomers">0</span>
+                    </div>
+                </div>
+                
+                <div id="routesList">
+                    <!-- Route details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu tuyến đường từ file lr209.txt
+        const routesData = [
+            [0, 27, 95, 0],
+            [0, 69, 0],
+            [0, 59, 28, 0],
+            [0, 92, 0],
+            [0, 5, 0],
+            [0, 83, 0],
+            [0, 72, 0],
+            [0, 33, 2, 52, 29, 19, 61, 101, 100, 84, 90, 77, 58, 102, 50, 0],
+            [0, 42, 0],
+            [0, 62, 44, 88, 76, 16, 40, 73, 22, 85, 81, 55, 80, 68, 34, 96, 43, 32, 48, 0],
+            [0, 45, 0],
+            [0, 15, 0],
+            [0, 14, 0],
+            [0, 11, 0],
+            [0, 39, 31, 30, 0],
+            [0, 47, 0],
+            [0, 63, 0],
+            [0, 23, 82, 38, 99, 41, 6, 8, 7, 86, 25, 56, 4, 74, 35, 54, 1, 89, 0],
+            [0, 36, 67, 21, 75, 78, 9, 53, 93, 57, 17, 94, 13, 3, 66, 97, 24, 91, 0],
+            [0, 64, 0],
+            [0, 65, 98, 12, 71, 70, 79, 51, 18, 87, 49, 46, 10, 20, 26, 37, 60, 0]
+        ];
+
+        // Canvas và context
+        const canvas = document.getElementById('routeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Biến global
+        let coordinates = {};
+        let selectedRoute = 'all';
+        let animationEnabled = false;
+        let animationFrame = 0;
+
+        // Màu sắc cho các tuyến
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D5A6BD',
+            '#AED6F1', '#A9DFBF', '#F9E79F', '#D7BDE2', '#A3E4D7',
+            '#FAD7A0'
+        ];
+
+        // Khởi tạo
+        function init() {
+            resizeCanvas();
+            generateCoordinates();
+            populateRouteSelect();
+            renderRoutes();
+            updateStatistics();
+            populateRoutesList();
+            
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            renderRoutes();
+        }
+
+        function generateCoordinates() {
+            // Tạo tọa độ ngẫu nhiên cho các điểm
+            const maxNode = Math.max(...routesData.flat());
+            const padding = 50;
+            const width = 800;
+            const height = 600;
+
+            // Depot ở trung tâm
+            coordinates[0] = { x: width / 2, y: height / 2 };
+
+            // Tạo tọa độ cho các điểm khác
+            for (let i = 1; i <= maxNode; i++) {
+                const angle = (i / maxNode) * 2 * Math.PI;
+                const radius = Math.random() * (Math.min(width, height) / 2 - padding) + 100;
+                coordinates[i] = {
+                    x: width / 2 + Math.cos(angle) * radius,
+                    y: height / 2 + Math.sin(angle) * radius
+                };
+            }
+        }
+
+        function populateRouteSelect() {
+            const select = document.getElementById('routeSelect');
+            routesData.forEach((route, index) => {
+                if (route.length > 2) { // Chỉ hiển thị routes có khách hàng
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `Tuyến ${index + 1} (${route.length - 2} khách hàng)`;
+                    select.appendChild(option);
+                }
+            });
+
+            select.addEventListener('change', (e) => {
+                selectedRoute = e.target.value;
+                renderRoutes();
+            });
+        }
+
+        function renderRoutes() {
+            if (!canvas.width || !canvas.height) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Tính scale để fit canvas
+            const scale = Math.min(canvas.width / 900, canvas.height / 700);
+            const offsetX = (canvas.width - 800 * scale) / 2;
+            const offsetY = (canvas.height - 600 * scale) / 2;
+
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+
+            // Vẽ grid
+            drawGrid();
+
+            // Vẽ tuyến đường
+            if (selectedRoute === 'all') {
+                routesData.forEach((route, index) => {
+                    if (route.length > 2) {
+                        drawRoute(route, colors[index % colors.length], index + 1);
+                    }
+                });
+            } else {
+                const routeIndex = parseInt(selectedRoute);
+                drawRoute(routesData[routeIndex], colors[routeIndex % colors.length], routeIndex + 1);
+            }
+
+            // Vẽ các điểm
+            drawNodes();
+
+            ctx.restore();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= 800; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 600);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= 600; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(800, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawRoute(route, color, routeNumber) {
+            if (route.length < 2) return;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            for (let i = 0; i < route.length - 1; i++) {
+                const from = coordinates[route[i]];
+                const to = coordinates[route[i + 1]];
+
+                if (from && to) {
+                    if (i === 0) {
+                        ctx.moveTo(from.x, from.y);
+                    }
+                    ctx.lineTo(to.x, to.y);
+                }
+            }
+
+            ctx.stroke();
+
+            // Vẽ mũi tên chỉ hướng
+            for (let i = 0; i < route.length - 1; i++) {
+                const from = coordinates[route[i]];
+                const to = coordinates[route[i + 1]];
+
+                if (from && to) {
+                    drawArrow(from.x, from.y, to.x, to.y, color);
+                }
+            }
+
+            // Vẽ số tuyến
+            if (route.length > 2) {
+                const midIndex = Math.floor(route.length / 2);
+                const midNode = coordinates[route[midIndex]];
+                if (midNode) {
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`T${routeNumber}`, midNode.x, midNode.y - 20);
+                }
+            }
+        }
+
+        function drawArrow(fromX, fromY, toX, toY, color) {
+            const midX = (fromX + toX) / 2;
+            const midY = (fromY + toY) / 2;
+            
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const arrowLength = 10;
+            const arrowAngle = Math.PI / 6;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(
+                midX - arrowLength * Math.cos(angle - arrowAngle),
+                midY - arrowLength * Math.sin(angle - arrowAngle)
+            );
+            ctx.lineTo(
+                midX - arrowLength * Math.cos(angle + arrowAngle),
+                midY - arrowLength * Math.sin(angle + arrowAngle)
+            );
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawNodes() {
+            // Vẽ depot
+            const depot = coordinates[0];
+            if (depot) {
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.fillRect(depot.x - 8, depot.y - 8, 16, 16);
+                ctx.strokeStyle = '#aa0000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(depot.x - 8, depot.y - 8, 16, 16);
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('D', depot.x, depot.y + 4);
+            }
+
+            // Vẽ các điểm khách hàng
+            Object.keys(coordinates).forEach(nodeId => {
+                const nodeNum = parseInt(nodeId);
+                if (nodeNum !== 0) {
+                    const node = coordinates[nodeNum];
+                    ctx.fillStyle = '#4444ff';
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = '#0000aa';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(nodeNum.toString(), node.x, node.y + 3);
+                }
+            });
+        }
+
+        function updateStatistics() {
+            const totalRoutes = routesData.filter(route => route.length > 2).length;
+            const totalCustomers = routesData.reduce((sum, route) => 
+                sum + Math.max(0, route.length - 2), 0);
+            const avgCustomers = totalCustomers / totalRoutes;
+
+            document.getElementById('totalRoutes').textContent = totalRoutes;
+            document.getElementById('totalCustomers').textContent = totalCustomers;
+            document.getElementById('avgCustomers').textContent = avgCustomers.toFixed(1);
+        }
+
+        function populateRoutesList() {
+            const container = document.getElementById('routesList');
+            container.innerHTML = '';
+
+            routesData.forEach((route, index) => {
+                if (route.length > 2) {
+                    const customers = route.filter(node => node !== 0);
+                    const routeDiv = document.createElement('div');
+                    routeDiv.className = 'route-info';
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'route-header';
+                    headerDiv.style.backgroundColor = colors[index % colors.length];
+                    headerDiv.textContent = `Tuyến ${index + 1}`;
+                    headerDiv.onclick = () => toggleRouteDetails(index);
+
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'route-details';
+                    detailsDiv.id = `route-details-${index}`;
+
+                    detailsDiv.innerHTML = `
+                        <div class="stat-item">
+                            <span class="stat-label">Số khách hàng:</span>
+                            <span class="stat-value">${customers.length}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Tổng điểm dừng:</span>
+                            <span class="stat-value">${route.length}</span>
+                        </div>
+                        <div class="node-sequence">
+                            <strong>Trình tự:</strong><br>
+                            ${route.join(' → ')}
+                        </div>
+                    `;
+
+                    routeDiv.appendChild(headerDiv);
+                    routeDiv.appendChild(detailsDiv);
+                    container.appendChild(routeDiv);
+                }
+            });
+        }
+
+        function toggleRouteDetails(routeIndex) {
+            const details = document.getElementById(`route-details-${routeIndex}`);
+            details.classList.toggle('hidden');
+        }
+
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            if (animationEnabled) {
+                animate();
+            }
+        }
+
+        function animate() {
+            if (!animationEnabled) return;
+            
+            animationFrame++;
+            // Animation logic can be added here
+            
+            requestAnimationFrame(animate);
+        }
+
+        function resetView() {
+            selectedRoute = 'all';
+            document.getElementById('routeSelect').value = 'all';
+            renderRoutes();
+        }
+
+        function exportImage() {
+            const link = document.createElement('a');
+            link.download = 'route_visualization.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Khởi tạo khi trang được load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

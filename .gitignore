@@ -39,3 +39,5 @@ build/
 
 ### Custom ###
 **/src/main/**/resource/**
+
+/data

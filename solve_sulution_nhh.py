@@ -1,3 +1,4 @@
+
 import math
 import os
 
@@ -30,7 +31,7 @@ class Vehicle:
         arrival_time = self.time + travel_time
         # Kiểm tra nếu xe có thể đến khách hàng trong cửa sổ thời gian
         within_tw = customer.tw_start <= arrival_time <= customer.tw_end
-        # Kiểm tra nếu xe có đủ dung lượng để phục vụ khách hàng
+        # Kiểm tra nếu xe có đủ dung lượng để phục vụ khách hàng (chỉ kiểm tra delivery demand)
         can_serve = self.remaining >= customer.d_demand and within_tw
         return can_serve
 
@@ -47,6 +48,7 @@ class Vehicle:
     def return_to_depot(self):
         self.route.append(0)  # Quay lại điểm xuất phát (depot)
 
+# greedy algorithm
 def assign_customers_to_vehicles(customers, vehicles):
     unassigned = [c for c in customers if not c.assigned]
 
@@ -75,62 +77,411 @@ def assign_customers_to_vehicles(customers, vehicles):
 
     return vehicles
 
-def read_data(filepath):
+def detect_file_format(lines):
+    """Phát hiện định dạng file dựa trên nội dung"""
+    # Kiểm tra TSPLIB-style format (Liu Tang Yao)
+    for i, line in enumerate(lines):
+        if 'NAME' in line and 'TYPE' in lines[i+1] if i+1 < len(lines) else False:
+            return 'TSPLIB'
+        # Kiểm tra định dạng explicit Wang Chen
+        if 'TYPE : VRPSDPTW' in line and 'DIMENSION' in lines[i+1] if i+1 < len(lines) else False:
+            return 'EXPLICIT_WANG_CHEN'
+        if 'VEHICLE' in line and i < 10:
+            return 'VRPTW'
+        if 'CUSTOMER' in line and 'VEHICLE' in line and i < 10:
+            return 'VRPSPDTW'
+    
+    # Nếu dòng đầu chỉ có 3 số thì có thể là PDPTW
+    first_line_parts = lines[0].split()
+    if len(first_line_parts) >= 3 and first_line_parts[0].isdigit():
+        return 'PDPTW'
+    
+    return 'UNKNOWN'
+
+def read_vrptw_format(lines):
+    """Đọc định dạng VRPTW (c101.txt style)"""
     customers = []
     vehicles = []
-
-    with open(filepath, 'r') as f:
-        lines = [line.strip() for line in f if line.strip()]
-
-    # Tìm vị trí các section
+    
+    # Tìm thông tin xe
     for i, line in enumerate(lines):
-        if line.startswith('NUMBER') and 'CAPACITY' in line:
+        if 'NUMBER' in line and 'CAPACITY' in line:
             vehicle_info_line = lines[i + 1]
-            customer_section_start = i + 3
+            num_vehicles, capacity = map(int, vehicle_info_line.split())
             break
-
-    num_customers, num_vehicles, capacity = map(int, vehicle_info_line.split())
-    # Đọc thông tin khách hàng
-    for line in lines[customer_section_start:]:
-        parts = line.split()
-        if len(parts) != 8:
-            continue  # bỏ qua dòng không hợp lệ
-
-        cid = int(parts[0])
-        x = float(parts[1])
-        y = float(parts[2])
-        d_demand = float(parts[3])
-        p_demand = float(parts[4])
-        ready = float(parts[5])
-        due = float(parts[6])
-        service = float(parts[7])
-
-        customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
-        
+    
+    # Tìm dữ liệu khách hàng
+    customer_data_start = None
+    for i, line in enumerate(lines):
+        if 'CUST NO.' in line:
+            customer_data_start = i + 2  # Bỏ qua dòng trống
+            break
+    
+    if customer_data_start:
+        for line in lines[customer_data_start:]:
+            parts = line.split()
+            if len(parts) >= 7:
+                cid = int(parts[0])
+                x = float(parts[1])
+                y = float(parts[2])
+                d_demand = float(parts[3])
+                p_demand = 0  # VRPTW không có pickup demand
+                ready = float(parts[4])
+                due = float(parts[5])
+                service = float(parts[6])
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
     # Tạo xe
     for i in range(1, num_vehicles + 1):
         vehicles.append(Vehicle(i, capacity, customers[0]))
-        
-    customers.pop(0)
-
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
 
+def read_vrpspdtw_format(lines):
+    """Đọc định dạng VRPSPDTW (cdp101.txt style)"""
+    customers = []
+    vehicles = []
+    
+    # Tìm thông tin xe
+    for i, line in enumerate(lines):
+        if 'NUMBER' in line and 'CAPACITY' in line:
+            vehicle_info_line = lines[i + 1]
+            parts = vehicle_info_line.split()
+            num_customers = int(parts[0])
+            num_vehicles = int(parts[1])
+            capacity = int(parts[2])
+            break
+    
+    # Tìm dữ liệu khách hàng
+    customer_data_start = None
+    for i, line in enumerate(lines):
+        if 'CUST NO.' in line and 'DDEMAND' in line:
+            customer_data_start = i + 2  # Bỏ qua dòng trống
+            break
+    
+    if customer_data_start:
+        for line in lines[customer_data_start:]:
+            parts = line.split()
+            if len(parts) >= 8:
+                cid = int(parts[0])
+                x = float(parts[1])
+                y = float(parts[2])
+                d_demand = float(parts[3])
+                p_demand = float(parts[4])
+                ready = float(parts[5])
+                due = float(parts[6])
+                service = float(parts[7])
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Tạo xe
+    for i in range(1, num_vehicles + 1):
+        vehicles.append(Vehicle(i, capacity, customers[0]))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def read_pdptw_format(lines):
+    """Đọc định dạng PDPTW (lc101.txt style)"""
+    customers = []
+    vehicles = []
+    
+    # Dòng đầu tiên chứa thông tin cơ bản
+    first_line = lines[0].split()
+    num_vehicles = int(first_line[0])
+    capacity = int(first_line[1])
+    
+    # Đọc dữ liệu khách hàng
+    for line in lines[1:]:
+        parts = line.split()
+        if len(parts) >= 7:
+            cid = int(parts[0])
+            x = float(parts[1])
+            y = float(parts[2])
+            demand = float(parts[3])  # Có thể âm hoặc dương
+            ready = float(parts[4])
+            due = float(parts[5])
+            service = float(parts[6])
+            
+            # Xử lý demand: nếu âm thì là delivery demand, nếu dương thì là pickup demand
+            if demand < 0:
+                d_demand = abs(demand)
+                p_demand = 0
+            else:
+                d_demand = 0
+                p_demand = demand
+            
+            customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Tạo xe
+    for i in range(1, num_vehicles + 1):
+        vehicles.append(Vehicle(i, capacity, customers[0]))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def read_tsplib_format(lines):
+    """Đọc định dạng TSPLIB-style (Liu Tang Yao)"""
+    customers = []
+    vehicles = []
+    
+    # Đọc thông tin header
+    dimension = 0
+    num_vehicles = 0
+    capacity = 0
+    
+    for line in lines:
+        if line.startswith('DIMENSION'):
+            dimension = int(line.split(':')[1].strip())
+        elif line.startswith('VEHICLES'):
+            num_vehicles = int(line.split(':')[1].strip())
+        elif line.startswith('CAPACITY'):
+            capacity = float(line.split(':')[1].strip())
+        elif line.startswith('NODE_SECTION'):
+            break
+    
+    # Tìm vị trí bắt đầu dữ liệu node
+    node_start = None
+    for i, line in enumerate(lines):
+        if line.startswith('NODE_SECTION'):
+            node_start = i + 1
+            break
+    
+    if node_start:
+        for i in range(node_start, len(lines)):
+            line = lines[i]
+            if not line or line.startswith('EOF'):
+                break
+            
+            parts = line.split(',')
+            if len(parts) >= 6:
+                cid = int(parts[0])
+                x = float(parts[1])
+                y = float(parts[2])
+                d_demand = float(parts[3])  # delivery demand
+                p_demand = 0  # pickup demand - tạm thời để 0
+                ready = float(parts[4])
+                due = float(parts[5])
+                service = 30 if cid > 0 else 0  # default service time
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Tạo xe với capacity đã đọc được
+    for i in range(1, min(num_vehicles, 50) + 1):  # Giới hạn số xe để tránh quá nhiều
+        vehicles.append(Vehicle(i, capacity, customers[0]))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def read_explicit_wang_chen_format(lines):
+    """Đọc định dạng explicit Wang Chen (explicit_cdp101.txt style)"""
+    customers = []
+    vehicles = []
+    num_vehicles = 0
+    capacity = 0
+    
+    # Đọc thông tin header
+    for line in lines:
+        if line.startswith('DIMENSION :'):
+            num_customers = int(line.split(':')[1].strip())
+        elif line.startswith('VEHICLES :'):
+            num_vehicles = int(line.split(':')[1].strip())
+        elif line.startswith('CAPACITY :'):
+            capacity = float(line.split(':')[1].strip())
+        elif line.startswith('NODE_SECTION'):
+            break
+    
+    # Tìm vị trí bắt đầu NODE_SECTION
+    node_start = None
+    for i, line in enumerate(lines):
+        if line.startswith('NODE_SECTION'):
+            node_start = i + 1
+            break
+    
+    # Đọc dữ liệu khách hàng từ NODE_SECTION
+    if node_start:
+        for i in range(node_start, len(lines)):
+            line = lines[i]
+            if not line or line.startswith('DISTANCETIME_SECTION'):
+                break
+            
+            parts = line.split(',')
+            if len(parts) >= 6:
+                cid = int(parts[0])
+                d_demand = float(parts[1])
+                p_demand = float(parts[2])
+                ready = float(parts[3])
+                due = float(parts[4])
+                service = float(parts[5])
+                
+                # Tạo tọa độ giả (vì explicit format có thể không có tọa độ)
+                # Hoặc có thể lấy từ distance matrix nếu cần
+                x = cid * 10  # Tạm thời tạo tọa độ giả
+                y = 0
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Tạo xe
+    for i in range(1, num_vehicles + 1):
+        vehicles.append(Vehicle(i, capacity, customers[0]))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def read_data(filepath):
+    """Hàm đọc dữ liệu tổng quát - tự động phát hiện định dạng file"""
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        
+        if not lines:
+            print(f"File {filepath} trống hoặc không đọc được")
+            return [], []
+        
+        # Phát hiện định dạng file
+        file_format = detect_file_format(lines)
+        print(f"Phát hiện định dạng file: {file_format}")
+        
+        # Đọc dữ liệu theo định dạng phù hợp
+        if file_format == 'VRPTW':
+            return read_vrptw_format(lines)
+        elif file_format == 'VRPSPDTW':
+            return read_vrpspdtw_format(lines)
+        elif file_format == 'PDPTW':
+            return read_pdptw_format(lines)
+        elif file_format == 'TSPLIB':
+            return read_tsplib_format(lines)
+        elif file_format == 'EXPLICIT_WANG_CHEN':
+            return read_explicit_wang_chen_format(lines)
+        else:
+            print(f"Không nhận diện được định dạng file {filepath}")
+            # Thử đọc như PDPTW format (định dạng đơn giản nhất)
+            try:
+                return read_pdptw_format(lines)
+            except:
+                print(f"Không thể đọc file {filepath}")
+                return [], []
+                
+    except Exception as e:
+        print(f"Lỗi khi đọc file {filepath}: {str(e)}")
+        return [], []
+
 def write_solution(filename, vehicles):
-    with open(filename, 'w') as f:
+    """Ghi kết quả giải thuật ra file"""
+    with open(filename, 'w', encoding='utf-8') as f:
         for vehicle in vehicles:
             route_str = ' '.join(map(str, vehicle.route))
             f.write(f"Route {vehicle.id}: {route_str}\n")
 
-# Danh sách khách hàng
-src_dir = r"D:\Logistic\new\logistic\src\main\resources\data\spdptw\src"
-solution_dir = r"D:\Logistic\new\logistic\src\main\resources\data\spdptw\solution"
+def print_file_info(customers, vehicles, filename):
+    """In thông tin về file vừa xử lý"""
+    print(f"  📁 File: {os.path.basename(filename)}")
+    print(f"  👥 Khách hàng: {len(customers)}")
+    print(f"  🚛 Xe có sẵn: {len(vehicles)}")
+    if vehicles:
+        depot = vehicles[0].current_location
+        print(f"  📍 Depot: ({depot.x}, {depot.y})")
+        print(f"  💰 Dung lượng xe: {vehicles[0].capacity}")
+    print(f"  ⏰ Thời gian xử lý: ", end="")
 
-for fname in os.listdir(src_dir):
-    src_path = os.path.join(src_dir, fname)
-    if not os.path.isfile(src_path):
-        continue
-    customers, vehicles = read_data(src_path)
-    vehicles_and_way = assign_customers_to_vehicles(customers, vehicles)
-    solution_path = os.path.join(solution_dir, fname)
-    write_solution(solution_path, vehicles_and_way)
-    print(f"Đã giải xong file {fname}, lưu kết quả vào {solution_path}")
+def process_directory(src_dir, solution_dir):
+    """Xử lý tất cả file trong một thư mục"""
+    if not os.path.exists(src_dir):
+        print(f"❌ Thư mục {src_dir} không tồn tại")
+        return
+    
+    # Tạo thư mục solution nếu chưa có
+    os.makedirs(solution_dir, exist_ok=True)
+    
+    processed_count = 0
+    error_count = 0
+    
+    txt_files = [f for f in os.listdir(src_dir) if f.endswith('.txt') and os.path.isfile(os.path.join(src_dir, f))]
+    
+    if not txt_files:
+        print(f"❌ Không tìm thấy file .txt nào trong thư mục {src_dir}")
+        return
+    
+    print(f"📂 Tìm thấy {len(txt_files)} file .txt")
+    
+    for i, fname in enumerate(txt_files, 1):
+        src_path = os.path.join(src_dir, fname)
+        
+        print(f"\n[{i}/{len(txt_files)}] 🔄 Đang xử lý...")
+        
+        import time
+        start_time = time.time()
+        
+        customers, vehicles = read_data(src_path)
+        
+        if not customers or not vehicles:
+            print(f"❌ Không thể đọc dữ liệu từ file {fname}")
+            error_count += 1
+            continue
+        
+        # In thông tin file
+        print_file_info(customers, vehicles, fname)
+        
+        # Giải thuật
+        vehicles_and_way = assign_customers_to_vehicles(customers, vehicles)
+        
+        # Lưu kết quả
+        solution_path = os.path.join(solution_dir, fname)
+        write_solution(solution_path, vehicles_and_way)
+        
+        # Tính thời gian xử lý
+        processing_time = time.time() - start_time
+        print(f"{processing_time:.2f}s")
+        
+        # Thống kê kết quả
+        used_vehicles = sum(1 for v in vehicles_and_way if len(v.route) > 2)
+        assigned_customers = sum(1 for c in customers if c.assigned)
+        
+        print(f"  ✅ Kết quả:")
+        print(f"     - Xe sử dụng: {used_vehicles}/{len(vehicles)}")
+        print(f"     - Khách hàng được phục vụ: {assigned_customers}/{len(customers)}")
+        print(f"     - File kết quả: {os.path.basename(solution_path)}")
+        
+        processed_count += 1
+    
+    print(f"\n{'='*50}")
+    print(f"🎯 TỔNG KẾT THƯMỤC")
+    print(f"✅ Thành công: {processed_count} file")
+    print(f"❌ Lỗi: {error_count} file")
+    if processed_count > 0:
+        print(f"📁 Kết quả lưu tại: {solution_dir}")
+    print(f"{'='*50}")
+
+# Định nghĩa các thư mục dữ liệu
+data_directories = [
+    {
+        'name': 'VRPTW',
+        'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution"
+    },
+    {
+        'name': 'PDPTW',
+        'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution"
+    },
+    {
+        'name': 'VRPSPDTW Wang Chen',
+        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\solution"
+    },
+    {
+        'name': 'VRPSPDTW Liu Tang Yao',
+        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\solution"
+    }
+]
+
+# Xử lý tất cả các thư mục
+for directory in data_directories:
+    print(f"\n{'='*50}")
+    print(f"XỬ LÝ THƯ MỤC: {directory['name']}")
+    print(f"{'='*50}")
+    
+    process_directory(directory['src'], directory['solution'])

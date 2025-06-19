@@ -1,0 +1,159 @@
+============================================================
+         BÁO CÁO CHI TIẾT CÁC TUYẾN ĐƯỜNG
+============================================================
+
+TUYẾN 1:
+----------------------------------------
+Trình tự di chuyển: 0 → 27 → 95 → 0
+Số khách hàng phục vụ: 2
+Danh sách khách hàng: 27, 95
+Tổng số điểm dừng: 4
+
+TUYẾN 2:
+----------------------------------------
+Trình tự di chuyển: 0 → 69 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 69
+Tổng số điểm dừng: 3
+
+TUYẾN 3:
+----------------------------------------
+Trình tự di chuyển: 0 → 59 → 28 → 0
+Số khách hàng phục vụ: 2
+Danh sách khách hàng: 59, 28
+Tổng số điểm dừng: 4
+
+TUYẾN 4:
+----------------------------------------
+Trình tự di chuyển: 0 → 92 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 92
+Tổng số điểm dừng: 3
+
+TUYẾN 5:
+----------------------------------------
+Trình tự di chuyển: 0 → 5 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 5
+Tổng số điểm dừng: 3
+
+TUYẾN 6:
+----------------------------------------
+Trình tự di chuyển: 0 → 83 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 83
+Tổng số điểm dừng: 3
+
+TUYẾN 7:
+----------------------------------------
+Trình tự di chuyển: 0 → 72 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 72
+Tổng số điểm dừng: 3
+
+TUYẾN 8:
+----------------------------------------
+Trình tự di chuyển: 0 → 33 → 2 → 52 → 29 → 19 → 61 → 101 → 100 → 84 → 90 → 77 → 58 → 102 → 50 → 0
+Số khách hàng phục vụ: 14
+Danh sách khách hàng: 33, 2, 52, 29, 19, 61, 101, 100, 84, 90, 77, 58, 102, 50
+Tổng số điểm dừng: 16
+
+TUYẾN 9:
+----------------------------------------
+Trình tự di chuyển: 0 → 42 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 42
+Tổng số điểm dừng: 3
+
+TUYẾN 10:
+----------------------------------------
+Trình tự di chuyển: 0 → 62 → 44 → 88 → 76 → 16 → 40 → 73 → 22 → 85 → 81 → 55 → 80 → 68 → 34 → 96 → 43 → 32 → 48 → 0
+Số khách hàng phục vụ: 18
+Danh sách khách hàng: 62, 44, 88, 76, 16, 40, 73, 22, 85, 81, 55, 80, 68, 34, 96, 43, 32, 48
+Tổng số điểm dừng: 20
+
+TUYẾN 11:
+----------------------------------------
+Trình tự di chuyển: 0 → 45 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 45
+Tổng số điểm dừng: 3
+
+TUYẾN 12:
+----------------------------------------
+Trình tự di chuyển: 0 → 15 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 15
+Tổng số điểm dừng: 3
+
+TUYẾN 13:
+----------------------------------------
+Trình tự di chuyển: 0 → 14 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 14
+Tổng số điểm dừng: 3
+
+TUYẾN 14:
+----------------------------------------
+Trình tự di chuyển: 0 → 11 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 11
+Tổng số điểm dừng: 3
+
+TUYẾN 15:
+----------------------------------------
+Trình tự di chuyển: 0 → 39 → 31 → 30 → 0
+Số khách hàng phục vụ: 3
+Danh sách khách hàng: 39, 31, 30
+Tổng số điểm dừng: 5
+
+TUYẾN 16:
+----------------------------------------
+Trình tự di chuyển: 0 → 47 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 47
+Tổng số điểm dừng: 3
+
+TUYẾN 17:
+----------------------------------------
+Trình tự di chuyển: 0 → 63 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 63
+Tổng số điểm dừng: 3
+
+TUYẾN 18:
+----------------------------------------
+Trình tự di chuyển: 0 → 23 → 82 → 38 → 99 → 41 → 6 → 8 → 7 → 86 → 25 → 56 → 4 → 74 → 35 → 54 → 1 → 89 → 0
+Số khách hàng phục vụ: 17
+Danh sách khách hàng: 23, 82, 38, 99, 41, 6, 8, 7, 86, 25, 56, 4, 74, 35, 54, 1, 89
+Tổng số điểm dừng: 19
+
+TUYẾN 19:
+----------------------------------------
+Trình tự di chuyển: 0 → 36 → 67 → 21 → 75 → 78 → 9 → 53 → 93 → 57 → 17 → 94 → 13 → 3 → 66 → 97 → 24 → 91 → 0
+Số khách hàng phục vụ: 17
+Danh sách khách hàng: 36, 67, 21, 75, 78, 9, 53, 93, 57, 17, 94, 13, 3, 66, 97, 24, 91
+Tổng số điểm dừng: 19
+
+TUYẾN 20:
+----------------------------------------
+Trình tự di chuyển: 0 → 64 → 0
+Số khách hàng phục vụ: 1
+Danh sách khách hàng: 64
+Tổng số điểm dừng: 3
+
+TUYẾN 21:
+----------------------------------------
+Trình tự di chuyển: 0 → 65 → 98 → 12 → 71 → 70 → 79 → 51 → 18 → 87 → 49 → 46 → 10 → 20 → 26 → 37 → 60 → 0
+Số khách hàng phục vụ: 16
+Danh sách khách hàng: 65, 98, 12, 71, 70, 79, 51, 18, 87, 49, 46, 10, 20, 26, 37, 60
+Tổng số điểm dừng: 18
+
+============================================================
+                THỐNG KÊ TỔNG QUAN
+============================================================
+Tổng số tuyến có khách hàng: 21
+Tổng số khách hàng được phục vụ: 102
+Trung bình khách hàng/tuyến: 4.9
+Tuyến ngắn nhất: 1 khách hàng
+Tuyến dài nhất: 18 khách hàng
