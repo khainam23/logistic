@@ -57,6 +57,29 @@ public class ParallelExecutionManager {
     }
     
     /**
+     * Chạy tất cả thuật toán với lựa chọn song song hoặc tuần tự
+     */
+    public Map<Algorithm, Solution> runAllAlgorithms(
+            Algorithm[] algorithms,
+            Solution[] initialSolutions,
+            FitnessUtil fitnessUtil,
+            CheckConditionUtil checkConditionUtil,
+            Location[] locations,
+            int maxPayload,
+            int iterations,
+            OptimizerFactory optimizerFactory,
+            boolean parallel) {
+        
+        if (parallel) {
+            return runAllAlgorithmsParallel(algorithms, initialSolutions, fitnessUtil, 
+                checkConditionUtil, locations, maxPayload, iterations, optimizerFactory);
+        } else {
+            return runAllAlgorithmsSequential(algorithms, initialSolutions, fitnessUtil, 
+                checkConditionUtil, locations, maxPayload, iterations, optimizerFactory);
+        }
+    }
+
+    /**
      * Chạy tất cả thuật toán song song với progress tracking
      */
     public Map<Algorithm, Solution> runAllAlgorithmsParallel(
@@ -120,6 +143,103 @@ public class ParallelExecutionManager {
         }
         
         System.out.println("\n=== HOÀN THÀNH CHẠY SONG SONG TẤT CẢ THUẬT TOÁN ===");
+        return results;
+    }
+
+    /**
+     * Chạy tất cả thuật toán tuần tự (không song song)
+     */
+    public Map<Algorithm, Solution> runAllAlgorithmsSequential(
+            Algorithm[] algorithms,
+            Solution[] initialSolutions,
+            FitnessUtil fitnessUtil,
+            CheckConditionUtil checkConditionUtil,
+            Location[] locations,
+            int maxPayload,
+            int iterations,
+            OptimizerFactory optimizerFactory) {
+        
+        System.out.println("\n=== BẮT ĐẦU CHẠY TUẦN TỰ " + algorithms.length + " THUẬT TOÁN ===");
+        System.out.println("Số iterations cho mỗi thuật toán: " + iterations);
+        System.out.println("Chế độ: TUẦN TỰ (không song song)");
+        
+        Map<Algorithm, Solution> results = new HashMap<>();
+        
+        // Chạy từng thuật toán một cách tuần tự
+        for (Algorithm algorithm : algorithms) {
+            System.out.println("\n--- Bắt đầu thuật toán " + algorithm + " ---");
+            
+            Solution bestSolution = null;
+            
+            // Chạy từng iteration một cách tuần tự
+            for (int iter = 0; iter < iterations; iter++) {
+                try {
+                    // Tạo bản sao của initial solutions
+                    Solution[] solutionsCopy = new Solution[initialSolutions.length];
+                    for (int i = 0; i < initialSolutions.length; i++) {
+                        solutionsCopy[i] = initialSolutions[i].copy();
+                    }
+                    
+                    // Tạo optimizer
+                    Optimizer optimizer = optimizerFactory.createOptimizer(algorithm);
+                    if (optimizer == null) {
+                        System.err.println("Không thể tạo optimizer cho thuật toán " + algorithm);
+                        continue;
+                    }
+                    
+                    // Ghi thời gian bắt đầu
+                    long startTime = System.currentTimeMillis();
+                    
+                    // Chạy optimization
+                    Solution result = optimizer.run(solutionsCopy, fitnessUtil, 
+                        checkConditionUtil, locations, maxPayload);
+                    
+                    // Ghi thời gian kết thúc và lưu vào performance monitor
+                    long executionTime = System.currentTimeMillis() - startTime;
+                    PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+                    performanceMonitor.recordIterationTime(algorithm, executionTime);
+                    
+                    if (result != null) {
+                        performanceMonitor.recordFitness(algorithm, result.getFitness());
+                        
+                        // Ghi lại weights data từ FitnessUtil
+                        int[] weights = fitnessUtil.getTempWeights();
+                        performanceMonitor.recordWeights(algorithm, weights);
+                        
+                        System.out.println("[" + algorithm + "] Iteration " + (iter + 1) + 
+                            " completed - Fitness: " + result.getFitness() + 
+                            ", Time: " + executionTime + "ms");
+                        
+                        // Cập nhật best solution nếu cần
+                        if (bestSolution == null || result.getFitness() < bestSolution.getFitness()) {
+                            bestSolution = result.copy();
+                        }
+                    } else {
+                        System.out.println("[" + algorithm + "] Iteration " + (iter + 1) + 
+                            " - Không có kết quả");
+                    }
+                    
+                } catch (Exception e) {
+                    System.err.println("Lỗi trong iteration " + (iter + 1) + 
+                        " của thuật toán " + algorithm + ": " + e.getMessage());
+                }
+            }
+            
+            // Lưu kết quả tốt nhất của thuật toán
+            results.put(algorithm, bestSolution);
+            
+            // Ghi lại kết quả cuối cùng vào performance monitor
+            if (bestSolution != null) {
+                PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+                performanceMonitor.recordAlgorithmResult(algorithm, bestSolution, 0);
+                System.out.println("--- Hoàn thành thuật toán " + algorithm + 
+                    " với fitness tốt nhất: " + bestSolution.getFitness() + " ---");
+            } else {
+                System.out.println("--- Thuật toán " + algorithm + " không có kết quả hợp lệ ---");
+            }
+        }
+        
+        System.out.println("\n=== HOÀN THÀNH CHẠY TUẦN TỰ TẤT CẢ THUẬT TOÁN ===");
         return results;
     }
     

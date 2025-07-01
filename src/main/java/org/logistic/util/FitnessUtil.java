@@ -18,6 +18,7 @@ public class FitnessUtil {
     static FitnessUtil instance;
     int[] tempWeights;
     FitnessStrategy fitnessStrategy;
+    boolean parallelMode = true; // Mặc định là song song
 
     private FitnessUtil() {
         this.tempWeights = new int[4];
@@ -46,13 +47,46 @@ public class FitnessUtil {
     }
 
     /**
+     * Thiết lập chế độ song song
+     * 
+     * @param parallelMode true để bật song song, false để tắt
+     */
+    public void setParallelMode(boolean parallelMode) {
+        this.parallelMode = parallelMode;
+    }
+
+    /**
      * Tính giá trị fitness của giải pháp dựa trên các tuyến đường và vị trí
+     * Sử dụng chế độ song song hiện tại được thiết lập
      *
      * @param routes    Mảng các tuyến đường
      * @param locations Mảng các vị trí
      * @return Giá trị fitness (càng thấp càng tốt)
      */
     public double calculatorFitness(Route[] routes, Location[] locations) {
+        return calculatorFitness(routes, locations, this.parallelMode);
+    }
+
+    /**
+     * Tính giá trị fitness của giải pháp dựa trên các tuyến đường và vị trí
+     *
+     * @param routes    Mảng các tuyến đường
+     * @param locations Mảng các vị trí
+     * @param parallel  Có sử dụng xử lý song song hay không
+     * @return Giá trị fitness (càng thấp càng tốt)
+     */
+    public double calculatorFitness(Route[] routes, Location[] locations, boolean parallel) {
+        if (parallel) {
+            return calculatorFitnessParallel(routes, locations);
+        } else {
+            return calculatorFitnessSequential(routes, locations);
+        }
+    }
+
+    /**
+     * Tính giá trị fitness song song (sử dụng stream parallel)
+     */
+    private double calculatorFitnessParallel(Route[] routes, Location[] locations) {
         AtomicInteger totalDistances = new AtomicInteger(0);
         AtomicInteger totalServiceTime = new AtomicInteger(0);
         AtomicInteger totalWaitingTime = new AtomicInteger(0);
@@ -98,6 +132,57 @@ public class FitnessUtil {
                 totalDistances.get(),
                 totalServiceTime.get(),
                 totalWaitingTime.get()
+        );
+    }
+
+    /**
+     * Tính giá trị fitness tuần tự (không sử dụng stream parallel)
+     */
+    private double calculatorFitnessSequential(Route[] routes, Location[] locations) {
+        int totalDistances = 0;
+        int totalServiceTime = 0;
+        int totalWaitingTime = 0;
+        int numberVehicle = 0;
+
+        for (Route route : routes) {
+            int[] indLocs = route.getIndLocations();
+
+            if (indLocs.length > 0) {
+                numberVehicle++;
+
+                for (int j = 0; j < indLocs.length - 1; j++) {
+                    Location currLoc = locations[indLocs[j]];
+                    Location nextLoc = locations[indLocs[j + 1]];
+
+                    // Tính khoảng cách
+                    totalDistances += currLoc.distance(nextLoc);
+
+                    // Tính thời gian phục vụ
+                    totalServiceTime += nextLoc.totalServiceTime();
+
+                    // Tính thời gian chờ của khách hàng
+                    int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
+                    if (waitingTime > 0) {
+                        totalWaitingTime += waitingTime;
+                    }
+                }
+
+                // Thêm khoảng cách về kho
+                totalDistances += locations[indLocs[indLocs.length - 1]].distance(locations[0]);
+            }
+        }
+
+        tempWeights[0] = numberVehicle;
+        tempWeights[1] = totalDistances;
+        tempWeights[2] = totalServiceTime;
+        tempWeights[3] = totalWaitingTime;
+
+        // Sử dụng strategy để tính fitness
+        return fitnessStrategy.calculateFitness(
+                numberVehicle,
+                totalDistances,
+                totalServiceTime,
+                totalWaitingTime
         );
     }
 

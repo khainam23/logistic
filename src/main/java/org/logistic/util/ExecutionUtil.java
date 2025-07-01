@@ -28,7 +28,7 @@ public class ExecutionUtil {
     public static void processAllFilesInDirectory(String srcDirectory, String solutionDirectory,
             ReadDataFromFile rdff, FitnessUtil fitnessUtil, PrintUtil printUtil,
             CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType, 
-            FitnessStrategy strategy, ExportType exportType, int iterations) {
+            FitnessStrategy strategy, ExportType exportType, int iterations, boolean parallelEnabled) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TẤT CẢ CÁC FILE TRONG THƯ MỤC ===");
         System.out.println("Thư mục src: " + srcDirectory);
         System.out.println("Thư mục solution: " + solutionDirectory);
@@ -40,7 +40,7 @@ public class ExecutionUtil {
                         System.out.println("\n=== XỬ LÝ FILE: " + fileName + " ===");
 
                         // Tạo giải pháp ban đầu và tập giải pháp
-                        Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
+                        Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
                         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
                         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
                                 locations, routes[0].getMaxPayload());
@@ -48,7 +48,7 @@ public class ExecutionUtil {
                         // Chạy tất cả các thuật toán tối ưu hóa
                         runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                                 routes[0].getMaxPayload(), printUtil, fileName,
-                                exportType, iterations, strategy);
+                                exportType, iterations, strategy, parallelEnabled);
 
                         System.out.println("=== HOÀN THÀNH XỬ LÝ FILE: " + fileName + " ===\n");
 
@@ -67,7 +67,7 @@ public class ExecutionUtil {
     public static void processSingleFile(String dataLocation, String dataSolution,
             ReadDataFromFile rdff, FitnessUtil fitnessUtil, PrintUtil printUtil,
             CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType, 
-            FitnessStrategy strategy, ExportType exportType, int iterations) {
+            FitnessStrategy strategy, ExportType exportType, int iterations, boolean parallelEnabled) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ FILE ĐƠN ===");
 
         try {
@@ -92,7 +92,7 @@ public class ExecutionUtil {
             }
 
             // Tạo giải pháp ban đầu và tập giải pháp
-            Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations));
+            Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
             SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
             Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations,
                     routes[0].getMaxPayload());
@@ -100,7 +100,7 @@ public class ExecutionUtil {
             // Chạy tất cả các thuật toán tối ưu hóa
             runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                     routes[0].getMaxPayload(), printUtil, null,
-                    exportType, iterations, strategy);
+                    exportType, iterations, strategy, parallelEnabled);
 
         } catch (Exception e) {
             System.err.println("Lỗi khi xử lý file đơn: " + e.getMessage());
@@ -154,21 +154,26 @@ public class ExecutionUtil {
      * @param exportType         Loại xuất dữ liệu
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
      * @param fitnessStrategy    Strategy fitness để xác định dữ liệu cần xuất
+     * @param parallelEnabled    Có sử dụng xử lý song song hay không
      */
     public static void runAllOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
             Location[] locations, int maxPayload, PrintUtil printUtil,
-            String fileName, ExportType exportType, int iterations, FitnessStrategy fitnessStrategy) {
+            String fileName, ExportType exportType, int iterations, FitnessStrategy fitnessStrategy,
+            boolean parallelEnabled) {
         
         // Khởi tạo parallel execution manager và performance monitor
         ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
         PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
         
+        // Thiết lập chế độ parallel cho FitnessUtil
+        fitnessUtil.setParallelMode(parallelEnabled);
+        
         // Tạo optimizer factory
         ParallelExecutionManager.OptimizerFactory optimizerFactory = ExecutionUtil::createOptimizer;
         
-        // Chạy tất cả thuật toán song song
-        Map<Algorithm, Solution> results = parallelManager.runAllAlgorithmsParallel(
+        // Chạy tất cả thuật toán (song song hoặc tuần tự)
+        Map<Algorithm, Solution> results = parallelManager.runAllAlgorithms(
             Algorithm.values(),
             initialSolutions,
             fitnessUtil,
@@ -176,7 +181,8 @@ public class ExecutionUtil {
             locations,
             maxPayload,
             iterations,
-            optimizerFactory
+            optimizerFactory,
+            parallelEnabled
         );
 
         // Tìm thuật toán tốt nhất

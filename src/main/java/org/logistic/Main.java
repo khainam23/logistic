@@ -29,7 +29,7 @@ public class Main {
      * Các chế độ chạy
      */
     enum RunMode {
-        SINGLE_FILE, DIRECTORY, R
+        SINGLE_FILE, DIRECTORY
     }
 
     /**
@@ -53,6 +53,9 @@ public class Main {
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
         int iterations = 1;
+        // Bật/tắt chế độ song song (mặc định là bật)
+        // Đặt thành false để chạy tuần tự (không song song)
+        boolean parallelEnabled = false;
     }
 
     /**
@@ -90,8 +93,10 @@ public class Main {
         CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
         ReadDataFromFile rdff = new ReadDataFromFile();
 
-        System.out.println("Chế độ chạy: Tất cả các thuật toán (SHO, ACO, GWO, WOA) sẽ được chạy song song");
+        System.out.println("Chế độ chạy: Tất cả các thuật toán (SHO, ACO, GWO, WOA) sẽ được chạy " + 
+                          (config.parallelEnabled ? "song song" : "tuần tự"));
         System.out.println("Số lần chạy lặp lại cho mỗi thuật toán: " + config.iterations);
+        System.out.println("Chế độ song song: " + (config.parallelEnabled ? "BẬT" : "TẮT"));
 
         // Khởi tạo ExcelUtil và file Excel nếu cần
         ExcelUtil excelUtil = ExcelUtil.getInstance();
@@ -117,12 +122,12 @@ public class Main {
             // Xử lý tất cả các file trong thư mục
             ExecutionUtil.processAllFilesInDirectory(config.srcDirectory, config.solutionDirectory,
                     rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
-                    config.exportType, config.iterations);
+                    config.exportType, config.iterations, config.parallelEnabled);
         } else {
             // Chạy với một file duy nhất
             ExecutionUtil.processSingleFile(config.dataLocation, config.dataSolution,
                     rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
-                    config.exportType, config.iterations);
+                    config.exportType, config.iterations, config.parallelEnabled);
         }
 
         // Lưu file Excel nếu đã được khởi tạo
