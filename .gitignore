@@ -41,3 +41,10 @@ build/
 **/src/main/**/resource/**
 
 /data
+
+/data-vrpspdtw
+
+.zencoder/
+.vscode/
+.venv/
+.qodo/
