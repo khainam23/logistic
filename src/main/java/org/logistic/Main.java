@@ -1,5 +1,7 @@
 package org.logistic;
 
+import java.util.Arrays;
+
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.parallel.ParallelExecutionManager;
 import org.logistic.parallel.PerformanceMonitor;
@@ -10,8 +12,7 @@ import org.logistic.util.ExecutionUtil;
 import org.logistic.util.FitnessStrategy;
 import org.logistic.util.FitnessUtil;
 import org.logistic.util.PrintUtil;
-
-import java.util.Arrays;
+import org.logistic.util.RLUtil;
 
 /**
  * Lớp chính của ứng dụng tối ưu hóa hậu cần
@@ -29,7 +30,7 @@ public class Main {
      * Các chế độ chạy
      */
     enum RunMode {
-        SINGLE_FILE, DIRECTORY
+        SINGLE_FILE, DIRECTORY, RL
     }
 
     /**
@@ -44,7 +45,9 @@ public class Main {
      */
     private static class ConfigParams {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
-        RunMode runMode = RunMode.DIRECTORY;
+        // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
+        // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
+        RunMode runMode = RunMode.RL;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
         String srcDirectory = "data/vrptw/src";
@@ -55,7 +58,9 @@ public class Main {
         int iterations = 1;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = true;
+        boolean parallelEnabled = false;
+        // Số vòng chạy cho RL
+        int epoch = 2;
     }
 
     /**
@@ -123,11 +128,16 @@ public class Main {
             ExecutionUtil.processAllFilesInDirectory(config.srcDirectory, config.solutionDirectory,
                     rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
                     config.exportType, config.iterations, config.parallelEnabled);
-        } else {
+        } else if(config.runMode == RunMode.SINGLE_FILE){
             // Chạy với một file duy nhất
             ExecutionUtil.processSingleFile(config.dataLocation, config.dataSolution,
                     rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
                     config.exportType, config.iterations, config.parallelEnabled);
+        } else if(config.runMode == RunMode.RL) {
+            // Xử lý học tăng cường
+            RLUtil.processRL(config.srcDirectory, config.solutionDirectory,
+                    rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
+                    config.exportType, config.iterations, config.parallelEnabled, config.iterations, config.epoch);
         }
 
         // Lưu file Excel nếu đã được khởi tạo

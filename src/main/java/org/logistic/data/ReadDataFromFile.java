@@ -42,7 +42,7 @@ public class ReadDataFromFile {
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public enum ProblemType {
         // Định nghĩa chỉ số cột: [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
-        VRPTW(false, 4, 9, 0, 1, 2, 3, 4, 5, 6),  // Vehicle Routing Problem with Time Windows
+        VRPTW(false, 3, 6, 0, 1, 2, 3, 4, 5, 6),  // Vehicle Routing Problem with Time Windows
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8);   // Pickup and Delivery Problem with Time Windows
         
         boolean isPickupDelivery;

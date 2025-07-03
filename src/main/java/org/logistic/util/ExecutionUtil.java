@@ -15,6 +15,7 @@ import org.logistic.model.Solution;
 import org.logistic.parallel.ParallelExecutionManager;
 import org.logistic.parallel.PerformanceMonitor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -142,6 +143,68 @@ public class ExecutionUtil {
     }
 
     /**
+     * Chạy các thuật toán tối ưu hóa theo cách tuần tự thông thường
+     *
+     * @param initialSolutions   Tập giải pháp ban đầu
+     * @param fitnessUtil        Tiện ích tính fitness
+     * @param checkConditionUtil Tiện ích kiểm tra điều kiện
+     * @param locations          Mảng các vị trí
+     * @param maxPayload         Trọng tải tối đa
+     * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
+     * @return Map chứa kết quả của từng thuật toán
+     */
+    private static Map<Algorithm, Solution> runSequentialOptimizers(Solution[] initialSolutions,
+            FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
+            Location[] locations, int maxPayload, int iterations) {
+        
+        Map<Algorithm, Solution> results = new HashMap<>();
+        Algorithm[] algorithms = Algorithm.values();
+        
+        // Chạy từng thuật toán một cách tuần tự
+        for (Algorithm algorithm : algorithms) {
+            try {
+                System.out.println("\n=== Bắt đầu chạy thuật toán: " + algorithm + " ===");
+                
+                Optimizer optimizer = createOptimizer(algorithm);
+                if (optimizer == null) {
+                    System.err.println("Không thể tạo optimizer cho thuật toán: " + algorithm);
+                    results.put(algorithm, null);
+                    continue;
+                }
+                
+                // Chạy thuật toán với số lần lặp được chỉ định
+                Solution bestSolution = null;
+                for (int i = 0; i < iterations; i++) {
+                    System.out.println("Lần chạy " + (i + 1) + "/" + iterations + " cho " + algorithm);
+                    
+                    Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil, 
+                            checkConditionUtil, locations, maxPayload);
+                    
+                    if (currentSolution != null && 
+                        (bestSolution == null || currentSolution.getFitness() < bestSolution.getFitness())) {
+                        bestSolution = currentSolution;
+                    }
+                }
+                
+                results.put(algorithm, bestSolution);
+                
+                if (bestSolution != null) {
+                    System.out.println("Hoàn thành " + algorithm + " với fitness tốt nhất: " + bestSolution.getFitness());
+                } else {
+                    System.out.println("Thuật toán " + algorithm + " không trả về kết quả");
+                }
+                
+            } catch (Exception e) {
+                System.err.println("Lỗi khi chạy thuật toán " + algorithm + ": " + e.getMessage());
+                e.printStackTrace();
+                results.put(algorithm, null);
+            }
+        }
+        
+        return results;
+    }
+
+    /**
      * Chạy tất cả các thuật toán tối ưu hóa và trả về kết quả tốt nhất
      *
      * @param initialSolutions   Tập giải pháp ban đầu
@@ -162,28 +225,32 @@ public class ExecutionUtil {
             String fileName, ExportType exportType, int iterations, FitnessStrategy fitnessStrategy,
             boolean parallelEnabled) {
         
-        // Khởi tạo parallel execution manager và performance monitor
-        ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
-        PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
-        
         // Thiết lập chế độ parallel cho FitnessUtil
         fitnessUtil.setParallelMode(parallelEnabled);
         
-        // Tạo optimizer factory
-        ParallelExecutionManager.OptimizerFactory optimizerFactory = ExecutionUtil::createOptimizer;
+        Map<Algorithm, Solution> results;
         
-        // Chạy tất cả thuật toán (song song hoặc tuần tự)
-        Map<Algorithm, Solution> results = parallelManager.runAllAlgorithms(
-            Algorithm.values(),
-            initialSolutions,
-            fitnessUtil,
-            checkConditionUtil,
-            locations,
-            maxPayload,
-            iterations,
-            optimizerFactory,
-            parallelEnabled
-        );
+        if (parallelEnabled) {
+            // Sử dụng parallel execution manager khi chạy song song
+            ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
+            ParallelExecutionManager.OptimizerFactory optimizerFactory = ExecutionUtil::createOptimizer;
+            
+            results = parallelManager.runAllAlgorithms(
+                Algorithm.values(),
+                initialSolutions,
+                fitnessUtil,
+                checkConditionUtil,
+                locations,
+                maxPayload,
+                iterations,
+                optimizerFactory,
+                parallelEnabled
+            );
+        } else {
+            // Xử lý tuần tự thông thường
+            results = runSequentialOptimizers(initialSolutions, fitnessUtil, checkConditionUtil,
+                    locations, maxPayload, iterations);
+        }
 
         // Tìm thuật toán tốt nhất
         Solution bestSolution = null;
@@ -219,17 +286,39 @@ public class ExecutionUtil {
         // Xuất dữ liệu ra Excel nếu được yêu cầu
         if (exportType == ExportType.EXCEL || exportType == ExportType.ALL) {
             try {
-                // Lấy dữ liệu từ performance monitor
-                double[][][] totalWeights = performanceMonitor.calculateTotalWeights();
-                long[] timeAvgs = new long[Algorithm.values().length];
-                
-                for (Algorithm algorithm : Algorithm.values()) {
-                    timeAvgs[algorithm.ordinal()] = (long) performanceMonitor.getAverageExecutionTime(algorithm);
+                if (parallelEnabled) {
+                    // Lấy dữ liệu từ performance monitor khi chạy song song
+                    PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
+                    double[][][] totalWeights = performanceMonitor.calculateTotalWeights();
+                    long[] timeAvgs = new long[Algorithm.values().length];
+                    
+                    for (Algorithm algorithm : Algorithm.values()) {
+                        timeAvgs[algorithm.ordinal()] = (long) performanceMonitor.getAverageExecutionTime(algorithm);
+                    }
+                    
+                    ExcelUtil excelUtil = ExcelUtil.getInstance();
+                    excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy);
+                    System.out.println("Đã xuất kết quả ra Excel với dữ liệu được lọc theo cấu hình fitness (chế độ song song)");
+                } else {
+                    // Tạo dữ liệu đơn giản cho chế độ tuần tự
+                    double[][][] totalWeights = new double[Algorithm.values().length][1][1];
+                    long[] timeAvgs = new long[Algorithm.values().length];
+                    
+                    // Điền dữ liệu fitness từ kết quả
+                    for (Algorithm algorithm : Algorithm.values()) {
+                        Solution solution = results.get(algorithm);
+                        if (solution != null) {
+                            totalWeights[algorithm.ordinal()][0][0] = solution.getFitness();
+                        } else {
+                            totalWeights[algorithm.ordinal()][0][0] = Double.MAX_VALUE;
+                        }
+                        timeAvgs[algorithm.ordinal()] = 0; // Không có thông tin thời gian trong chế độ tuần tự
+                    }
+                    
+                    ExcelUtil excelUtil = ExcelUtil.getInstance();
+                    excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy);
+                    System.out.println("Đã xuất kết quả ra Excel với dữ liệu được lọc theo cấu hình fitness (chế độ tuần tự)");
                 }
-                
-                ExcelUtil excelUtil = ExcelUtil.getInstance();
-                excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy);
-                System.out.println("Đã xuất kết quả ra Excel với dữ liệu được lọc theo cấu hình fitness");
             } catch (Exception e) {
                 System.err.println("Lỗi khi xuất dữ liệu ra Excel: " + e.getMessage());
                 e.printStackTrace();
