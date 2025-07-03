@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,16 +13,16 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
@@ -29,19 +30,19 @@
             text-align: center;
             position: relative;
         }
-        
+
         .header h1 {
             margin: 0;
             font-size: 2.8em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        
+
         .header .subtitle {
             margin: 10px 0 0 0;
             opacity: 0.9;
             font-size: 1.1em;
         }
-        
+
         .controls {
             padding: 25px;
             background: #f8f9fa;
@@ -51,33 +52,36 @@
             gap: 20px;
             align-items: center;
         }
-        
+
         .control-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        
+
         label {
             font-weight: bold;
             color: #495057;
             font-size: 14px;
         }
-        
-        select, input, button {
+
+        select,
+        input,
+        button {
             padding: 10px 15px;
             border: 2px solid #ced4da;
             border-radius: 8px;
             font-size: 14px;
             transition: all 0.3s;
         }
-        
-        select:focus, input:focus {
+
+        select:focus,
+        input:focus {
             border-color: #007bff;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
         }
-        
+
         button {
             background: #007bff;
             color: white;
@@ -87,66 +91,66 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         button:hover {
             background: #0056b3;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        
+
         button.active {
             background: #28a745;
         }
-        
+
         button.reset {
             background: #dc3545;
         }
-        
+
         button.reset:hover {
             background: #c82333;
         }
-        
+
         .main-content {
             display: flex;
             height: 80vh;
         }
-        
+
         .canvas-container {
             flex: 1;
             position: relative;
             background: #f8f9fa;
         }
-        
+
         #routeCanvas {
             width: 100%;
             height: 100%;
             border: none;
             cursor: grab;
         }
-        
+
         #routeCanvas:active {
             cursor: grabbing;
         }
-        
+
         .sidebar {
             width: 400px;
             background: #2c3e50;
             color: white;
             overflow-y: auto;
         }
-        
+
         .status-panel {
             padding: 20px;
             background: #34495e;
             border-bottom: 1px solid #3c5068;
         }
-        
+
         .status-panel h3 {
             margin: 0 0 15px 0;
             color: #ecf0f1;
             font-size: 1.3em;
         }
-        
+
         .status-item {
             display: flex;
             justify-content: space-between;
@@ -154,26 +158,26 @@
             padding: 8px 0;
             border-bottom: 1px solid #3c5068;
         }
-        
+
         .status-label {
             color: #bdc3c7;
         }
-        
+
         .status-value {
             color: #3498db;
             font-weight: bold;
         }
-        
+
         .vehicles-panel {
             padding: 20px;
         }
-        
+
         .vehicles-panel h3 {
             margin: 0 0 15px 0;
             color: #ecf0f1;
             font-size: 1.3em;
         }
-        
+
         .vehicle-item {
             background: rgba(52, 152, 219, 0.1);
             border-left: 4px solid #3498db;
@@ -182,53 +186,53 @@
             border-radius: 5px;
             transition: all 0.3s;
         }
-        
+
         .vehicle-item:hover {
             background: rgba(52, 152, 219, 0.2);
             transform: translateX(5px);
         }
-        
+
         .vehicle-item.active {
             border-left-color: #e74c3c;
             background: rgba(231, 76, 60, 0.1);
         }
-        
+
         .vehicle-header {
             display: flex;
             justify-content: between;
             align-items: center;
             margin-bottom: 8px;
         }
-        
+
         .vehicle-id {
             font-weight: bold;
             color: #ecf0f1;
             font-size: 1.1em;
         }
-        
+
         .vehicle-status {
             font-size: 0.9em;
             padding: 4px 8px;
             border-radius: 12px;
             margin-left: auto;
         }
-        
+
         .vehicle-status.moving {
             background: #27ae60;
             color: white;
         }
-        
+
         .vehicle-status.stopped {
             background: #f39c12;
             color: white;
         }
-        
+
         .vehicle-info {
             font-size: 0.9em;
             color: #bdc3c7;
             line-height: 1.4;
         }
-        
+
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -237,19 +241,19 @@
             margin-top: 8px;
             overflow: hidden;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #3498db, #2ecc71);
             border-radius: 3px;
             transition: width 0.5s ease;
         }
-        
+
         .time-display {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
@@ -257,64 +261,84 @@
             font-weight: bold;
             font-family: 'Courier New', monospace;
         }
-        
+
         .legend {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .legend h4 {
             margin: 0 0 10px 0;
             color: #2c3e50;
         }
-        
+
         .legend-item {
             display: flex;
             align-items: center;
             margin-bottom: 6px;
             font-size: 14px;
         }
-        
+
         .legend-icon {
             width: 20px;
             height: 20px;
             margin-right: 10px;
             border-radius: 3px;
         }
-        
+
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
-        
+
         .pulsing {
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes vehicleMove {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0deg); }
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
         }
-        
+
         .moving-vehicle {
             animation: vehicleMove 0.5s infinite;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>🚛 Mô Phỏng Di Chuyển Logistics</h1>
             <p class="subtitle">Trực quan hóa thời gian thực - Dữ liệu từ lr209.txt</p>
         </div>
-        
+
         <div class="controls">
             <div class="control-group">
                 <label for="routeSelect">Chọn tuyến:</label>
@@ -322,26 +346,26 @@
                     <option value="all">Tất cả tuyến</option>
                 </select>
             </div>
-            
+
             <div class="control-group">
                 <label for="speedSlider">Tốc độ (x):</label>
                 <input type="range" id="speedSlider" min="0.1" max="5" value="1" step="0.1">
                 <span id="speedValue">1.0x</span>
             </div>
-            
+
             <div class="control-group">
                 <button id="playPauseBtn" onclick="toggleAnimation()">▶️ Bắt đầu</button>
             </div>
-            
+
             <div class="control-group">
                 <button onclick="resetAnimation()" class="reset">🔄 Reset</button>
             </div>
-            
+
             <div class="control-group">
                 <button onclick="toggleTrails()">👁️ Hiện vết</button>
             </div>
         </div>
-        
+
         <div class="main-content">
             <div class="canvas-container">
                 <canvas id="routeCanvas"></canvas>
@@ -366,7 +390,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="sidebar">
                 <div class="status-panel">
                     <h3>📊 Trạng thái hệ thống</h3>
@@ -387,7 +411,7 @@
                         <span class="status-value" id="servedCustomers">0/102</span>
                     </div>
                 </div>
-                
+
                 <div class="vehicles-panel">
                     <h3>🚛 Danh sách xe</h3>
                     <div id="vehiclesList">
@@ -480,7 +504,7 @@
                 const angle = (i / maxNode) * 2 * Math.PI;
                 const radiusVariation = 0.7 + Math.random() * 0.6; // 0.7 - 1.3
                 const radius = 250 * radiusVariation;
-                
+
                 coordinates[i] = {
                     x: centerX + Math.cos(angle) * radius,
                     y: centerY + Math.sin(angle) * radius
@@ -497,7 +521,7 @@
                         route: route,
                         currentSegment: 0,
                         progress: 0,
-                        position: {...coordinates[route[0]]},
+                        position: { ...coordinates[route[0]] },
                         isMoving: false,
                         color: colors[index % colors.length],
                         totalDistance: 0,
@@ -574,7 +598,7 @@
         function toggleAnimation() {
             isAnimating = !isAnimating;
             const btn = document.getElementById('playPauseBtn');
-            
+
             if (isAnimating) {
                 btn.textContent = '⏸️ Tạm dừng';
                 btn.classList.add('active');
@@ -592,12 +616,12 @@
             startTime = Date.now();
             servedCustomers.clear();
             trails = [];
-            
+
             // Reset vehicles
             vehicles.forEach(vehicle => {
                 vehicle.currentSegment = 0;
                 vehicle.progress = 0;
-                vehicle.position = {...coordinates[vehicle.route[0]]};
+                vehicle.position = { ...coordinates[vehicle.route[0]] };
                 vehicle.isMoving = false;
                 vehicle.totalDistance = 0;
                 vehicle.stopTime = 0;
@@ -651,7 +675,7 @@
                     vehicle.isMoving = true;
                     vehicle.stopTime = 0;
                     vehicle.nextStopDuration = getRandomStopDuration();
-                    
+
                     // Mark customer as served
                     if (currentNode !== 0) {
                         servedCustomers.add(currentNode);
@@ -669,19 +693,19 @@
                 vehicle.progress = 0;
                 vehicle.currentSegment++;
                 vehicle.isMoving = false;
-                
+
                 if (vehicle.currentSegment < vehicle.route.length) {
-                    vehicle.position = {...coordinates[vehicle.route[vehicle.currentSegment]]};
+                    vehicle.position = { ...coordinates[vehicle.route[vehicle.currentSegment]] };
                 }
             } else {
                 // Interpolate position
                 const from = coordinates[currentNode];
                 const to = coordinates[nextNode];
-                
+
                 if (from && to) {
                     vehicle.position.x = from.x + (to.x - from.x) * vehicle.progress;
                     vehicle.position.y = from.y + (to.y - from.y) * vehicle.progress;
-                    
+
                     // Add to trail
                     if (showTrails) {
                         trails.push({
@@ -691,7 +715,7 @@
                             time: Date.now()
                         });
                     }
-                    
+
                     // Update total distance
                     const distance = Math.sqrt(
                         Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2)
@@ -706,7 +730,7 @@
             const hours = Math.floor(simulationTime / 3600000);
             const minutes = Math.floor((simulationTime % 3600000) / 60000);
             const seconds = Math.floor((simulationTime % 60000) / 1000);
-            
+
             const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             document.getElementById('timeDisplay').textContent = timeString;
             document.getElementById('simTime').textContent = timeString;
@@ -714,10 +738,10 @@
             // Update status
             const activeVehicles = vehicles.filter(v => v.isMoving).length;
             document.getElementById('activeVehicles').textContent = activeVehicles;
-            
+
             const totalDistance = vehicles.reduce((sum, v) => sum + v.totalDistance, 0);
             document.getElementById('totalDistance').textContent = (totalDistance / 100).toFixed(1) + ' km';
-            
+
             document.getElementById('servedCustomers').textContent = `${servedCustomers.size}/102`;
 
             // Update vehicle list
@@ -738,11 +762,11 @@
                         vehicleElement.classList.remove('active');
                     }
 
-                    const currentNodeName = vehicle.currentSegment < vehicle.route.length ? 
+                    const currentNodeName = vehicle.currentSegment < vehicle.route.length ?
                         (vehicle.route[vehicle.currentSegment] === 0 ? 'Depot' : `KH ${vehicle.route[vehicle.currentSegment]}`) : 'Hoàn thành';
-                    
+
                     const overallProgress = (vehicle.currentSegment + vehicle.progress) / (vehicle.route.length - 1) * 100;
-                    
+
                     infoElement.innerHTML = `
                         <div>Tuyến: ${vehicle.route.join(' → ')}</div>
                         <div>Vị trí: ${currentNodeName}</div>
@@ -809,14 +833,14 @@
         function drawGrid() {
             ctx.strokeStyle = 'rgba(0,0,0,0.05)';
             ctx.lineWidth = 1;
-            
+
             for (let x = 0; x <= 1200; x += 50) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, 800);
                 ctx.stroke();
             }
-            
+
             for (let y = 0; y <= 800; y += 50) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -833,7 +857,7 @@
             trails.forEach((trail, index) => {
                 const age = currentTime - trail.time;
                 const alpha = Math.max(0, 1 - age / 5000);
-                
+
                 ctx.fillStyle = trail.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
                 ctx.beginPath();
                 ctx.arc(trail.x, trail.y, 2, 0, 2 * Math.PI);
@@ -872,7 +896,7 @@
                 ctx.fillStyle = '#e74c3c';
                 ctx.strokeStyle = '#c0392b';
                 ctx.lineWidth = 3;
-                
+
                 ctx.beginPath();
                 ctx.fillRect(depot.x - 12, depot.y - 12, 24, 24);
                 ctx.strokeRect(depot.x - 12, depot.y - 12, 24, 24);
@@ -889,11 +913,11 @@
                 if (nodeNum !== 0) {
                     const node = coordinates[nodeNum];
                     const isServed = servedCustomers.has(nodeNum);
-                    
+
                     ctx.fillStyle = isServed ? '#27ae60' : '#3498db';
                     ctx.strokeStyle = isServed ? '#1e8449' : '#2e86ab';
                     ctx.lineWidth = 2;
-                    
+
                     ctx.beginPath();
                     ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI);
                     ctx.fill();
@@ -906,7 +930,7 @@
                         ctx.fillText('✓', node.x, node.y + 3);
                     } else {
                         ctx.fillStyle = 'white';
-                        ctx.font = '10px Arial';  
+                        ctx.font = '10px Arial';
                         ctx.textAlign = 'center';
                         ctx.fillText(nodeNum.toString(), node.x, node.y + 3);
                     }
@@ -917,7 +941,7 @@
         function drawVehicle(vehicle) {
             const pos = vehicle.position;
             const size = 16;
-            
+
             ctx.fillStyle = vehicle.color;
             ctx.strokeStyle = vehicle.isMoving ? '#2c3e50' : '#7f8c8d';
             ctx.lineWidth = 2;
@@ -952,4 +976,5 @@
         window.addEventListener('load', init);
     </script>
 </body>
+
 </html>

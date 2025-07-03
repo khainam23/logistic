@@ -86,10 +86,14 @@ def detect_file_format(lines):
         # Kiểm tra định dạng explicit Wang Chen
         if 'TYPE : VRPSDPTW' in line and 'DIMENSION' in lines[i+1] if i+1 < len(lines) else False:
             return 'EXPLICIT_WANG_CHEN'
+        if 'CUSTOMER' in line and 'VEHICLE' in line and i < 10:
+            # Kiểm tra thêm có DDEMAND và PDEMAND không (đặc trưng của VRPSPDTW)
+            for j in range(i, min(i+10, len(lines))):
+                if 'DDEMAND' in lines[j] and 'PDEMAND' in lines[j]:
+                    return 'VRPSPDTW'
+            return 'VRPTW'
         if 'VEHICLE' in line and i < 10:
             return 'VRPTW'
-        if 'CUSTOMER' in line and 'VEHICLE' in line and i < 10:
-            return 'VRPSPDTW'
     
     # Nếu dòng đầu chỉ có 3 số thì có thể là PDPTW
     first_line_parts = lines[0].split()
@@ -107,7 +111,13 @@ def read_vrptw_format(lines):
     for i, line in enumerate(lines):
         if 'NUMBER' in line and 'CAPACITY' in line:
             vehicle_info_line = lines[i + 1]
-            num_vehicles, capacity = map(int, vehicle_info_line.split())
+            parts = vehicle_info_line.split()
+            if len(parts) == 2:
+                # Định dạng VRPTW chuẩn: num_vehicles, capacity
+                num_vehicles, capacity = map(int, parts)
+            elif len(parts) >= 3:
+                # Định dạng Wang Chang: num_customers, num_vehicles, capacity
+                num_vehicles, capacity = int(parts[1]), int(parts[2])
             break
     
     # Tìm dữ liệu khách hàng
@@ -147,34 +157,47 @@ def read_vrpspdtw_format(lines):
     # Tìm thông tin xe
     for i, line in enumerate(lines):
         if 'NUMBER' in line and 'CAPACITY' in line:
-            vehicle_info_line = lines[i + 1]
-            parts = vehicle_info_line.split()
-            num_customers = int(parts[0])
-            num_vehicles = int(parts[1])
-            capacity = int(parts[2])
-            break
+            vehicle_info_line = lines[i + 1].strip()
+            # Xử lý tab và nhiều dấu cách
+            parts = vehicle_info_line.replace('\t', ' ').split()
+            if len(parts) >= 3:
+                num_customers = int(parts[0])
+                num_vehicles = int(parts[1])
+                capacity = int(parts[2])
+                break
     
     # Tìm dữ liệu khách hàng
     customer_data_start = None
     for i, line in enumerate(lines):
         if 'CUST NO.' in line and 'DDEMAND' in line:
-            customer_data_start = i + 2  # Bỏ qua dòng trống
+            customer_data_start = i + 1  # Tìm dòng tiếp theo
+            # Bỏ qua các dòng trống
+            while customer_data_start < len(lines) and not lines[customer_data_start].strip():
+                customer_data_start += 1
             break
     
     if customer_data_start:
         for line in lines[customer_data_start:]:
-            parts = line.split()
+            # Xử lý dấu cách không đều và tab
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.replace('\t', ' ').split()
             if len(parts) >= 8:
-                cid = int(parts[0])
-                x = float(parts[1])
-                y = float(parts[2])
-                d_demand = float(parts[3])
-                p_demand = float(parts[4])
-                ready = float(parts[5])
-                due = float(parts[6])
-                service = float(parts[7])
-                
-                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+                try:
+                    cid = int(parts[0])
+                    x = float(parts[1])
+                    y = float(parts[2])
+                    d_demand = float(parts[3])
+                    p_demand = float(parts[4])
+                    ready = float(parts[5])
+                    due = float(parts[6])
+                    service = float(parts[7])
+                    
+                    customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+                except (ValueError, IndexError):
+                    # Bỏ qua dòng không hợp lệ
+                    continue
     
     # Tạo xe
     for i in range(1, num_vehicles + 1):
@@ -398,18 +421,30 @@ def process_directory(src_dir, solution_dir):
     processed_count = 0
     error_count = 0
     
-    txt_files = [f for f in os.listdir(src_dir) if f.endswith('.txt') and os.path.isfile(os.path.join(src_dir, f))]
+    # Hỗ trợ cả file .txt và .vrpsdptw
+    supported_extensions = ['.txt', '.vrpsdptw']
+    data_files = [f for f in os.listdir(src_dir) 
+                  if any(f.endswith(ext) for ext in supported_extensions) 
+                  and os.path.isfile(os.path.join(src_dir, f))]
     
-    if not txt_files:
-        print(f"❌ Không tìm thấy file .txt nào trong thư mục {src_dir}")
+    if not data_files:
+        print(f"❌ Không tìm thấy file .txt hoặc .vrpsdptw nào trong thư mục {src_dir}")
         return
     
-    print(f"📂 Tìm thấy {len(txt_files)} file .txt")
+    # Thống kê theo loại file
+    txt_count = len([f for f in data_files if f.endswith('.txt')])
+    vrpsdptw_count = len([f for f in data_files if f.endswith('.vrpsdptw')])
     
-    for i, fname in enumerate(txt_files, 1):
+    print(f"📂 Tìm thấy {len(data_files)} file dữ liệu:")
+    if txt_count > 0:
+        print(f"   - {txt_count} file .txt")
+    if vrpsdptw_count > 0:
+        print(f"   - {vrpsdptw_count} file .vrpsdptw")
+    
+    for i, fname in enumerate(data_files, 1):
         src_path = os.path.join(src_dir, fname)
         
-        print(f"\n[{i}/{len(txt_files)}] 🔄 Đang xử lý...")
+        print(f"\n[{i}/{len(data_files)}] 🔄 Đang xử lý {fname}...")
         
         import time
         start_time = time.time()
@@ -427,8 +462,10 @@ def process_directory(src_dir, solution_dir):
         # Giải thuật
         vehicles_and_way = assign_customers_to_vehicles(customers, vehicles)
         
-        # Lưu kết quả
-        solution_path = os.path.join(solution_dir, fname)
+        # Lưu kết quả - đổi đuôi thành .txt
+        base_name = os.path.splitext(fname)[0]  # Lấy tên file không có đuôi
+        solution_filename = f"{base_name}.txt"  # Thêm đuôi .txt
+        solution_path = os.path.join(solution_dir, solution_filename)
         write_solution(solution_path, vehicles_and_way)
         
         # Tính thời gian xử lý
