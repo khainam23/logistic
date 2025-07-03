@@ -17,26 +17,55 @@ class Customer:
     def distance_to(self, other):
         return math.hypot(self.x - other.x, self.y - other.y)
 
+class DistanceMatrix:
+    def __init__(self):
+        self.distances = {}
+        self.times = {}
+    
+    def add_distance(self, from_node, to_node, distance, time):
+        self.distances[(from_node, to_node)] = distance
+        self.times[(from_node, to_node)] = time
+    
+    def get_distance(self, from_node, to_node):
+        return self.distances.get((from_node, to_node), float('inf'))
+    
+    def get_time(self, from_node, to_node):
+        return self.times.get((from_node, to_node), float('inf'))
+
 class Vehicle:
-    def __init__(self, id, capacity, current_location):
+    def __init__(self, id, capacity, current_location, distance_matrix=None):
         self.id = id
         self.capacity = capacity
         self.remaining = capacity
         self.route = [0]  # depot
         self.current_location = current_location  # depot
         self.time = 0
+        self.distance_matrix = distance_matrix
+
+    def get_travel_time(self, from_customer, to_customer):
+        """Lấy thời gian di chuyển giữa hai khách hàng"""
+        if self.distance_matrix:
+            return self.distance_matrix.get_time(from_customer.cid, to_customer.cid)
+        else:
+            # Fallback to Euclidean distance
+            return from_customer.distance_to(to_customer)
 
     def can_serve(self, customer):
-        travel_time = self.current_location.distance_to(customer)
+        travel_time = self.get_travel_time(self.current_location, customer)
         arrival_time = self.time + travel_time
-        # Kiểm tra nếu xe có thể đến khách hàng trong cửa sổ thời gian
-        within_tw = customer.tw_start <= arrival_time <= customer.tw_end
-        # Kiểm tra nếu xe có đủ dung lượng để phục vụ khách hàng (chỉ kiểm tra delivery demand)
-        can_serve = self.remaining >= customer.d_demand and within_tw
-        return can_serve
+        
+        # Kiểm tra dung lượng
+        if self.remaining < customer.d_demand:
+            return False
+        
+        # Kiểm tra thời gian - xe có thể đến sau due time
+        if arrival_time > customer.tw_end:
+            return False
+            
+        return True
 
     def assign(self, customer):
-        travel_time = self.current_location.distance_to(customer)
+        travel_time = self.get_travel_time(self.current_location, customer)
         self.time += travel_time
         self.time = max(self.time, customer.tw_start)  # Đảm bảo xe đến sau thời gian sẵn sàng
         self.time += customer.service  # Thời gian phục vụ khách hàng
@@ -59,9 +88,10 @@ def assign_customers_to_vehicles(customers, vehicles):
             best_distance = float('inf')
             for customer in unassigned:
                 if vehicle.can_serve(customer):
-                    dist = vehicle.current_location.distance_to(customer)
-                    if dist < best_distance:
-                        best_distance = dist
+                    # Sử dụng travel time thay vì distance
+                    travel_time = vehicle.get_travel_time(vehicle.current_location, customer)
+                    if travel_time < best_distance:
+                        best_distance = travel_time
                         best_customer = customer
             if best_customer:
                 vehicle.assign(best_customer)
@@ -79,7 +109,23 @@ def assign_customers_to_vehicles(customers, vehicles):
 
 def detect_file_format(lines):
     """Phát hiện định dạng file dựa trên nội dung"""
-    # Kiểm tra TSPLIB-style format (Liu Tang Yao)
+    # Kiểm tra Liu Tang Yao format (VRPSDPTW) - có NAME, TYPE : VRPSDPTW, NODE_SECTION
+    has_name = False
+    has_vrpsdptw_type = False
+    has_node_section = False
+    
+    for i, line in enumerate(lines):
+        if line.startswith('NAME'):
+            has_name = True
+        elif 'TYPE : VRPSDPTW' in line:
+            has_vrpsdptw_type = True
+        elif line.startswith('NODE_SECTION'):
+            has_node_section = True
+            
+    if has_name and has_vrpsdptw_type and has_node_section:
+        return 'LIU_TANG_YAO'
+    
+    # Kiểm tra TSPLIB-style format khác
     for i, line in enumerate(lines):
         if 'NAME' in line and 'TYPE' in lines[i+1] if i+1 < len(lines) else False:
             return 'TSPLIB'
@@ -144,7 +190,7 @@ def read_vrptw_format(lines):
     
     # Tạo xe
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0]))
+        vehicles.append(Vehicle(i, capacity, customers[0], None))
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
@@ -201,7 +247,7 @@ def read_vrpspdtw_format(lines):
     
     # Tạo xe
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0]))
+        vehicles.append(Vehicle(i, capacity, customers[0], None))
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
@@ -240,13 +286,89 @@ def read_pdptw_format(lines):
     
     # Tạo xe
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0]))
+        vehicles.append(Vehicle(i, capacity, customers[0], None))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def read_liu_tang_yao_format(lines):
+    """Đọc định dạng Liu Tang Yao (VRPSDPTW)"""
+    customers = []
+    vehicles = []
+    distance_matrix = DistanceMatrix()
+    
+    # Đọc thông tin header
+    dimension = 0
+    num_vehicles = 0
+    capacity = 0
+    
+    for line in lines:
+        if line.startswith('DIMENSION'):
+            dimension = int(line.split(':')[1].strip())
+        elif line.startswith('VEHICLES'):
+            num_vehicles = int(line.split(':')[1].strip())
+        elif line.startswith('CAPACITY'):
+            capacity = float(line.split(':')[1].strip())
+        elif line.startswith('NODE_SECTION'):
+            break
+    
+    # Tìm vị trí bắt đầu dữ liệu node
+    node_start = None
+    distance_start = None
+    
+    for i, line in enumerate(lines):
+        if line.startswith('NODE_SECTION'):
+            node_start = i + 1
+        elif line.startswith('DISTANCETIME_SECTION'):
+            distance_start = i + 1
+            break
+    
+    # Đọc dữ liệu node
+    if node_start:
+        for i in range(node_start, len(lines)):
+            line = lines[i]
+            if not line or line.startswith('EOF') or line.startswith('DISTANCETIME_SECTION'):
+                break
+            
+            parts = line.split(',')
+            if len(parts) >= 6:
+                cid = int(parts[0])
+                x = float(parts[1])
+                y = float(parts[2])
+                d_demand = float(parts[3])  # delivery demand
+                due = float(parts[4])       # due time
+                service = float(parts[5])   # service time
+                ready = 0                   # ready time - mặc định là 0
+                p_demand = 0                # pickup demand - Liu Tang Yao thường chỉ có delivery
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Đọc ma trận khoảng cách và thời gian
+    if distance_start:
+        for i in range(distance_start, len(lines)):
+            line = lines[i]
+            if not line or line.startswith('EOF'):
+                break
+            
+            parts = line.split(',')
+            if len(parts) >= 4:
+                from_node = int(parts[0])
+                to_node = int(parts[1])
+                distance = float(parts[2])
+                time = float(parts[3])
+                
+                distance_matrix.add_distance(from_node, to_node, distance, time)
+    
+    # Tạo xe với capacity đã đọc được, giới hạn số lượng xe hợp lý
+    actual_vehicles = min(num_vehicles, 50, len(customers))
+    for i in range(1, actual_vehicles + 1):
+        vehicles.append(Vehicle(i, capacity, customers[0], distance_matrix))
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
 
 def read_tsplib_format(lines):
-    """Đọc định dạng TSPLIB-style (Liu Tang Yao)"""
+    """Đọc định dạng TSPLIB-style khác"""
     customers = []
     vehicles = []
     
@@ -293,7 +415,7 @@ def read_tsplib_format(lines):
     
     # Tạo xe với capacity đã đọc được
     for i in range(1, min(num_vehicles, 50) + 1):  # Giới hạn số xe để tránh quá nhiều
-        vehicles.append(Vehicle(i, capacity, customers[0]))
+        vehicles.append(Vehicle(i, capacity, customers[0], None))
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
@@ -348,7 +470,7 @@ def read_explicit_wang_chen_format(lines):
     
     # Tạo xe
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0]))
+        vehicles.append(Vehicle(i, capacity, customers[0], None))
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
@@ -374,6 +496,8 @@ def read_data(filepath):
             return read_vrpspdtw_format(lines)
         elif file_format == 'PDPTW':
             return read_pdptw_format(lines)
+        elif file_format == 'LIU_TANG_YAO':
+            return read_liu_tang_yao_format(lines)
         elif file_format == 'TSPLIB':
             return read_tsplib_format(lines)
         elif file_format == 'EXPLICIT_WANG_CHEN':
