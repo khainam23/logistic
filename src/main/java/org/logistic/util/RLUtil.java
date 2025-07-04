@@ -1,5 +1,6 @@
 package org.logistic.util;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,23 @@ import org.logistic.model.Route;
 import org.logistic.model.Solution;
 
 public class RLUtil {
+    
+    /**
+     * Lấy đường dẫn thư mục exports tự động
+     */
+    private static String getExportsDirectory() {
+        // Lấy thư mục hiện tại của project
+        String currentDir = System.getProperty("user.dir");
+        File exportsDir = new File(currentDir, "exports");
+        
+        // Tạo thư mục exports nếu chưa tồn tại
+        if (!exportsDir.exists()) {
+            exportsDir.mkdirs();
+        }
+        
+        return exportsDir.getAbsolutePath();
+    }
+    
     /**
      * Xử lý tăng cường.
      * 
@@ -267,8 +285,8 @@ public class RLUtil {
                 if (baseFileName.contains(".")) {
                     baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
                 }
-                String outputFileName = String.format("d:/Logistic/new/logistic/exports/rl_results_%s_epoch%d.txt", 
-                    baseFileName, epochResult.epochNumber);
+                String outputFileName = String.format("%s%srl_results_%s_epoch%d.txt", 
+                    getExportsDirectory(), File.separator, baseFileName, epochResult.epochNumber);
                 
                 FileWriter writer = new FileWriter(outputFileName);
                 
@@ -325,8 +343,8 @@ public class RLUtil {
             if (baseFileName.contains(".")) {
                 baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
             }
-            String outputFileName = String.format("d:/Logistic/new/logistic/exports/rl_iter_%s_epoch%d_iter%d.txt", 
-                baseFileName, epochNumber, iteratorNumber);
+            String outputFileName = String.format("%s%srl_iter_%s_epoch%d_iter%d.txt", 
+                getExportsDirectory(), File.separator, baseFileName, epochNumber, iteratorNumber);
             
             FileWriter writer = new FileWriter(outputFileName);
             
@@ -397,7 +415,7 @@ public class RLUtil {
         }
         
         try {
-            String outputFileName = "d:/Logistic/new/logistic/exports/rl_global_best.txt";
+            String outputFileName = getExportsDirectory() + File.separator + "rl_global_best.txt";
             FileWriter writer = new FileWriter(outputFileName);
             
             // Ghi thông tin global best
