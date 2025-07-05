@@ -294,8 +294,7 @@ public class ExecutionUtil {
                 locations,
                 maxPayload,
                 iterations,
-                optimizerFactory,
-                parallelEnabled
+                optimizerFactory
             );
         } else {
             // Xử lý tuần tự thông thường

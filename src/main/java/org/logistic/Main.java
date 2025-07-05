@@ -58,7 +58,7 @@ public class Main {
         int iterations = 1;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = false;
+        boolean parallelEnabled = true;
         // Số vòng chạy cho RL
         int epoch = 2;
         // Loại bài toán (chỉ định trực tiếp)
