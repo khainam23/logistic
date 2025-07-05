@@ -40,7 +40,7 @@ public class RLUtil {
      * + Chạy các thuật toán trong thư mục như bình thường
      * + Nhưng lặp qua các epoch, epoch sau sẽ lấy thông tin solution tốt nhất từ epoch trước đó làm init solution
      * + Mỗi epoch có iterator lần thực hiện, mỗi lần chạy tất cả 4 thuật toán
-     * + Mỗi iterator ghi file riêng và cập nhật global best solution
+     * + Sau mỗi epoch ghi global best solution của file (được lưu trong map) ra file
      * + Cuối cùng ghi global best solution tổng thể
      * 
      * @param epoch số epoch cần thực hiện
@@ -63,15 +63,22 @@ public class RLUtil {
         // Lưu trữ kết quả của từng epoch
         List<EpochResult> epochResults = new ArrayList<>();
         
+        // Map lưu trữ best solution của từng file theo epoch
+        // Key: fileName, Value: best solution của file đó tại epoch hiện tại
+        Map<String, Solution> fileBestSolutions = new HashMap<>();
+        
         // Xử lý từng file trong thư mục
         rdff.processAllFilesInDirectory(srcDirectory, solutionDirectory, problemType,
                 (locations, routes, fileName) -> {
                     try {
                         System.out.println("\n=== XỬ LÝ FILE: " + fileName + " ===");
                         
-                        // Khởi tạo solution ban đầu cho epoch đầu tiên
-                        Solution currentBestSolution = new Solution(routes, 
+                        // Khởi tạo solution ban đầu cho file này
+                        Solution initialSolution = new Solution(routes, 
                             fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
+                        
+                        // Khởi tạo best solution cho file này trong map
+                        fileBestSolutions.put(fileName, initialSolution.copy());
                         
                         List<EpochResult> fileEpochResults = new ArrayList<>();
                         
@@ -79,20 +86,20 @@ public class RLUtil {
                         for (int currentEpoch = 1; currentEpoch <= epoch; currentEpoch++) {
                             System.out.println("\n--- EPOCH " + currentEpoch + "/" + epoch + " cho file " + fileName + " ---");
                             
+                            // Lấy base solution cho epoch hiện tại từ map
+                            Solution baseSolution = fileBestSolutions.get(fileName);
+                            
                             // Tạo initial solutions cho epoch hiện tại
-                            Solution[] initialSolutions;
+                            SimulatedAnnealing sa = new SimulatedAnnealing(baseSolution);
+                            Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
+                                    locations, routes[0].getMaxPayload());
+                            
                             if (currentEpoch == 1) {
-                                // Epoch đầu tiên: sử dụng SA để tạo population từ solution gốc
-                                SimulatedAnnealing sa = new SimulatedAnnealing(currentBestSolution);
-                                initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
-                                        locations, routes[0].getMaxPayload());
+                                System.out.println("Sử dụng solution gốc cho epoch đầu tiên (fitness: " + 
+                                    baseSolution.getFitness() + ")");
                             } else {
-                                // Epoch tiếp theo: sử dụng best solution từ epoch trước để tạo population
-                                SimulatedAnnealing sa = new SimulatedAnnealing(currentBestSolution);
-                                initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
-                                        locations, routes[0].getMaxPayload());
-                                System.out.println("Sử dụng solution tốt nhất từ epoch trước (fitness: " + 
-                                    currentBestSolution.getFitness() + ") làm cơ sở cho epoch " + currentEpoch);
+                                System.out.println("Sử dụng solution tốt nhất từ epoch trước của file " + fileName + 
+                                    " (fitness: " + baseSolution.getFitness() + ") làm cơ sở cho epoch " + currentEpoch);
                             }
                             
                             Solution epochBestSolution = null;
@@ -113,11 +120,6 @@ public class RLUtil {
                                 // Lưu kết quả iterator
                                 epochIteratorResults.add(new IteratorResult(iter, iteratorBestSolution, iteratorResults));
                                 
-                                // Ghi file cho iterator này
-                                if (iteratorBestSolution != null) {
-                                    writeIteratorResultToFile(fileName, currentEpoch, iter, iteratorBestSolution, exportType);
-                                }
-                                
                                 // Cập nhật best solution trong epoch
                                 if (iteratorBestSolution != null && 
                                     (epochBestSolution == null || iteratorBestSolution.getFitness() < epochBestSolution.getFitness())) {
@@ -125,15 +127,22 @@ public class RLUtil {
                                     System.out.println("  ✓ Cập nhật best solution trong epoch: fitness = " + epochBestSolution.getFitness());
                                 }
                                 
-                                // Cập nhật global best solution
+                                // Cập nhật best solution cho file này trong map
+                                Solution currentFileBest = fileBestSolutions.get(fileName);
                                 if (iteratorBestSolution != null && 
-                                    (currentBestSolution == null || iteratorBestSolution.getFitness() < currentBestSolution.getFitness())) {
-                                    currentBestSolution = iteratorBestSolution.copy();
-                                    System.out.println("  ✓✓ Cập nhật GLOBAL best solution: fitness = " + currentBestSolution.getFitness());
+                                    (currentFileBest == null || iteratorBestSolution.getFitness() < currentFileBest.getFitness())) {
+                                    fileBestSolutions.put(fileName, iteratorBestSolution.copy());
+                                    System.out.println("  ✓✓ Cập nhật best solution cho file " + fileName + ": fitness = " + iteratorBestSolution.getFitness());
                                 }
                                 
                                 System.out.println("  Hoàn thành iterator " + iter + 
                                     " - Best fitness: " + (iteratorBestSolution != null ? iteratorBestSolution.getFitness() : "N/A"));
+                            }
+                            
+                            // Ghi file sau khi hoàn thành epoch với global best solution của file này
+                            Solution currentFileBest = fileBestSolutions.get(fileName);
+                            if (currentFileBest != null) {
+                                writeEpochResultToFile(fileName, currentEpoch, currentFileBest, exportType);
                             }
                             
                             // Global best đã được cập nhật trong từng iterator
@@ -151,7 +160,8 @@ public class RLUtil {
                         epochResults.addAll(fileEpochResults);
                         
                         // In kết quả tổng kết cho file
-                        printFileRLResults(fileName, fileEpochResults, currentBestSolution);
+                        Solution finalBestSolution = fileBestSolutions.get(fileName);
+                        printFileRLResults(fileName, fileEpochResults, finalBestSolution);
                         
                         System.out.println("=== HOÀN THÀNH XỬ LÝ FILE: " + fileName + " ===\n");
                         
@@ -160,9 +170,6 @@ public class RLUtil {
                         e.printStackTrace();
                     }
                 });
-        
-        // Ghi kết quả ra file riêng cho từng file input
-        writeRLResultsToFiles(epochResults, exportType);
         
         // Ghi global best solution cho tất cả các file
         writeGlobalBestSolution(epochResults, exportType);
@@ -242,7 +249,7 @@ public class RLUtil {
             // In chi tiết từng iterator trong epoch
             if (epochResult.iteratorResults != null && !epochResult.iteratorResults.isEmpty()) {
                 for (IteratorResult iterResult : epochResult.iteratorResults) {
-                    System.out.printf("  Iterator %d: Best fitness = %.2f", 
+                    System.out.printf("  Iterator %d: Best fitness = %.2f\n", 
                         iterResult.iteratorNumber,
                         iterResult.bestSolution != null ? iterResult.bestSolution.getFitness() : Double.MAX_VALUE);
                     
@@ -270,69 +277,10 @@ public class RLUtil {
     }
     
     /**
-     * Ghi kết quả RL ra file riêng cho từng epoch của từng file input - chỉ ghi routes
+     * Ghi kết quả của một epoch ra file
      */
-    private static void writeRLResultsToFiles(List<EpochResult> epochResults, ExportType exportType) {
-        if (exportType == ExportType.NONE) {
-            return;
-        }
-        
-        // Ghi file riêng cho từng epoch của từng file input
-        for (EpochResult epochResult : epochResults) {
-            try {
-                // Tạo tên file output dựa trên tên file input và epoch number
-                String baseFileName = epochResult.fileName;
-                if (baseFileName.contains(".")) {
-                    baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
-                }
-                String outputFileName = String.format("%s%srl_results_%s_epoch%d.txt", 
-                    getExportsDirectory(), File.separator, baseFileName, epochResult.epochNumber);
-                
-                FileWriter writer = new FileWriter(outputFileName);
-                
-                // Ghi routes của solution tốt nhất trong epoch - chỉ routes, không có điểm số
-                if (epochResult.bestSolution != null && epochResult.bestSolution.getRoutes() != null) {
-                    Route[] routes = epochResult.bestSolution.getRoutes();
-                    int routeNumber = 1;
-                    
-                    for (Route route : routes) {
-                        if (route != null && route.getIndLocations() != null && route.getIndLocations().length > 0) {
-                            writer.write("Route " + routeNumber + ": ");
-                            
-                            // Ghi các điểm trong route, bỏ qua điểm 0 (depot)
-                            boolean first = true;
-                            for (int location : route.getIndLocations()) {
-                                if (location != 0) { // Bỏ qua điểm 0
-                                    if (!first) {
-                                        writer.write(" ");
-                                    }
-                                    writer.write(String.valueOf(location));
-                                    first = false;
-                                }
-                            }
-                            writer.write("\n");
-                            routeNumber++;
-                        }
-                    }
-                } else {
-                    writer.write("Không có solution hợp lệ\n");
-                }
-                
-                writer.close();
-                System.out.println("Đã ghi kết quả RL routes ra file: " + outputFileName);
-                
-            } catch (IOException e) {
-                System.err.println("Lỗi khi ghi file kết quả RL cho " + epochResult.fileName + 
-                    " epoch " + epochResult.epochNumber + ": " + e.getMessage());
-            }
-        }
-    }
-    
-    /**
-     * Ghi kết quả của một iterator ra file
-     */
-    private static void writeIteratorResultToFile(String fileName, int epochNumber, int iteratorNumber, 
-                                                 Solution solution, ExportType exportType) {
+    private static void writeEpochResultToFile(String fileName, int epochNumber, 
+                                              Solution solution, ExportType exportType) {
         if (exportType == ExportType.NONE) {
             return;
         }
@@ -343,8 +291,8 @@ public class RLUtil {
             if (baseFileName.contains(".")) {
                 baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
             }
-            String outputFileName = String.format("%s%srl_iter_%s_epoch%d_iter%d.txt", 
-                getExportsDirectory(), File.separator, baseFileName, epochNumber, iteratorNumber);
+            String outputFileName = String.format("%s%srl_epoch_%s_epoch%d.txt", 
+                getExportsDirectory(), File.separator, baseFileName, epochNumber);
             
             FileWriter writer = new FileWriter(outputFileName);
             
@@ -377,11 +325,11 @@ public class RLUtil {
             }
             
             writer.close();
-            System.out.println("    Đã ghi kết quả iterator ra file: " + outputFileName);
+            System.out.println("  Đã ghi kết quả epoch ra file: " + outputFileName);
             
         } catch (IOException e) {
-            System.err.println("    Lỗi khi ghi file kết quả iterator cho " + fileName + 
-                " epoch " + epochNumber + " iter " + iteratorNumber + ": " + e.getMessage());
+            System.err.println("  Lỗi khi ghi file kết quả epoch cho " + fileName + 
+                " epoch " + epochNumber + ": " + e.getMessage());
         }
     }
     
