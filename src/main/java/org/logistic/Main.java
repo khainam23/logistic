@@ -1,6 +1,6 @@
 package org.logistic;
 
-import java.util.Arrays;
+
 
 import org.logistic.data.ReadDataFromFile;
 import org.logistic.parallel.ParallelExecutionManager;
@@ -47,7 +47,7 @@ public class Main {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
-        RunMode runMode = RunMode.RL;
+        RunMode runMode = RunMode.DIRECTORY;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
         String srcDirectory = "data/vrptw/src";
@@ -55,16 +55,19 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
-        int iterations = 1;
+        int iterations = 3;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = false;
+        boolean parallelEnabled = true;
         // Số vòng chạy cho RL
         int epoch = 2;
+        // Loại bài toán (chỉ định trực tiếp)
+        ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPTW;
     }
 
     /**
-     * Phương thức chính của ứng dụng
+     * Phương thức chính của ứng dụng.
+     * !!! KHÔNG THAY ĐỔI LOGIC CỦA CHUONG TRÌNH NÀY !!!
      *
      * @param args Tham số dòng lệnh (không sử dụng)
      */
@@ -109,29 +112,20 @@ public class Main {
             excelUtil.initializeExcelWorkbook(strategy);
         }
 
-        // Xác định loại bài toán dựa trên đường dẫn
-        ReadDataFromFile.ProblemType problemType = Arrays.stream(ReadDataFromFile.ProblemType.values())
-                .filter(type -> config.srcDirectory.toLowerCase().contains(type.name().toLowerCase()))
-                .findFirst()
-                .orElse(null);
-
-        // Không làm nếu không có chỉ định loại bài toán
-        if(problemType == null) {
-            System.err.println("Không xác định được loại bài toán từ thư mục: " + config.srcDirectory);
-            return;
-        }
-
+        // Sử dụng loại bài toán được chỉ định trong config
+        ReadDataFromFile.ProblemType problemType = config.problemType;
+        
         System.out.println("Loại bài toán: " + problemType);
 
         if (config.runMode == RunMode.DIRECTORY) {
             // Xử lý tất cả các file trong thư mục
             ExecutionUtil.processAllFilesInDirectory(config.srcDirectory, config.solutionDirectory,
-                    rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
+                    rdff, fitnessUtil, printUtil, checkConditionUtil, problemType,
                     config.exportType, config.iterations, config.parallelEnabled);
         } else if(config.runMode == RunMode.SINGLE_FILE){
             // Chạy với một file duy nhất
             ExecutionUtil.processSingleFile(config.dataLocation, config.dataSolution,
-                    rdff, fitnessUtil, printUtil, checkConditionUtil, problemType, strategy,
+                    rdff, fitnessUtil, printUtil, checkConditionUtil, problemType,
                     config.exportType, config.iterations, config.parallelEnabled);
         } else if(config.runMode == RunMode.RL) {
             // Xử lý học tăng cường

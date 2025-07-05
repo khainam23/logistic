@@ -184,10 +184,31 @@ public class ExcelUtil {
             int colIndex = 2;
             for (int weightIndex = 0; weightIndex < useFlags.length; weightIndex++) {
                 if (useFlags[weightIndex]) {
-                    // Xuất Min, Std, Mean cho weight này
-                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][0]); // Min
-                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][1]); // Std
-                    row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][2]); // Mean
+                    // Kiểm tra kích thước mảng để tránh lỗi ArrayIndexOutOfBoundsException
+                    if (weightIndex < partsWeights.length) {
+                        if (partsWeights[weightIndex].length >= 3) {
+                            // Chế độ song song - có đầy đủ Min, Std, Mean
+                            row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][0]); // Min
+                            row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][1]); // Std
+                            row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][2]); // Mean
+                        } else if (partsWeights[weightIndex].length >= 1) {
+                            // Chế độ tuần tự - chỉ có 1 giá trị
+                            double value = partsWeights[weightIndex][0];
+                            row.createCell(colIndex++).setCellValue(value); // Min = giá trị
+                            row.createCell(colIndex++).setCellValue(0.0); // Std = 0 (không có độ lệch chuẩn)
+                            row.createCell(colIndex++).setCellValue(value); // Mean = giá trị
+                        } else {
+                            // Mảng rỗng
+                            row.createCell(colIndex++).setCellValue(0.0); // Min
+                            row.createCell(colIndex++).setCellValue(0.0); // Std
+                            row.createCell(colIndex++).setCellValue(0.0); // Mean
+                        }
+                    } else {
+                        // weightIndex vượt quá kích thước mảng
+                        row.createCell(colIndex++).setCellValue(0.0); // Min
+                        row.createCell(colIndex++).setCellValue(0.0); // Std
+                        row.createCell(colIndex++).setCellValue(0.0); // Mean
+                    }
                 }
             }
 
