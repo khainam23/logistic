@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.logistic.model.Location;
@@ -24,34 +23,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-/**
- * Lớp đọc dữ liệu từ file
- */
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReadDataFromFile {
     Location[] locations;
     Route[] routes;
     int maxCapacity;
-    Random rd = new Random();
 
-    /**
-     * Enum định nghĩa các loại bài toán và cấu hình đọc dữ liệu tương ứng
-     */
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public enum ProblemType {
-        // Định nghĩa chỉ số cột: [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
-        VRPTW(false, 3, 6, 0, 1, 2, 3, 4, 5, 6),  // Vehicle Routing Problem with Time Windows
-        PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8);   // Pickup and Delivery Problem with Time Windows
+        VRPTW(false, 3, 6, 0, 1, 2, 3, 4, 5, 6),
+        PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8),
+        VRPSPDTW_LIU_TANG_YAO(true, 7, 9, 0, 1, 2, 3, 4, 5, 6),
+        VRPSPDTW_WANG_CHEN(true, 3, 6, 0, 1, 2, 3, 4, 5, 6, 7, 8);
         
         boolean isPickupDelivery;
         int capacityLineIndex;
         int dataStartLineIndex;
-        int[] columnIndices; // [id, x, y, demand, ltw, utw, service, pickup_idx (chỉ cho PDPTW)]
+        int[] columnIndices;
         
-        ProblemType(boolean isPickupDelivery, int capacityLineIndex, int dataStartLineIndex, 
-                   int... columnIndices) {
+        ProblemType(boolean isPickupDelivery, int capacityLineIndex, int dataStartLineIndex, int... columnIndices) {
             this.isPickupDelivery = isPickupDelivery;
             this.capacityLineIndex = capacityLineIndex;
             this.dataStartLineIndex = dataStartLineIndex;
@@ -59,125 +51,105 @@ public class ReadDataFromFile {
         }
         
         public int getColumnIndex(int field) {
-            if (field < 0 || field >= columnIndices.length) {
-                System.err.println("Warning: Trying to access column index " + field + 
-                                  " but only " + columnIndices.length + " indices are defined.");
-                return -1;
-            }
-            return columnIndices[field];
+            return (field < 0 || field >= columnIndices.length) ? -1 : columnIndices[field];
         }
     }
     
-    /**
-     * Cấu hình định dạng file giải pháp
-     */
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SolutionFormat {
-        int headerLines = 5;
+        int headerLines = 0;  // Changed from 5 to 0 to work with PDPTW files
         String routePrefix = ":";
         String delimiter = "\\s+";
     }
 
-    /**
-     * Đọc dữ liệu của bài toán
-     * 
-     * @param filePath Đường dẫn file
-     * @param problemType Loại bài toán
-     */
     public void readProblemData(String filePath, ProblemType problemType) {
         try {
-            Path path = resolveFilePath(filePath);
-            readProblemDataFromPath(path, problemType);
+            readProblemDataFromPath(resolveFilePath(filePath), problemType);
         } catch (Exception e) {
             System.err.println("Error reading problem data: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Đọc giải pháp từ file
-     * 
-     * @param filePath Đường dẫn file
-     */
     public void readSolution(String filePath) {
         readSolution(filePath, new SolutionFormat());
     }
     
-    /**
-     * Đọc giải pháp từ file với định dạng tùy chỉnh
-     * 
-     * @param filePath Đường dẫn file
-     * @param format Định dạng file giải pháp
-     */
-    public void readSolution(String filePath, SolutionFormat format) {
+    public void readSolution(String filePath, ProblemType problemType) {
         try {
-            Path path = resolveFilePath(filePath);
-            readSolutionFromPath(path, format);
+            switch (problemType) {
+                case VRPTW:
+                    readVRPTWSolution(resolveFilePath(filePath));
+                    break;
+                case PDPTW:
+                    readPDPTWSolution(resolveFilePath(filePath));
+                    break;
+                case VRPSPDTW_LIU_TANG_YAO:
+                    readVRPSPDTWLiuTangYaoSolution(resolveFilePath(filePath));
+                    break;
+                case VRPSPDTW_WANG_CHEN:
+                    readVRPSPDTWWangChenSolution(resolveFilePath(filePath));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported problem type: " + problemType);
+            }
         } catch (Exception e) {
             System.err.println("Error reading solution: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    /**
-     * Giải quyết đường dẫn file, hỗ trợ cả classpath và đường dẫn tuyệt đối
-     * 
-     * @param filePath Đường dẫn file
-     * @return Path đã giải quyết
-     * @throws IOException Nếu không tìm thấy file
-     */
+    public void readSolution(String filePath, SolutionFormat format) {
+        try {
+            readSolutionFromPath(resolveFilePath(filePath), format);
+        } catch (Exception e) {
+            System.err.println("Error reading solution: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     private Path resolveFilePath(String filePath) throws IOException {
-        // Thử đọc từ classpath trước
         try {
             URL resource = ReadDataFromFile.class.getClassLoader().getResource(filePath);
-            if (resource != null) {
-                return Paths.get(resource.toURI());
-            }
-        } catch (Exception e) {
-            // Bỏ qua lỗi và thử đường dẫn tuyệt đối
-        }
+            if (resource != null) return Paths.get(resource.toURI());
+        } catch (Exception ignored) {}
         
-        // Thử đọc từ đường dẫn tuyệt đối
         Path path = Paths.get(filePath);
-        if (!Files.exists(path)) {
-            throw new IOException("File not found: " + filePath);
-        }
-        
+        if (!Files.exists(path)) throw new IOException("File not found: " + filePath);
         return path;
     }
     
-    /**
-     * Giải quyết đường dẫn thư mục, hỗ trợ cả classpath và đường dẫn tuyệt đối
-     * 
-     * @param directoryPath Đường dẫn thư mục
-     * @return File đã giải quyết
-     */
     private File resolveDirectoryPath(String directoryPath) {
-        // Thử tìm thư mục từ classpath
         try {
             URL url = ReadDataFromFile.class.getClassLoader().getResource(directoryPath);
-            if (url != null) {
-                return new File(url.toURI());
-            }
-        } catch (Exception e) {
-            // Bỏ qua lỗi và thử đường dẫn tuyệt đối
-        }
-        
-        // Thử đường dẫn tuyệt đối
+            if (url != null) return new File(url.toURI());
+        } catch (Exception ignored) {}
         return new File(directoryPath);
     }
     
-    /**
-     * Đọc dữ liệu bài toán từ Path
-     * 
-     * @param path Đường dẫn file
-     * @param problemType Loại bài toán
-     * @throws IOException Nếu có lỗi khi đọc file
-     */
     private void readProblemDataFromPath(Path path, ProblemType problemType) throws IOException {
+        switch (problemType) {
+            case VRPTW:
+                readVRPTWData(path, problemType);
+                break;
+            case PDPTW:
+                readPDPTWData(path, problemType);
+                break;
+            case VRPSPDTW_LIU_TANG_YAO:
+                readVRPSPDTWLiuTangYaoData(path);
+                break;
+            case VRPSPDTW_WANG_CHEN:
+                readVRPSPDTWWangChenData(path, problemType);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported problem type: " + problemType);
+        }
+    }
+    
+    private void readVRPTWData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
         
         try (BufferedReader reader = Files.newBufferedReader(path)) {
@@ -185,48 +157,33 @@ public class ReadDataFromFile {
             int count = 0;
             
             while ((line = reader.readLine()) != null) {
-                // Đọc dung lượng tối đa
                 if (count == problemType.getCapacityLineIndex()) {
-                    String[] parts = line.trim().split("\\s+");
-                    maxCapacity = Integer.parseInt(parts[1]);
+                    maxCapacity = Integer.parseInt(line.trim().split("\\s+")[1]);
                     System.out.println("Max capacity: " + maxCapacity);
                 }
 
-                // Đọc thông tin địa điểm
                 if (count >= problemType.getDataStartLineIndex()) {
                     String[] parts = line.trim().split("\\s+");
-                    int minColumns = problemType.isPickupDelivery() ? 8 : 7;
-                    
-                    if (parts.length < minColumns) {
+                    if (parts.length < 7) {
                         count++;
-                        continue; // Bỏ qua dòng không đủ dữ liệu
+                        continue;
                     }
 
                     try {
-                        // Lấy các chỉ số cột
-                        int idIdx = problemType.getColumnIndex(0);
-                        int xIdx = problemType.getColumnIndex(1);
-                        int yIdx = problemType.getColumnIndex(2);
-                        int demandIdx = problemType.getColumnIndex(3);
-                        int ltwIdx = problemType.getColumnIndex(4);
-                        int utwIdx = problemType.getColumnIndex(5);
-                        int serviceIdx = problemType.getColumnIndex(6);
-                        
-                        // Kiểm tra các chỉ số cột hợp lệ
-                        if (idIdx < 0 || xIdx < 0 || yIdx < 0 || demandIdx < 0 || 
-                            ltwIdx < 0 || utwIdx < 0 || serviceIdx < 0) {
-                            System.err.println("Error: Invalid column indices for problem type " + problemType);
-                            throw new IllegalArgumentException("Invalid column indices configuration");
+                        int[] indices = new int[7];
+                        for (int i = 0; i < 7; i++) {
+                            indices[i] = problemType.getColumnIndex(i);
+                            if (indices[i] < 0) {
+                                throw new IllegalArgumentException("Invalid column indices for " + problemType);
+                            }
                         }
                         
-                        // Đọc dữ liệu từ các cột
-                        // int id = Integer.parseInt(parts[idIdx]);
-                        int x = Integer.parseInt(parts[xIdx]);
-                        int y = Integer.parseInt(parts[yIdx]);
-                        int demand = Integer.parseInt(parts[demandIdx]);
-                        int ltw = Integer.parseInt(parts[ltwIdx]);
-                        int utw = Integer.parseInt(parts[utwIdx]);
-                        int service = Integer.parseInt(parts[serviceIdx]);
+                        int x = Integer.parseInt(parts[indices[1]]);
+                        int y = Integer.parseInt(parts[indices[2]]);
+                        int demand = Integer.parseInt(parts[indices[3]]);
+                        int ltw = Integer.parseInt(parts[indices[4]]);
+                        int utw = Integer.parseInt(parts[indices[5]]);
+                        int service = Integer.parseInt(parts[indices[6]]);
 
                         Location location = Location.builder()
                                 .point(new Point(x, y))
@@ -236,43 +193,388 @@ public class ReadDataFromFile {
                                 .utw(utw)
                                 .build();
 
-                        // Xử lý dữ liệu theo loại bài toán
-                        if (problemType.isPickupDelivery()) {
-                            if (demand < 0) {
-                                location.setPick(true);
-                                location.setDemandPick(Math.abs(demand));
-                            } else {
-                                location.setDeliver(true);
-                                location.setDemandDeliver(demand);
+                        location.setDeliver(true);
+                        location.setDemandDeliver(demand);
+
+                        locationList.add(location);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing VRPTW line " + count + ": " + line);
+                    }
+                }
+                count++;
+            }
+            
+            locations = locationList.toArray(new Location[0]);
+            System.out.println("Read " + locations.length + " VRPTW locations from " + path);
+        }
+    }
+    
+    private void readPDPTWData(Path path, ProblemType problemType) throws IOException {
+        List<Location> locationList = new ArrayList<>();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int count = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                if (count == problemType.getCapacityLineIndex()) {
+                    maxCapacity = Integer.parseInt(line.trim().split("\\s+")[1]);
+                    System.out.println("Max capacity: " + maxCapacity);
+                }
+
+                if (count >= problemType.getDataStartLineIndex()) {
+                    String[] parts = line.trim().split("\\s+");
+                    if (parts.length < 8) {
+                        count++;
+                        continue;
+                    }
+
+                    try {
+                        int[] indices = new int[7];
+                        for (int i = 0; i < 7; i++) {
+                            indices[i] = problemType.getColumnIndex(i);
+                            if (indices[i] < 0) {
+                                throw new IllegalArgumentException("Invalid column indices for " + problemType);
                             }
+                        }
+                        
+                        int x = Integer.parseInt(parts[indices[1]]);
+                        int y = Integer.parseInt(parts[indices[2]]);
+                        int demand = Integer.parseInt(parts[indices[3]]);
+                        int ltw = Integer.parseInt(parts[indices[4]]);
+                        int utw = Integer.parseInt(parts[indices[5]]);
+                        int service = Integer.parseInt(parts[indices[6]]);
+
+                        Location location = Location.builder()
+                                .point(new Point(x, y))
+                                .serviceTimePick(0)
+                                .serviceTimeDeliver(service)
+                                .ltw(ltw)
+                                .utw(utw)
+                                .build();
+
+                        if (demand < 0) {
+                            location.setPick(true);
+                            location.setDemandPick(Math.abs(demand));
                         } else {
-                            // VRPTW và các loại bài toán khác
                             location.setDeliver(true);
                             location.setDemandDeliver(demand);
                         }
 
                         locationList.add(location);
                     } catch (NumberFormatException e) {
-                        System.err.println("Error parsing line " + count + ": " + line);
-                        System.err.println("Error: " + e.getMessage());
+                        System.err.println("Error parsing PDPTW line " + count + ": " + line);
                     }
                 }
                 count++;
             }
             
-            // Chuyển List<Location> thành mảng
             locations = locationList.toArray(new Location[0]);
-            System.out.println("Read " + locations.length + " locations from " + path);
+            System.out.println("Read " + locations.length + " PDPTW locations from " + path);
         }
     }
     
-    /**
-     * Đọc giải pháp từ Path
-     * 
-     * @param path Đường dẫn file
-     * @param format Định dạng file giải pháp
-     * @throws IOException Nếu có lỗi khi đọc file
-     */
+    private void readVRPSPDTWLiuTangYaoData(Path path) throws IOException {
+        List<Location> locationList = new ArrayList<>();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            boolean inNodeSection = false;
+            
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                
+                // Đọc capacity từ dòng CAPACITY
+                if (line.startsWith("CAPACITY")) {
+                    String[] parts = line.split(":");
+                    if (parts.length > 1) {
+                        maxCapacity = (int) (Double.parseDouble(parts[1].trim()) * 100);
+                        System.out.println("Max capacity: " + maxCapacity);
+                    }
+                    continue;
+                }
+                
+                // Bắt đầu đọc dữ liệu node
+                if (line.equals("NODE_SECTION")) {
+                    inNodeSection = true;
+                    continue;
+                }
+                
+                // Kết thúc đọc dữ liệu node
+                if (line.startsWith("DISTANCETIME_SECTION") || line.startsWith("EOF")) {
+                    inNodeSection = false;
+                    break;
+                }
+                
+                // Đọc dữ liệu node
+                if (inNodeSection && !line.isEmpty()) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 6) {
+                        try {
+                            int nodeId = Integer.parseInt(parts[0]);
+                            double x = Double.parseDouble(parts[1]) * 1000;
+                            double y = Double.parseDouble(parts[2]) * 1000;
+                            int demand = Integer.parseInt(parts[3]);
+                            int ltw = Integer.parseInt(parts[4]);
+                            int utw = Integer.parseInt(parts[5]);
+                            int service = 30;
+                            
+                            Location location = Location.builder()
+                                    .point(new Point((int)x, (int)y))
+                                    .serviceTimePick(0)
+                                    .serviceTimeDeliver(service)
+                                    .ltw(ltw)
+                                    .utw(utw)
+                                    .build();
+                            
+                            if (demand < 0) {
+                                location.setPick(true);
+                                location.setDemandPick(Math.abs(demand));
+                            } else if (demand > 0) {
+                                location.setDeliver(true);
+                                location.setDemandDeliver(demand);
+                            } else {
+                                location.setDeliver(false);
+                                location.setPick(false);
+                                location.setDemandDeliver(0);
+                                location.setDemandPick(0);
+                            }
+                            
+                            locationList.add(location);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Error parsing Liu Tang Yao line: " + line);
+                        }
+                    }
+                }
+            }
+            
+            locations = locationList.toArray(new Location[0]);
+            System.out.println("Read " + locations.length + " VRPSPDTW Liu Tang Yao locations from " + path);
+        }
+    }
+    
+    private void readVRPSPDTWWangChenData(Path path, ProblemType problemType) throws IOException {
+        List<Location> locationList = new ArrayList<>();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int count = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                
+                // Đọc capacity từ dòng thứ 4 (index 3): "100        25       200"
+                if (count == problemType.getCapacityLineIndex()) {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length >= 3) {
+                        maxCapacity = Integer.parseInt(parts[2]);
+                        System.out.println("Max capacity: " + maxCapacity);
+                    }
+                }
+                
+                // Bắt đầu đọc dữ liệu từ dòng thứ 7 (index 6)
+                if (count >= problemType.getDataStartLineIndex()) {
+                    String[] parts = line.split("\\s+");
+                    System.out.println("Line " + count + ": " + line + " -> Parts: " + parts.length);
+                    if (parts.length >= 8) {
+                        try {
+                            int custNo = Integer.parseInt(parts[0]);
+                            int x = Integer.parseInt(parts[1]);
+                            int y = Integer.parseInt(parts[2]);
+                            int dDemand = Integer.parseInt(parts[3]); // Delivery demand
+                            int pDemand = Integer.parseInt(parts[4]); // Pickup demand
+                            int readyTime = Integer.parseInt(parts[5]);
+                            int dueDate = Integer.parseInt(parts[6]);
+                            int serviceTime = Integer.parseInt(parts[7]);
+                            
+                            Location location = Location.builder()
+                                    .point(new Point(x, y))
+                                    .serviceTimePick(serviceTime)
+                                    .serviceTimeDeliver(serviceTime)
+                                    .ltw(readyTime)
+                                    .utw(dueDate)
+                                    .build();
+                            
+                            // Xử lý pickup và delivery demand
+                            if (pDemand > 0) {
+                                location.setPick(true);
+                                location.setDemandPick(pDemand);
+                            }
+                            
+                            if (dDemand > 0) {
+                                location.setDeliver(true);
+                                location.setDemandDeliver(dDemand);
+                            }
+                            
+                            // Nếu cả hai đều bằng 0 (depot)
+                            if (pDemand == 0 && dDemand == 0) {
+                                location.setPick(false);
+                                location.setDeliver(false);
+                                location.setDemandPick(0);
+                                location.setDemandDeliver(0);
+                            }
+                            
+                            locationList.add(location);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Error parsing VRPSPDTW Wang Chen line " + count + ": " + line);
+                        }
+                    }
+                }
+                count++;
+            }
+            
+            locations = locationList.toArray(new Location[0]);
+            System.out.println("Read " + locations.length + " VRPSPDTW Wang Chen locations from " + path);
+        }
+    }
+    
+    private void readVRPTWSolution(Path path) throws IOException {
+        List<Route> routeList = new ArrayList<>();
+        SolutionFormat format = new SolutionFormat();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int count = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
+                    try {
+                        String routeData = line.substring(line.indexOf(format.getRoutePrefix()) + 1).trim();
+                        String[] parts = routeData.split(format.getDelimiter());
+                        int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
+
+                        Route route = new Route(indLocs, maxCapacity);
+                        if (locations != null) route.calculateDistance(locations);
+                        routeList.add(route);
+                    } catch (Exception e) {
+                        System.err.println("Error parsing VRPTW route at line " + count + ": " + line);
+                    }
+                }
+                count++;
+            }
+            
+            routes = routeList.toArray(new Route[0]);
+            System.out.println("Read " + routes.length + " VRPTW routes from " + path);
+        }
+    }
+    
+    private void readPDPTWSolution(Path path) throws IOException {
+        List<Route> routeList = new ArrayList<>();
+        SolutionFormat format = new SolutionFormat();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int count = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
+                    try {
+                        String routeData = line.substring(line.indexOf(format.getRoutePrefix()) + 1).trim();
+                        String[] parts = routeData.split(format.getDelimiter());
+                        int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
+
+                        Route route = new Route(indLocs, maxCapacity);
+                        if (locations != null) route.calculateDistance(locations);
+                        routeList.add(route);
+                    } catch (Exception e) {
+                        System.err.println("Error parsing PDPTW route at line " + count + ": " + line);
+                    }
+                }
+                count++;
+            }
+            
+            routes = routeList.toArray(new Route[0]);
+            System.out.println("Read " + routes.length + " PDPTW routes from " + path);
+        }
+    }
+    
+    private void readVRPSPDTWLiuTangYaoSolution(Path path) throws IOException {
+        List<Route> routeList = new ArrayList<>();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int count = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("Route")) {
+                    try {
+                        // Xử lý định dạng Liu Tang Yao: "Route 1:  185"
+                        String[] parts = line.split(":");
+                        if (parts.length > 1) {
+                            String routeData = parts[1].trim();
+                            if (!routeData.isEmpty()) {
+                                String[] nodeStrings = routeData.split("\\s+");
+                                List<Integer> nodeList = new ArrayList<>();
+                                nodeList.add(0); // Thêm depot đầu
+                                for (String nodeStr : nodeStrings) {
+                                    if (!nodeStr.trim().isEmpty()) {
+                                        nodeList.add(Integer.parseInt(nodeStr.trim()));
+                                    }
+                                }
+                                nodeList.add(0); // Thêm depot cuối
+                                
+                                int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
+                                Route route = new Route(indLocs, maxCapacity);
+                                if (locations != null) route.calculateDistance(locations);
+                                routeList.add(route);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error parsing Liu Tang Yao route at line " + count + ": " + line);
+                    }
+                }
+                count++;
+            }
+            
+            routes = routeList.toArray(new Route[0]);
+            System.out.println("Read " + routes.length + " VRPSPDTW Liu Tang Yao routes from " + path);
+        }
+    }
+    
+    private void readVRPSPDTWWangChenSolution(Path path) throws IOException {
+        List<Route> routeList = new ArrayList<>();
+        
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("Route")) {
+                    try {
+                        // Xử lý định dạng Wang Chen: "Route 1:  20 29 46 48"
+                        String[] parts = line.split(":");
+                        if (parts.length > 1) {
+                            String routeData = parts[1].trim();
+                            if (!routeData.isEmpty()) {
+                                String[] nodeStrings = routeData.split("\\s+");
+                                List<Integer> nodeList = new ArrayList<>();
+                                nodeList.add(0); // Thêm depot đầu
+                                
+                                for (String nodeStr : nodeStrings) {
+                                    if (!nodeStr.trim().isEmpty()) {
+                                        nodeList.add(Integer.parseInt(nodeStr.trim()));
+                                    }
+                                }
+                                nodeList.add(0); // Thêm depot cuối
+                                
+                                int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
+                                Route route = new Route(indLocs, maxCapacity);
+                                if (locations != null) route.calculateDistance(locations);
+                                routeList.add(route);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error parsing VRPSPDTW Wang Chen route: " + line);
+                        e.printStackTrace();
+                    }
+                }
+            }
+            
+            routes = routeList.toArray(new Route[0]);
+            System.out.println("Read " + routes.length + " VRPSPDTW Wang Chen routes from " + path);
+        }
+    }
+    
     private void readSolutionFromPath(Path path, SolutionFormat format) throws IOException {
         List<Route> routeList = new ArrayList<>();
         
@@ -285,58 +587,33 @@ public class ReadDataFromFile {
                     try {
                         String routeData = line.substring(line.indexOf(format.getRoutePrefix()) + 1).trim();
                         String[] parts = routeData.split(format.getDelimiter());
-                        int[] indLocs = new int[parts.length];
-                        
-                        for (int i = 0; i < parts.length; ++i) {
-                            indLocs[i] = Integer.parseInt(parts[i]);
-                        }
+                        int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
                         Route route = new Route(indLocs, maxCapacity);
-                        
-                        // Tính khoảng cách nếu đã có locations
-                        if (locations != null) {
-                            route.calculateDistance(locations);
-                        }
-
+                        if (locations != null) route.calculateDistance(locations);
                         routeList.add(route);
                     } catch (Exception e) {
                         System.err.println("Error parsing route at line " + count + ": " + line);
-                        System.err.println("Error: " + e.getMessage());
                     }
                 }
                 count++;
             }
             
-            // Chuyển List<Route> thành mảng
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " routes from " + path);
         }
     }
     
-    /**
-     * Lấy danh sách các file trong thư mục
-     * 
-     * @param directoryPath Đường dẫn thư mục
-     * @param extension Phần mở rộng của file (ví dụ: ".txt")
-     * @return Danh sách các file
-     */
     private List<File> getFilesInDirectory(String directoryPath, String extension) {
         File directory = resolveDirectoryPath(directoryPath);
         
         if (!directory.exists() || !directory.isDirectory()) {
-            System.err.println("Directory not found or not a directory: " + directoryPath);
-            System.err.println("Absolute path: " + directory.getAbsolutePath());
+            System.err.println("Directory not found: " + directoryPath);
             return new ArrayList<>();
         }
         
-        System.out.println("Reading files from directory: " + directory.getAbsolutePath());
-        
-        // Lọc và sắp xếp các file theo tên
         File[] files = directory.listFiles();
-        if (files == null || files.length == 0) {
-            System.err.println("No files found in directory: " + directory.getAbsolutePath());
-            return new ArrayList<>();
-        }
+        if (files == null || files.length == 0) return new ArrayList<>();
         
         return Arrays.stream(files)
                 .filter(file -> file.isFile() && file.getName().endsWith(extension))
@@ -344,117 +621,53 @@ public class ReadDataFromFile {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Lấy file solution tương ứng với file src
-     * 
-     * @param srcFile File src
-     * @param solutionDir Thư mục chứa các file solution
-     * @return File solution tương ứng hoặc null nếu không tìm thấy
-     */
     private File getMatchingSolutionFile(File srcFile, String solutionDir) {
-        String srcName = srcFile.getName();
-        String baseName = srcName.substring(0, srcName.lastIndexOf('.'));
-        
+        String baseName = srcFile.getName().substring(0, srcFile.getName().lastIndexOf('.'));
         File solutionDirectory = resolveDirectoryPath(solutionDir);
         
-        if (!solutionDirectory.exists() || !solutionDirectory.isDirectory()) {
-            System.err.println("Solution directory not found or not a directory: " + solutionDir);
-            System.err.println("Absolute path: " + solutionDirectory.getAbsolutePath());
-            return null;
-        }
-        
-        System.out.println("Looking for solution file matching '" + baseName + "' in: " + solutionDirectory.getAbsolutePath());
+        if (!solutionDirectory.exists() || !solutionDirectory.isDirectory()) return null;
         
         File[] matchingFiles = solutionDirectory.listFiles(
                 file -> file.isFile() && file.getName().startsWith(baseName) && file.getName().endsWith(".txt"));
         
         if (matchingFiles != null && matchingFiles.length > 0) {
-            // Sắp xếp để lấy file ngắn nhất (thường là file không có hậu tố)
-            Arrays.sort(matchingFiles, Comparator.comparing(File::getName, 
-                    Comparator.comparingInt(String::length)));
-            System.out.println("Found matching solution file: " + matchingFiles[0].getName());
+            Arrays.sort(matchingFiles, Comparator.comparing(File::getName, Comparator.comparingInt(String::length)));
             return matchingFiles[0];
         }
-        
-        System.err.println("No matching solution file found for: " + baseName);
         return null;
     }
     
-    /**
-     * Đọc tất cả các file trong thư mục src và solution tương ứng
-     * 
-     * @param srcDirPath Đường dẫn thư mục chứa file src
-     * @param solutionDirPath Đường dẫn thư mục chứa file solution
-     * @param problemType Loại bài toán
-     * @param callback Callback để xử lý sau khi đọc mỗi cặp file
-     */
     public void processAllFilesInDirectory(String srcDirPath, String solutionDirPath, 
                                           ProblemType problemType, FileProcessCallback callback) {
-        System.out.println("Attempting to process files from:");
-        System.out.println("Source directory: " + srcDirPath);
-        System.out.println("Solution directory: " + solutionDirPath);
-        
         List<File> srcFiles = getFilesInDirectory(srcDirPath, ".txt");
         if (srcFiles.isEmpty()) {
             System.err.println("No source files found in directory: " + srcDirPath);
             return;
         }
         
-        System.out.println("Found " + srcFiles.size() + " source files in directory: " + srcDirPath);
-        
-        // Xử lý từng file src và solution tương ứng
         for (File srcFile : srcFiles) {
             try {
-                // Reset dữ liệu trước khi đọc file mới
                 locations = null;
                 routes = null;
                 
-                // Đọc file src
-                String srcPath = srcFile.getAbsolutePath();
-                System.out.println("\nProcessing source file: " + srcFile.getName() + " (" + srcPath + ")");
-                readProblemData(srcPath, problemType);
+                readProblemData(srcFile.getAbsolutePath(), problemType);
+                if (locations == null || locations.length == 0) continue;
                 
-                if (locations == null || locations.length == 0) {
-                    System.err.println("Failed to read locations from: " + srcPath);
-                    continue;
-                }
-                
-                System.out.println("Successfully read " + locations.length + " locations from: " + srcFile.getName());
-                
-                // Tìm và đọc file solution tương ứng
                 File solutionFile = getMatchingSolutionFile(srcFile, solutionDirPath);
-                if (solutionFile == null) {
-                    System.err.println("No matching solution file found for: " + srcFile.getName());
-                    continue;
-                }
+                if (solutionFile == null) continue;
                 
-                String solutionPath = solutionFile.getAbsolutePath();
-                System.out.println("Processing solution file: " + solutionFile.getName() + " (" + solutionPath + ")");
-                readSolution(solutionPath);
+                readSolution(solutionFile.getAbsolutePath());
+                if (routes == null || routes.length == 0) continue;
                 
-                if (routes == null || routes.length == 0) {
-                    System.err.println("Failed to read routes from: " + solutionPath);
-                    continue;
-                }
-                
-                System.out.println("Successfully read " + routes.length + " routes from: " + solutionFile.getName());
-                
-                // Gọi callback để xử lý dữ liệu
                 callback.process(locations, routes, srcFile.getName());
-                
-                // Giải phóng bộ nhớ sau khi xử lý xong
                 System.gc();
                 
             } catch (Exception e) {
                 System.err.println("Error processing file " + srcFile.getName() + ": " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
     
-    /**
-     * Interface callback để xử lý sau khi đọc mỗi cặp file
-     */
     public interface FileProcessCallback {
         void process(Location[] locations, Route[] routes, String fileName);
     }

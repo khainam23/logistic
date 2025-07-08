@@ -86,7 +86,7 @@ public class ExecutionUtil {
 
             // Đọc giải pháp
             System.out.println("Đang đọc giải pháp từ file: " + dataSolution);
-            rdff.readSolution(dataSolution);
+            rdff.readSolution(dataSolution, problemType);
             Route[] routes = rdff.getRoutes();
 
             if (routes == null || routes.length == 0) {
