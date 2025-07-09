@@ -533,11 +533,77 @@ def print_file_info(customers, vehicles, filename):
         print(f"  💰 Dung lượng xe: {vehicles[0].capacity}")
     print(f"  ⏰ Thời gian xử lý: ", end="")
 
-def process_directory(src_dir, solution_dir):
+def get_export_directory(src_dir):
+    """Tạo đường dẫn thư mục export dựa trên tên bài toán"""
+    # Lấy tên bài toán từ đường dẫn (thư mục cha của src)
+    # Ví dụ: từ "data/vrptw/src" -> lấy "vrptw"
+    parent_dir = os.path.dirname(os.path.normpath(src_dir))
+    problem_name = os.path.basename(parent_dir)
+    
+    # Tạo đường dẫn exports với tên bài toán và thêm solution
+    project_root = r"D:\Logistic\excute_data\logistic"
+    export_dir = os.path.join(project_root, "exports", problem_name, "solution")
+    
+    return export_dir
+
+def ensure_exports_structure():
+    """Đảm bảo cấu trúc thư mục exports tồn tại"""
+    project_root = r"D:\Logistic\excute_data\logistic"
+    exports_root = os.path.join(project_root, "exports")
+    
+    if not os.path.exists(exports_root):
+        os.makedirs(exports_root, exist_ok=True)
+        print(f"✅ Đã tạo thư mục exports: {exports_root}")
+    
+    return exports_root
+
+def show_exports_structure():
+    """Hiển thị cấu trúc thư mục exports"""
+    project_root = r"D:\Logistic\excute_data\logistic"
+    exports_root = os.path.join(project_root, "exports")
+    
+    if os.path.exists(exports_root):
+        print(f"\n📁 CẤU TRÚC THƯ MỤC EXPORTS:")
+        print(f"📂 {exports_root}")
+        
+        for item in os.listdir(exports_root):
+            item_path = os.path.join(exports_root, item)
+            if os.path.isdir(item_path):
+                solution_path = os.path.join(item_path, "solution")
+                if os.path.exists(solution_path):
+                    file_count = len([f for f in os.listdir(solution_path) if f.endswith('.txt')])
+                    print(f"   └── 📁 {item}/")
+                    print(f"       └── 📁 solution/ ({file_count} file kết quả)")
+                else:
+                    print(f"   └── 📁 {item}/ (chưa có solution)")
+    else:
+        print(f"❌ Thư mục exports chưa tồn tại: {exports_root}")
+
+def process_single_directory(src_dir):
+    """Xử lý một thư mục đơn lẻ với export tự động"""
+    export_dir = get_export_directory(src_dir)
+    
+    # Lấy tên bài toán từ đường dẫn
+    parent_dir = os.path.dirname(os.path.normpath(src_dir))
+    problem_name = os.path.basename(parent_dir)
+    
+    print(f"\n{'='*50}")
+    print(f"XỬ LÝ BÀI TOÁN: {problem_name}")
+    print(f"📂 Input: {src_dir}")
+    print(f"📁 Export: {export_dir}")
+    print(f"{'='*50}")
+    
+    process_directory(src_dir, export_dir)
+
+def process_directory(src_dir, solution_dir=None):
     """Xử lý tất cả file trong một thư mục"""
     if not os.path.exists(src_dir):
         print(f"❌ Thư mục {src_dir} không tồn tại")
         return
+    
+    # Nếu không có solution_dir, tự động tạo trong exports
+    if solution_dir is None:
+        solution_dir = get_export_directory(src_dir)
     
     # Tạo thư mục solution nếu chưa có
     os.makedirs(solution_dir, exist_ok=True)
@@ -619,30 +685,40 @@ def process_directory(src_dir, solution_dir):
 data_directories = [
     {
         'name': 'VRPTW',
-        'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution"
+        'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src"
     },
     {
         'name': 'PDPTW',
-        'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution"
+        'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src"
     },
     {
         'name': 'VRPSPDTW Wang Chen',
-        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\solution"
+        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\src"
     },
     {
         'name': 'VRPSPDTW Liu Tang Yao',
-        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\solution"
+        'src': r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\src"
     }
 ]
 
+# Đảm bảo cấu trúc thư mục exports tồn tại
+ensure_exports_structure()
+
 # Xử lý tất cả các thư mục
 for directory in data_directories:
-    print(f"\n{'='*50}")
-    print(f"XỬ LÝ THƯ MỤC: {directory['name']}")
-    print(f"{'='*50}")
-    
-    process_directory(directory['src'], directory['solution'])
+    process_single_directory(directory['src'])
+
+print(f"\n{'='*60}")
+print(f"🎯 HOÀN THÀNH TẤT CẢ BÀI TOÁN")
+print(f"📁 Tất cả kết quả được lưu trong thư mục: D:\\Logistic\\excute_data\\logistic\\exports\\")
+print(f"   - Cấu trúc: exports/[tên_bài_toán]/solution/")
+print(f"   - Mỗi bài toán có thư mục riêng với tên tương ứng")
+
+# Hiển thị cấu trúc thư mục exports
+show_exports_structure()
+
+print(f"{'='*60}")
+
+# Ví dụ sử dụng cho một bài toán cụ thể:
+# process_single_directory(r"D:\Logistic\excute_data\logistic\data\vrptw\src")
+# Kết quả sẽ được lưu trong: D:\Logistic\excute_data\logistic\exports\vrptw\solution\
