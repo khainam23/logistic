@@ -35,6 +35,49 @@ public class RLUtil {
     }
     
     /**
+     * Trích xuất tên dataset từ srcDirectory
+     * Ví dụ: "data/pdptw" -> "pdptw", "src/main/resources/data/vrptw" -> "vrptw"
+     */
+    private static String extractDatasetName(String srcDirectory) {
+        if (srcDirectory == null || srcDirectory.trim().isEmpty()) {
+            return "unknown";
+        }
+        
+        // Chuẩn hóa đường dẫn (thay thế \ thành /)
+        String normalizedPath = srcDirectory.replace("\\", "/");
+        
+        // Loại bỏ dấu / ở cuối nếu có
+        if (normalizedPath.endsWith("/")) {
+            normalizedPath = normalizedPath.substring(0, normalizedPath.length() - 1);
+        }
+        
+        // Lấy phần cuối cùng của đường dẫn
+        int lastSlashIndex = normalizedPath.lastIndexOf("/");
+        if (lastSlashIndex >= 0 && lastSlashIndex < normalizedPath.length() - 1) {
+            return normalizedPath.substring(lastSlashIndex + 1);
+        }
+        
+        // Nếu không có dấu /, trả về toàn bộ chuỗi
+        return normalizedPath;
+    }
+    
+    /**
+     * Tạo thư mục solution cho dataset
+     */
+    private static String createDatasetSolutionDirectory(String datasetName) {
+        String currentDir = System.getProperty("user.dir");
+        File datasetDir = new File(currentDir, "exports" + File.separator + datasetName);
+        File solutionDir = new File(datasetDir, "solution");
+        
+        // Tạo thư mục nếu chưa tồn tại
+        if (!solutionDir.exists()) {
+            solutionDir.mkdirs();
+        }
+        
+        return solutionDir.getAbsolutePath();
+    }
+    
+    /**
      * Xử lý tăng cường.
      * 
      * + Chạy các thuật toán trong thư mục như bình thường
@@ -52,8 +95,12 @@ public class RLUtil {
             CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType,
             FitnessStrategy strategy, ExportType exportType, int iterations, boolean parallelEnabled, int iterator, int epoch) {
 
+        // Trích xuất tên dataset từ srcDirectory
+        String datasetName = extractDatasetName(srcDirectory);
+        
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TĂNG CƯỜNG (RL) ===");
         System.out.println("Thư mục src: " + srcDirectory);
+        System.out.println("Dataset: " + datasetName);
         System.out.println("Thư mục solution: " + solutionDirectory);
         System.out.println("Số epoch: " + epoch);
         System.out.println("Số vòng lặp mỗi epoch: " + iterator);
@@ -142,7 +189,7 @@ public class RLUtil {
                             // Ghi file sau khi hoàn thành epoch với global best solution của file này
                             Solution currentFileBest = fileBestSolutions.get(fileName);
                             if (currentFileBest != null) {
-                                writeEpochResultToFile(fileName, currentEpoch, currentFileBest, exportType);
+                                writeEpochResultToFile(datasetName, fileName, currentEpoch, currentFileBest, exportType);
                             }
                             
                             // Global best đã được cập nhật trong từng iterator
@@ -172,7 +219,7 @@ public class RLUtil {
                 });
         
         // Ghi global best solution cho tất cả các file
-        writeGlobalBestSolution(epochResults, exportType);
+        writeGlobalBestSolution(datasetName, epochResults, exportType);
         
         System.out.println("\n=== HOÀN THÀNH XỬ LÝ TĂNG CƯỜNG (RL) ===");
     }
@@ -279,20 +326,23 @@ public class RLUtil {
     /**
      * Ghi kết quả của một epoch ra file
      */
-    private static void writeEpochResultToFile(String fileName, int epochNumber, 
+    private static void writeEpochResultToFile(String datasetName, String fileName, int epochNumber, 
                                               Solution solution, ExportType exportType) {
         if (exportType == ExportType.NONE) {
             return;
         }
         
         try {
+            // Tạo thư mục solution cho dataset
+            String solutionDirectory = createDatasetSolutionDirectory(datasetName);
+            
             // Tạo tên file output
             String baseFileName = fileName;
             if (baseFileName.contains(".")) {
                 baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
             }
             String outputFileName = String.format("%s%srl_epoch_%s_epoch%d.txt", 
-                getExportsDirectory(), File.separator, baseFileName, epochNumber);
+                solutionDirectory, File.separator, baseFileName, epochNumber);
             
             FileWriter writer = new FileWriter(outputFileName);
             
@@ -336,7 +386,7 @@ public class RLUtil {
     /**
      * Ghi global best solution ra file
      */
-    private static void writeGlobalBestSolution(List<EpochResult> epochResults, ExportType exportType) {
+    private static void writeGlobalBestSolution(String datasetName, List<EpochResult> epochResults, ExportType exportType) {
         if (exportType == ExportType.NONE || epochResults.isEmpty()) {
             return;
         }
@@ -363,7 +413,9 @@ public class RLUtil {
         }
         
         try {
-            String outputFileName = getExportsDirectory() + File.separator + "rl_global_best.txt";
+            // Tạo thư mục solution cho dataset
+            String solutionDirectory = createDatasetSolutionDirectory(datasetName);
+            String outputFileName = solutionDirectory + File.separator + "rl_global_best.txt";
             FileWriter writer = new FileWriter(outputFileName);
             
             // Ghi thông tin global best
