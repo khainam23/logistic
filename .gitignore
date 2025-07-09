@@ -41,6 +41,6 @@ build/
 .DS_Store
 
 # Loại bỏ dữ liệu kết quả
-src/main/resources/**/data/
+src/main/resources/**
 logs/
 exports/
