@@ -51,60 +51,202 @@ class Vehicle:
             return from_customer.distance_to(to_customer)
 
     def can_serve(self, customer):
+        """
+        Kiểm tra xem xe có thể phục vụ khách hàng này không
+        Theo logic Java: kiểm tra cả payload và time window constraints
+        """
         travel_time = self.get_travel_time(self.current_location, customer)
         arrival_time = self.time + travel_time
         
-        # Kiểm tra dung lượng
-        if self.remaining < customer.d_demand:
+        # Tính current payload (dung lượng đang sử dụng)
+        current_payload = self.capacity - self.remaining
+        
+        # Tính target payload sau khi thực hiện cả delivery và pickup
+        target_payload = current_payload
+        
+        # Delivery trước (giải phóng hàng)
+        if customer.d_demand > 0:
+            # Kiểm tra xem có đủ hàng để delivery không
+            if current_payload < customer.d_demand:
+                return False
+            target_payload -= customer.d_demand
+        
+        # Pickup sau (nhận thêm hàng)
+        if customer.p_demand > 0:
+            target_payload += customer.p_demand
+            # Kiểm tra xem có vượt quá capacity không
+            if target_payload > self.capacity:
+                return False
+        
+        # Kiểm tra ràng buộc thời gian
+        # Nếu đến sớm, phải chờ đến thời gian sẵn sàng (ltw)
+        service_start_time = max(arrival_time, customer.tw_start)
+        
+        # Nếu đến muộn hơn thời gian hạn chót (utw), không hợp lệ
+        if service_start_time > customer.tw_end:
             return False
         
-        # Kiểm tra thời gian - xe có thể đến sau due time
-        if arrival_time > customer.tw_end:
-            return False
-            
+        # Kiểm tra thời gian hoàn thành service + quay về depot
+        service_end_time = service_start_time + customer.service
+        
+        # Tạm thời giả sử depot luôn mở (có thể cải thiện sau)
+        # Trong thực tế cần kiểm tra depot closing time
+        
         return True
 
     def assign(self, customer):
+        """
+        Gán khách hàng vào tuyến đường
+        Theo logic Java: cập nhật đúng payload và time
+        """
         travel_time = self.get_travel_time(self.current_location, customer)
         self.time += travel_time
-        self.time = max(self.time, customer.tw_start)  # Đảm bảo xe đến sau thời gian sẵn sàng
-        self.time += customer.service  # Thời gian phục vụ khách hàng
-        self.remaining -= customer.d_demand  # Giảm dung lượng của xe
-        self.route.append(customer.cid)  # Thêm khách hàng vào tuyến đường
-        self.current_location = customer  # Cập nhật vị trí của xe
+        
+        # Kiểm tra ràng buộc thời gian - nếu đến sớm phải chờ
+        if self.time < customer.tw_start:
+            self.time = customer.tw_start
+        
+        # Cập nhật payload theo đúng logic pickup/delivery
+        if customer.d_demand > 0:  # Delivery
+            self.remaining += customer.d_demand  # Delivery giải phóng dung lượng
+        
+        if customer.p_demand > 0:  # Pickup  
+            self.remaining -= customer.p_demand  # Pickup chiếm dung lượng
+        
+        # Thêm thời gian phục vụ
+        self.time += customer.service
+        
+        # Cập nhật route và vị trí
+        self.route.append(customer.cid)
+        self.current_location = customer
         customer.assigned = True
+
+    def validate_route(self, all_customers):
+        """
+        Validate toàn bộ route theo logic Java CheckConditionUtil
+        """
+        if len(self.route) <= 2:  # Chỉ có depot hoặc depot + 1 customer
+            return True
+        
+        # Tạo customer dictionary
+        customer_dict = {c.cid: c for c in all_customers}
+        
+        current_payload = 0  # Bắt đầu với payload = 0 (xe rỗng)
+        current_time = 0
+        
+        # Tìm depot trong all_customers
+        depot = None
+        for customer in all_customers:
+            if customer.cid == 0:
+                depot = customer
+                break
+        
+        if depot is None:
+            return False
+            
+        previous_location = depot
+        
+        for i, customer_id in enumerate(self.route):
+            if customer_id == 0:  # Skip depot
+                continue
+                
+            if customer_id not in customer_dict:
+                return False
+                
+            customer = customer_dict[customer_id]
+            
+            # Tính travel time từ vị trí trước đó
+            travel_time = previous_location.distance_to(customer)
+            current_time += travel_time
+            
+            # Kiểm tra ràng buộc thời gian - nếu đến sớm phải chờ
+            if current_time < customer.tw_start:
+                current_time = customer.tw_start
+            
+            # Kiểm tra có đến muộn không
+            if current_time > customer.tw_end:
+                return False
+            
+            # Kiểm tra ràng buộc trọng tải
+            # Delivery trước (phải có đủ hàng để giao)
+            if customer.d_demand > 0:
+                if current_payload < customer.d_demand:
+                    return False
+                current_payload -= customer.d_demand
+            
+            # Pickup sau (nhận thêm hàng)
+            if customer.p_demand > 0:
+                current_payload += customer.p_demand
+                if current_payload > self.capacity:
+                    return False
+            
+            # Thêm service time
+            current_time += customer.service
+            
+            # Cập nhật vị trí trước đó
+            previous_location = customer
+        
+        return True
 
     def return_to_depot(self):
         self.route.append(0)  # Quay lại điểm xuất phát (depot)
 
-# greedy algorithm
+# greedy algorithm với constraint validation cải tiến
 def assign_customers_to_vehicles(customers, vehicles):
+    """
+    Thuật toán greedy với kiểm tra ràng buộc theo logic Java
+    """
+    # Thêm depot vào đầu để tạo complete customer list
+    depot = vehicles[0].current_location
+    all_customers = [depot] + customers
+    
     unassigned = [c for c in customers if not c.assigned]
+    
+    print(f"🔄 Bắt đầu gán {len(unassigned)} khách hàng cho {len(vehicles)} xe...")
 
     while unassigned:
         progress = False
         for vehicle in vehicles:
             best_customer = None
             best_distance = float('inf')
+            
             for customer in unassigned:
                 if vehicle.can_serve(customer):
-                    # Sử dụng travel time thay vì distance
+                    # Sử dụng travel time để chọn khách hàng gần nhất
                     travel_time = vehicle.get_travel_time(vehicle.current_location, customer)
                     if travel_time < best_distance:
                         best_distance = travel_time
                         best_customer = customer
+            
             if best_customer:
                 vehicle.assign(best_customer)
                 unassigned.remove(best_customer)
                 progress = True
+                
+                # Validate route sau khi assign (optional debug)
+                if not vehicle.validate_route(all_customers):
+                    print(f"⚠️ Warning: Route validation failed for vehicle {vehicle.id}")
+        
         if not progress:
-            break  # Nếu không có tiến bộ, thoát khỏi vòng lặp
+            print(f"⚠️ Không thể gán {len(unassigned)} khách hàng còn lại")
+            # In thông tin debug về khách hàng không gán được
+            for customer in unassigned[:3]:  # Chỉ hiển thị 3 khách hàng đầu
+                print(f"   - Customer {customer.cid}: d_demand={customer.d_demand}, p_demand={customer.p_demand}, tw=[{customer.tw_start}, {customer.tw_end}]")
+            break
 
-    # Quay về depot khi đã hoàn thành các tuyến đường
+    # Quay về depot và validate final routes
+    valid_routes = 0
     for vehicle in vehicles:
         if vehicle.route[-1] != 0:
             vehicle.return_to_depot()
+        
+        if len(vehicle.route) > 2:  # Có khách hàng
+            if vehicle.validate_route(all_customers):
+                valid_routes += 1
+            else:
+                print(f"❌ Vehicle {vehicle.id} có route không hợp lệ: {vehicle.route}")
 
+    print(f"✅ Hoàn thành: {valid_routes} route hợp lệ")
     return vehicles
 
 def detect_file_format(lines):
@@ -522,6 +664,55 @@ def write_solution(filename, vehicles):
             route_str = ' '.join(map(str, vehicle.route))
             f.write(f"Route {vehicle.id}: {route_str}\n")
 
+def analyze_solution_quality(customers, vehicles):
+    """
+    Phân tích chất lượng solution
+    """
+    print(f"\n📊 PHÂN TÍCH CHẤT LƯỢNG SOLUTION:")
+    
+    # Thống kê cơ bản
+    total_customers = len(customers)
+    assigned_customers = len([c for c in customers if c.assigned])
+    used_vehicles = len([v for v in vehicles if len(v.route) > 2])
+    
+    print(f"   👥 Khách hàng được phục vụ: {assigned_customers}/{total_customers} ({assigned_customers/total_customers*100:.1f}%)")
+    print(f"   🚛 Xe được sử dụng: {used_vehicles}/{len(vehicles)}")
+    
+    # Phân tích payload utilization
+    total_capacity = sum(v.capacity for v in vehicles)
+    used_capacity = sum(v.capacity - v.remaining for v in vehicles if len(v.route) > 2)
+    
+    print(f"   📦 Utilization: {used_capacity}/{total_capacity} ({used_capacity/total_capacity*100:.1f}%)")
+    
+    # Phân tích theo loại demand
+    delivery_customers = [c for c in customers if c.d_demand > 0]
+    pickup_customers = [c for c in customers if c.p_demand > 0]
+    both_customers = [c for c in customers if c.d_demand > 0 and c.p_demand > 0]
+    
+    print(f"   📋 Loại khách hàng:")
+    print(f"      - Chỉ delivery: {len(delivery_customers)}")
+    print(f"      - Chỉ pickup: {len(pickup_customers)}")
+    print(f"      - Cả hai: {len(both_customers)}")
+    
+    # Kiểm tra constraint violations
+    violations = 0
+    depot = vehicles[0].current_location
+    all_customers = [depot] + customers
+    
+    for vehicle in vehicles:
+        if len(vehicle.route) > 2:
+            if not vehicle.validate_route(all_customers):
+                violations += 1
+    
+    print(f"   ⚠️ Constraint violations: {violations} routes")
+    
+    return {
+        'assigned_rate': assigned_customers/total_customers,
+        'vehicle_utilization': used_vehicles/len(vehicles),
+        'capacity_utilization': used_capacity/total_capacity if total_capacity > 0 else 0,
+        'violations': violations
+    }
+
 def print_file_info(customers, vehicles, filename):
     """In thông tin về file vừa xử lý"""
     print(f"  📁 File: {os.path.basename(filename)}")
@@ -649,8 +840,11 @@ def process_directory(src_dir, solution_dir=None):
         # In thông tin file
         print_file_info(customers, vehicles, fname)
         
-        # Giải thuật
+        # Giải thuật với constraint validation cải tiến
         vehicles_and_way = assign_customers_to_vehicles(customers, vehicles)
+        
+        # Phân tích chất lượng solution
+        quality_metrics = analyze_solution_quality(customers, vehicles_and_way)
         
         # Lưu kết quả - đổi đuôi thành .txt
         base_name = os.path.splitext(fname)[0]  # Lấy tên file không có đuôi
@@ -660,15 +854,14 @@ def process_directory(src_dir, solution_dir=None):
         
         # Tính thời gian xử lý
         processing_time = time.time() - start_time
-        print(f"{processing_time:.2f}s")
+        print(f"⏱️ Thời gian xử lý: {processing_time:.2f}s")
         
-        # Thống kê kết quả
-        used_vehicles = sum(1 for v in vehicles_and_way if len(v.route) > 2)
-        assigned_customers = sum(1 for c in customers if c.assigned)
-        
-        print(f"  ✅ Kết quả:")
-        print(f"     - Xe sử dụng: {used_vehicles}/{len(vehicles)}")
-        print(f"     - Khách hàng được phục vụ: {assigned_customers}/{len(customers)}")
+        # Thống kê kết quả với metrics mới
+        print(f"  ✅ Kết quả tổng quan:")
+        print(f"     - Assigned rate: {quality_metrics['assigned_rate']*100:.1f}%")
+        print(f"     - Vehicle utilization: {quality_metrics['vehicle_utilization']*100:.1f}%") 
+        print(f"     - Capacity utilization: {quality_metrics['capacity_utilization']*100:.1f}%")
+        print(f"     - Constraint violations: {quality_metrics['violations']}")
         print(f"     - File kết quả: {os.path.basename(solution_path)}")
         
         processed_count += 1
