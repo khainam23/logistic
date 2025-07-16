@@ -54,9 +54,6 @@ public abstract class AbstractOptimizer implements Optimizer {
         int temp = way[pos1];
         way[pos1] = way[pos2];
         way[pos2] = temp;
-
-        // Đảm bảo giá trị không vượt quá giới hạn
-        validateLocationIndices(way);
     }
 
     /**
@@ -81,9 +78,6 @@ public abstract class AbstractOptimizer implements Optimizer {
             way[i] = posVal;
             posVal = tempVal;
         }
-
-        // Đảm bảo giá trị không vượt quá giới hạn
-        validateLocationIndices(way);
     }
 
     /**
@@ -116,9 +110,6 @@ public abstract class AbstractOptimizer implements Optimizer {
             pos1++;
             pos2--;
         }
-
-        // Đảm bảo giá trị không vượt quá giới hạn
-        validateLocationIndices(way);
     }
 
     /**
@@ -225,10 +216,6 @@ public abstract class AbstractOptimizer implements Optimizer {
         int temp = way1[pos1];
         way1[pos1] = way2[pos2];
         way2[pos2] = temp;
-
-        // Đảm bảo giá trị không vượt quá giới hạn
-        validateLocationIndices(way1);
-        validateLocationIndices(way2);
 
         // Cập nhật khoảng cách nếu có thông tin về locations
         if (locations != null) {

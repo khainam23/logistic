@@ -120,7 +120,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         // Cập nhật từng tuyến đường (từng chiều)
         for (int i = 0; i < dimensions; i++) {
             // Pha 1: Tìm kiếm (dựa vào vector B)
-            if (Math.abs(B[i]) > 1) {
+            if (B[i] > 1) {
                 // Khám phá: thực hiện biến đổi ngẫu nhiên
                 applyRandomOperation(routes[i]);
             }
@@ -175,35 +175,97 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
     /**
      * Tính toán khoảng cách giữa hai tuyến đường
+     * Sử dụng số lượng điểm khác nhau và độ tương đồng về thứ tự
      */
     private double calculateRouteDistance(Route route1, Route route2) {
         int[] way1 = route1.getIndLocations();
         int[] way2 = route2.getIndLocations();
-        int minLength = Math.min(way1.length, way2.length);
-
-        double distance = 0;
-        for (int i = 0; i < minLength; i++) {
-            distance += Math.abs(way1[i] - way2[i]);
+        
+        if (way1.length == 0 && way2.length == 0) {
+            return 0.0;
         }
-        return distance / minLength;
+        
+        // Tính toán độ khác biệt về độ dài
+        // double lengthDifference = Math.abs(way1.length - way2.length);
+        
+        // Tính toán số điểm chung
+        int commonPoints = 0;
+        for (int loc1 : way1) {
+            for (int loc2 : way2) {
+                if (loc1 == loc2) {
+                    commonPoints++;
+                    break;
+                }
+            }
+        }
+        
+        // Tính toán độ tương đồng về thứ tự (cho các điểm chung)
+        double orderSimilarity = 0.0;
+        int minLength = Math.min(way1.length, way2.length);
+        if (minLength > 0) {
+            int samePositions = 0;
+            for (int i = 0; i < minLength; i++) {
+                if (way1[i] == way2[i]) {
+                    samePositions++;
+                }
+            }
+            orderSimilarity = (double) samePositions / minLength;
+        }
+        
+        // Kết hợp các yếu tố để tính khoảng cách
+        int maxLength = Math.max(way1.length, way2.length);
+        double structuralDistance = (maxLength - commonPoints) / (double) maxLength;
+        double orderDistance = 1.0 - orderSimilarity;
+        
+        // Trọng số: 60% cấu trúc, 40% thứ tự
+        return 0.6 * structuralDistance + 0.4 * orderDistance;
     }
 
     /**
      * Học hỏi từ tuyến đường tốt nhất với công thức SHO
+     * Thực hiện swap và reorder các điểm dựa trên best route
      */
     private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double E) {
         int[] targetWay = targetRoute.getIndLocations();
         int[] bestWay = bestRoute.getIndLocations();
-        int minLength = Math.min(targetWay.length, bestWay.length);
-
-        for (int i = 0; i < minLength; i++) {
-            // Công thức SHO: newPosition = bestPosition - E * D
-            double newPos = bestWay[i] - E * D;
-
-            // Làm tròn và điều chỉnh nếu cần
-            int adjustedPos = (int) Math.round(newPos);
-            if (adjustedPos >= 0 && adjustedPos < targetWay.length) {
-                targetWay[i] = adjustedPos;
+        
+        if (targetWay.length <= 1 || bestWay.length <= 1) {
+            return;
+        }
+        
+        // Tính toán số lượng thay đổi dựa trên công thức SHO
+        double intensity = Math.abs(E * D);
+        int numSwaps = Math.max(1, (int) Math.round(intensity * targetWay.length / 2));
+        numSwaps = Math.min(numSwaps, targetWay.length / 2);
+        
+        // Thực hiện swap các điểm để học hỏi từ best route
+        for (int swap = 0; swap < numSwaps; swap++) {
+            // Chọn ngẫu nhiên một điểm từ best route
+            int bestIndex = random.nextInt(bestWay.length);
+            int bestLocationId = bestWay[bestIndex];
+            
+            // Tìm điểm này trong target route
+            int targetIndex = -1;
+            for (int i = 0; i < targetWay.length; i++) {
+                if (targetWay[i] == bestLocationId) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            
+            // Nếu tìm thấy, di chuyển nó về vị trí tương tự như trong best route
+            if (targetIndex != -1) {
+                // Tính vị trí mục tiêu dựa trên tỷ lệ vị trí trong best route
+                double relativePos = (double) bestIndex / bestWay.length;
+                int newTargetIndex = (int) Math.round(relativePos * (targetWay.length - 1));
+                newTargetIndex = Math.max(0, Math.min(newTargetIndex, targetWay.length - 1));
+                
+                // Thực hiện swap nếu vị trí khác nhau
+                if (targetIndex != newTargetIndex) {
+                    int temp = targetWay[targetIndex];
+                    targetWay[targetIndex] = targetWay[newTargetIndex];
+                    targetWay[newTargetIndex] = temp;
+                }
             }
         }
     }
@@ -212,7 +274,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Chạy thuật toán SHO cải tiến
      */
     @Override
-
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
                         CheckConditionUtil checkConditionUtil, Location[] locations,
                         int currentTarget) {

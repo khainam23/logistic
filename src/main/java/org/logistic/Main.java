@@ -47,11 +47,11 @@ public class Main {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
-        RunMode runMode = RunMode.RL;
-        String dataLocation = "data/vrpspdtw_Wang_Chen/src/cdp101.txt";
-        String dataSolution = "data/vrpspdtw_Wang_Chen/solution/cdp101.txt";
-        String srcDirectory = "data/vrpspdtw_Wang_Chen/src";
-        String solutionDirectory = "data/vrpspdtw_Wang_Chen/solution";
+        RunMode runMode = RunMode.DIRECTORY;
+        String dataLocation = "data/vrpspdtw_Liu_Tang_Yao/src/cdp101.txt";
+        String dataSolution = "data/vrpspdtw_Liu_Tang_Yao/solution/cdp101.txt";
+        String srcDirectory = "data/vrpspdtw_Liu_Tang_Yao/src";
+        String solutionDirectory = "data/vrpspdtw_Liu_Tang_Yao/solution";
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
@@ -60,9 +60,9 @@ public class Main {
         // Đặt thành false để chạy tuần tự (không song song)
         boolean parallelEnabled = true;
         // Số vòng chạy cho RL
-        int epoch = 2;
+        int epoch = 1;
         // Loại bài toán (chỉ định trực tiếp)
-        ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPSPDTW_WANG_CHEN;
+        ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPSPDTW_LIU_TANG_YAO;
     }
 
     /**

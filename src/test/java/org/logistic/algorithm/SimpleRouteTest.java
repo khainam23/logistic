@@ -53,9 +53,10 @@ public class SimpleRouteTest {
             int[] routeLocs = solutionRoutes[i].getIndLocations();
             System.out.println("Route " + (i + 1) + ": " + Arrays.toString(routeLocs));
         }
+        
 
         // Tạo initial solutions từ solution đã đọc bằng SA
-        Solution mainSolution = new Solution(solutionRoutes, 0);
+        Solution mainSolution = new Solution(solutionRoutes, fitnessUtil.calculatorFitness(solutionRoutes, locations));
         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
         initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, maxCapacity);
 

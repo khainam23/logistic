@@ -135,9 +135,11 @@ public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
             double newPos = bestWay[i] - A * D;
             int adjustedPos = (int) Math.round(newPos); // X_best - A * D
 
-            if (adjustedPos >= 0 && adjustedPos < way.length) {
+            // Kiểm tra tính hợp lệ của chỉ số location
+            if (locations != null && adjustedPos >= 1 && adjustedPos < locations.length) {
                 way[i] = adjustedPos;
             }
+            // Nếu không hợp lệ, giữ nguyên giá trị cũ
         }
     }
 
@@ -153,9 +155,11 @@ public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
             double newPos = D_ * Math.exp(b * l) * Math.cos(2 * Math.PI * l) + bestWay[i]; // D' * e^(bl) * cos(2pi * l) + X_best
             int adjustedPos = (int) Math.round(newPos);
 
-            if (adjustedPos >= 0 && adjustedPos < way.length) {
+            // Kiểm tra tính hợp lệ của chỉ số location
+            if (locations != null && adjustedPos >= 1 && adjustedPos < locations.length) {
                 way[i] = adjustedPos;
             }
+            // Nếu không hợp lệ, giữ nguyên giá trị cũ
         }
     }
 

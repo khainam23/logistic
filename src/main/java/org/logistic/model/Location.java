@@ -23,7 +23,7 @@ public class Location {
      * @return Tổng thời gian phục vụ
      */
     public int totalServiceTime() {
-        return serviceTimeDeliver;
+        return serviceTimeDeliver + serviceTimePick;
     }
 
     /**

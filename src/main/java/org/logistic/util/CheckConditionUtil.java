@@ -30,7 +30,7 @@ public class CheckConditionUtil {
      * 
      * Hợp lệ là khi:
      * - Trọng tải không xảy ra mâu thuẫn (không xuất hiện số âm trong quá trình)
-     * - Thời gian giao phải khớp với cửa sổ thời gian
+     * - Thời gian giao phải khớp với cửa sổ thời gian (cả ltw và utw)
      *
      * @param route Tuyến đường cần kiểm tra
      * @param locations Mảng các vị trí
@@ -41,24 +41,13 @@ public class CheckConditionUtil {
     public boolean isInsertionFeasible(Route route, Location[] locations, int maxPayload, int currTarget) {
         int[] indLocations = route.getIndLocations();
         int targetPayload = currTarget;
-        int serviceTime = 0;
+        int currentTime = 0;
         int length = indLocations.length;
 
         for (int i = 0; i < length; i++) {
             Location currLoc = locations[indLocations[i]];
 
-            // Kiểm tra có vi phạm thời gian tối đa
-            if (i < length - 1) {
-                Location nextLoc = locations[indLocations[i + 1]];
-                serviceTime += currLoc.totalServiceTime() + currLoc.distance(nextLoc);
-                
-                // Nếu vượt quá cửa sổ thời gian trên, tuyến đường không hợp lệ
-                if (serviceTime > nextLoc.getUtw()) {
-                    return false;
-                }
-            }
-
-            // Kiểm tra giao hàng
+            // Kiểm tra ràng buộc trọng tải trước khi thực hiện hoạt động
             if (currLoc.isDeliver()) {
                 targetPayload -= currLoc.getDemandDeliver();
                 // Nếu trọng tải âm, tuyến đường không hợp lệ
@@ -67,13 +56,32 @@ public class CheckConditionUtil {
                 }
             }
 
-            // Kiểm tra lấy hàng
             if (currLoc.isPick()) {
                 targetPayload += currLoc.getDemandPick();
                 // Nếu vượt quá trọng tải tối đa, tuyến đường không hợp lệ
                 if (targetPayload > maxPayload) {
                     return false;
                 }
+            }
+
+            // Kiểm tra ràng buộc thời gian tại địa điểm hiện tại
+            // Nếu đến sớm, phải chờ đến thời gian sẵn sàng
+            if (currentTime < currLoc.getLtw()) {
+                currentTime = currLoc.getLtw();
+            }
+            
+            // Nếu đến muộn hơn thời gian hạn chót, tuyến đường không hợp lệ
+            if (currentTime > currLoc.getUtw()) {
+                return false;
+            }
+
+            // Thêm thời gian phục vụ tại địa điểm hiện tại
+            currentTime += currLoc.getServiceTime();
+
+            // Tính thời gian di chuyển đến địa điểm tiếp theo
+            if (i < length - 1) {
+                Location nextLoc = locations[indLocations[i + 1]];
+                currentTime += currLoc.distance(nextLoc);
             }
         }
 
