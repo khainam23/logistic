@@ -53,7 +53,7 @@ class Vehicle:
     def can_serve(self, customer):
         """
         Kiểm tra xem xe có thể phục vụ khách hàng này không
-        Theo logic Java: kiểm tra cả payload và time window constraints
+        Theo logic VRPSPDTW Wang Chen: delivery trước, pickup sau
         """
         travel_time = self.get_travel_time(self.current_location, customer)
         arrival_time = self.time + travel_time
@@ -61,36 +61,30 @@ class Vehicle:
         # Tính current payload (dung lượng đang sử dụng)
         current_payload = self.capacity - self.remaining
         
-        # Tính target payload sau khi thực hiện cả delivery và pickup
-        target_payload = current_payload
+        # Trong VRPSPDTW Wang Chen format:
+        # Xe thực hiện DELIVERY TRƯỚC, PICKUP SAU tại cùng một khách hàng
+        # Tính payload sau khi thực hiện cả delivery và pickup
+        
+        final_payload = current_payload
         
         # Delivery trước (giải phóng hàng)
         if customer.d_demand > 0:
-            # Kiểm tra xem có đủ hàng để delivery không
             if current_payload < customer.d_demand:
-                return False
-            target_payload -= customer.d_demand
+                return False  # Không đủ hàng để delivery
+            final_payload -= customer.d_demand
         
         # Pickup sau (nhận thêm hàng)
         if customer.p_demand > 0:
-            target_payload += customer.p_demand
-            # Kiểm tra xem có vượt quá capacity không
-            if target_payload > self.capacity:
-                return False
+            final_payload += customer.p_demand
+            if final_payload > self.capacity:
+                return False  # Vượt quá capacity sau pickup
         
         # Kiểm tra ràng buộc thời gian
-        # Nếu đến sớm, phải chờ đến thời gian sẵn sàng (ltw)
         service_start_time = max(arrival_time, customer.tw_start)
         
-        # Nếu đến muộn hơn thời gian hạn chót (utw), không hợp lệ
+        # Nếu đến muộn hơn thời gian hạn chót, không hợp lệ
         if service_start_time > customer.tw_end:
             return False
-        
-        # Kiểm tra thời gian hoàn thành service + quay về depot
-        service_end_time = service_start_time + customer.service
-        
-        # Tạm thời giả sử depot luôn mở (có thể cải thiện sau)
-        # Trong thực tế cần kiểm tra depot closing time
         
         return True
 
@@ -387,9 +381,12 @@ def read_vrpspdtw_format(lines):
                     # Bỏ qua dòng không hợp lệ
                     continue
     
-    # Tạo xe
+    # Tạo xe - trong VRPSPDTW Wang Chen, xe bắt đầu với hàng đầy
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0], None))
+        vehicle = Vehicle(i, capacity, customers[0], None)
+        # Xe bắt đầu với hàng đầy để có thể delivery
+        vehicle.remaining = 0  # Hàng đầy
+        vehicles.append(vehicle)
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
