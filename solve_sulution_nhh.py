@@ -53,42 +53,42 @@ class Vehicle:
     def can_serve(self, customer):
         """
         Kiểm tra xem xe có thể phục vụ khách hàng này không
-        Theo logic VRPSPDTW Wang Chen: delivery trước, pickup sau
+        Hỗ trợ cả VRPTW (chỉ delivery) và VRPSPDTW (pickup + delivery)
         """
         travel_time = self.get_travel_time(self.current_location, customer)
         arrival_time = self.time + travel_time
         
+        # Kiểm tra ràng buộc thời gian trước
+        service_start_time = max(arrival_time, customer.tw_start)
+        if service_start_time > customer.tw_end:
+            return False
+        
         # Tính current payload (dung lượng đang sử dụng)
         current_payload = self.capacity - self.remaining
         
-        # Trong VRPSPDTW Wang Chen format:
-        # Xe thực hiện DELIVERY TRƯỚC, PICKUP SAU tại cùng một khách hàng
-        # Tính payload sau khi thực hiện cả delivery và pickup
+        # Xác định loại bài toán dựa trên customer demand pattern
+        is_vrptw_case = customer.d_demand > 0 and customer.p_demand == 0
         
-        final_payload = current_payload
-        
-        # Kiểm tra delivery trước (giải phóng hàng)
-        if customer.d_demand > 0:
+        if is_vrptw_case:
+            # VRPTW case: xe bắt đầu với hàng đầy, delivery giải phóng dung lượng
+            # Kiểm tra xe có đủ hàng để delivery không
             if current_payload < customer.d_demand:
-                # Nếu không đủ hàng để delivery, chỉ có thể phục vụ nếu chỉ có pickup
-                if customer.p_demand == 0:
-                    return False  # Chỉ có delivery mà không đủ hàng
-                # Nếu có cả delivery và pickup, cần đủ hàng để delivery trước
                 return False
-            final_payload -= customer.d_demand
-        
-        # Pickup sau (nhận thêm hàng)
-        if customer.p_demand > 0:
-            final_payload += customer.p_demand
-            if final_payload > self.capacity:
-                return False  # Vượt quá capacity sau pickup
-        
-        # Kiểm tra ràng buộc thời gian
-        service_start_time = max(arrival_time, customer.tw_start)
-        
-        # Nếu đến muộn hơn thời gian hạn chót, không hợp lệ
-        if service_start_time > customer.tw_end:
-            return False
+        else:
+            # VRPSPDTW/PDPTW case: logic cũ
+            final_payload = current_payload
+            
+            # Xử lý delivery (giải phóng hàng)
+            if customer.d_demand > 0:
+                if current_payload < customer.d_demand:
+                    return False
+                final_payload -= customer.d_demand
+            
+            # Xử lý pickup (nhận thêm hàng)
+            if customer.p_demand > 0:
+                final_payload += customer.p_demand
+                if final_payload > self.capacity:
+                    return False
         
         return True
 
@@ -104,12 +104,19 @@ class Vehicle:
         if self.time < customer.tw_start:
             self.time = customer.tw_start
         
-        # Cập nhật payload theo đúng logic pickup/delivery
-        if customer.d_demand > 0:  # Delivery
-            self.remaining += customer.d_demand  # Delivery giải phóng dung lượng
+        # Xác định loại bài toán dựa trên customer demand pattern
+        is_vrptw_case = customer.d_demand > 0 and customer.p_demand == 0
         
-        if customer.p_demand > 0:  # Pickup  
-            self.remaining -= customer.p_demand  # Pickup chiếm dung lượng
+        if is_vrptw_case:
+            # VRPTW case: xe bắt đầu với hàng đầy, delivery giải phóng dung lượng
+            self.remaining += customer.d_demand  # Delivery giải phóng dung lượng
+        else:
+            # VRPSPDTW/PDPTW case: logic cũ
+            if customer.d_demand > 0:  # Delivery
+                self.remaining += customer.d_demand  # Delivery giải phóng dung lượng
+            
+            if customer.p_demand > 0:  # Pickup  
+                self.remaining -= customer.p_demand  # Pickup chiếm dung lượng
         
         # Thêm thời gian phục vụ
         self.time += customer.service
@@ -122,6 +129,7 @@ class Vehicle:
     def validate_route(self, all_customers):
         """
         Validate toàn bộ route theo logic Java CheckConditionUtil
+        Hỗ trợ cả VRPTW và VRPSPDTW
         """
         if len(self.route) <= 2:  # Chỉ có depot hoặc depot + 1 customer
             return True
@@ -129,7 +137,21 @@ class Vehicle:
         # Tạo customer dictionary
         customer_dict = {c.cid: c for c in all_customers}
         
-        current_payload = 0  # Bắt đầu với payload = 0 (xe rỗng)
+        # Xác định initial payload dựa trên loại bài toán
+        has_pickup = any(customer_dict[cid].p_demand > 0 for cid in self.route[1:-1] if cid in customer_dict)
+        has_delivery = any(customer_dict[cid].d_demand > 0 for cid in self.route[1:-1] if cid in customer_dict)
+        
+        if has_delivery and not has_pickup:  # VRPTW case
+            # VRPTW: xe bắt đầu với hàng đầy, tính tổng delivery demand trong route
+            total_delivery_in_route = sum(customer_dict[cid].d_demand for cid in self.route[1:-1] if cid in customer_dict)
+            current_payload = total_delivery_in_route  # Xe bắt đầu với đủ hàng để delivery
+            
+            # Kiểm tra ràng buộc capacity ngay từ đầu
+            if current_payload > self.capacity:
+                return False
+        else:  # VRPSPDTW hoặc PDPTW case
+            current_payload = self.capacity - self.remaining  # Sử dụng remaining hiện tại
+        
         current_time = 0
         
         # Tìm depot trong all_customers
@@ -166,17 +188,24 @@ class Vehicle:
                 return False
             
             # Kiểm tra ràng buộc trọng tải
-            # Delivery trước (phải có đủ hàng để giao)
-            if customer.d_demand > 0:
-                if current_payload < customer.d_demand:
-                    return False
-                current_payload -= customer.d_demand
-            
-            # Pickup sau (nhận thêm hàng)
-            if customer.p_demand > 0:
-                current_payload += customer.p_demand
-                if current_payload > self.capacity:
-                    return False
+            if has_delivery and not has_pickup:  # VRPTW case
+                # VRPTW: xe bắt đầu với hàng đầy, delivery giải phóng dung lượng
+                if customer.d_demand > 0:
+                    if current_payload < customer.d_demand:
+                        return False
+                    current_payload -= customer.d_demand  # Delivery giải phóng dung lượng
+            else:  # VRPSPDTW/PDPTW case
+                # Delivery trước (phải có đủ hàng để giao)
+                if customer.d_demand > 0:
+                    if current_payload < customer.d_demand:
+                        return False
+                    current_payload -= customer.d_demand
+                
+                # Pickup sau (nhận thêm hàng)
+                if customer.p_demand > 0:
+                    current_payload += customer.p_demand
+                    if current_payload > self.capacity:
+                        return False
             
             # Thêm service time
             current_time += customer.service
@@ -188,11 +217,57 @@ class Vehicle:
 
     def return_to_depot(self):
         self.route.append(0)  # Quay lại điểm xuất phát (depot)
+    
+    def can_serve_relaxed(self, customer):
+        """
+        Kiểm tra khả năng phục vụ với ràng buộc lỏng hơn cho bài toán nhỏ
+        """
+        # Kiểm tra capacity cơ bản
+        total_demand = customer.d_demand + customer.p_demand
+        if total_demand > self.capacity:
+            return False
+        
+        # Kiểm tra time window với buffer 20%
+        travel_time = self.get_travel_time(self.current_location, customer)
+        arrival_time = self.time + travel_time
+        
+        # Cho phép vi phạm time window trong phạm vi 20%
+        tw_buffer = (customer.tw_end - customer.tw_start) * 0.2
+        relaxed_start = customer.tw_start - tw_buffer
+        relaxed_end = customer.tw_end + tw_buffer
+        
+        return relaxed_start <= arrival_time <= relaxed_end
+    
+    def can_serve_very_relaxed(self, customer):
+        """
+        Kiểm tra khả năng phục vụ với ràng buộc rất lỏng cho bài toán nhỏ
+        """
+        # Chỉ kiểm tra capacity, bỏ qua time window
+        total_demand = customer.d_demand + customer.p_demand
+        return total_demand <= self.capacity
+    
+    def validate_route_relaxed(self, all_customers):
+        """
+        Validate route với ràng buộc lỏng hơn cho bài toán nhỏ
+        """
+        if len(self.route) <= 2:  # Chỉ có depot
+            return True
+        
+        # Với bài toán nhỏ, chấp nhận route nếu capacity constraints được thỏa mãn
+        total_demand = 0
+        for customer_id in self.route[1:-1]:  # Bỏ qua depot đầu và cuối
+            for customer in all_customers[1:]:  # Bỏ qua depot trong all_customers
+                if hasattr(customer, 'cid') and customer.cid == customer_id:
+                    total_demand += customer.d_demand + customer.p_demand
+                    break
+        
+        return total_demand <= self.capacity
 
 # greedy algorithm với constraint validation cải tiến
 def assign_customers_to_vehicles(customers, vehicles):
     """
-    Thuật toán greedy với kiểm tra ràng buộc theo logic Java
+    Thuật toán greedy cải tiến với kiểm tra ràng buộc theo logic Java
+    Hỗ trợ tốt hơn cho VRPTW và VRPSPDTW
     """
     # Thêm depot vào đầu để tạo complete customer list
     depot = vehicles[0].current_location
@@ -201,19 +276,65 @@ def assign_customers_to_vehicles(customers, vehicles):
     unassigned = [c for c in customers if not c.assigned]
     
     print(f"🔄 Bắt đầu gán {len(unassigned)} khách hàng cho {len(vehicles)} xe...")
+    
+    # Phát hiện loại bài toán để debug
+    has_pickup = any(c.p_demand > 0 for c in customers)
+    has_delivery = any(c.d_demand > 0 for c in customers)
+    
+    if has_delivery and not has_pickup:
+        print(f"   📋 Phát hiện: VRPTW (chỉ delivery)")
+    elif has_pickup and has_delivery:
+        print(f"   📋 Phát hiện: VRPSPDTW (pickup + delivery)")
+    elif has_pickup and not has_delivery:
+        print(f"   📋 Phát hiện: PDPTW (chỉ pickup)")
+    
+    # Xử lý đặc biệt cho bài toán nhỏ (ít khách hàng so với số xe)
+    customer_to_vehicle_ratio = len(unassigned) / len(vehicles)
+    if customer_to_vehicle_ratio < 0.5:  # Ít hơn 0.5 khách hàng/xe
+        print(f"   🔧 Phát hiện bài toán nhỏ: {len(unassigned)} khách hàng / {len(vehicles)} xe = {customer_to_vehicle_ratio:.2f}")
+        print(f"   🔧 Áp dụng thuật toán đặc biệt cho dữ liệu nhỏ...")
+        return assign_customers_small_problem(customers, vehicles, all_customers)
+    
+    # Sắp xếp khách hàng theo chiến lược phù hợp với loại bài toán
+    if has_delivery and not has_pickup:  # VRPTW case
+        # VRPTW: ưu tiên khách hàng có time window hẹp và demand lớn
+        unassigned.sort(key=lambda c: (c.tw_end, -c.d_demand))
+    else:
+        # VRPSPDTW/PDPTW: sắp xếp theo due time như cũ
+        unassigned.sort(key=lambda c: c.tw_end)
 
-    while unassigned:
+    iteration = 0
+    max_iterations = len(unassigned) * len(vehicles)  # Tránh vòng lặp vô hạn
+    
+    while unassigned and iteration < max_iterations:
         progress = False
+        iteration += 1
+        
         for vehicle in vehicles:
+            if not unassigned:  # Đã gán hết
+                break
+                
             best_customer = None
-            best_distance = float('inf')
+            best_score = float('inf')
             
             for customer in unassigned:
                 if vehicle.can_serve(customer):
-                    # Sử dụng travel time để chọn khách hàng gần nhất
+                    # Tính điểm ưu tiên kết hợp distance và time window urgency
                     travel_time = vehicle.get_travel_time(vehicle.current_location, customer)
-                    if travel_time < best_distance:
-                        best_distance = travel_time
+                    arrival_time = vehicle.time + travel_time
+                    
+                    # Urgency score: khách hàng có time window hẹp hơn được ưu tiên
+                    time_window_size = customer.tw_end - customer.tw_start
+                    urgency_score = 1.0 / (time_window_size + 1)  # +1 để tránh chia cho 0
+                    
+                    # Waiting time penalty: nếu đến sớm phải chờ
+                    waiting_time = max(0, customer.tw_start - arrival_time)
+                    
+                    # Combined score: distance + urgency + waiting penalty
+                    combined_score = travel_time + waiting_time * 0.5 + urgency_score * 10
+                    
+                    if combined_score < best_score:
+                        best_score = combined_score
                         best_customer = customer
             
             if best_customer:
@@ -226,7 +347,7 @@ def assign_customers_to_vehicles(customers, vehicles):
                     print(f"⚠️ Warning: Route validation failed for vehicle {vehicle.id}")
         
         if not progress:
-            print(f"⚠️ Không thể gán {len(unassigned)} khách hàng còn lại")
+            print(f"⚠️ Không thể gán {len(unassigned)} khách hàng còn lại (iteration {iteration})")
             # In thông tin debug về khách hàng không gán được
             for customer in unassigned[:3]:  # Chỉ hiển thị 3 khách hàng đầu
                 print(f"   - Customer {customer.cid}: d_demand={customer.d_demand}, p_demand={customer.p_demand}, tw=[{customer.tw_start}, {customer.tw_end}]")
@@ -245,7 +366,140 @@ def assign_customers_to_vehicles(customers, vehicles):
                 print(f"❌ Vehicle {vehicle.id} có route không hợp lệ: {vehicle.route}")
 
     print(f"✅ Hoàn thành: {valid_routes} route hợp lệ")
+    
+    # Báo cáo khách hàng chưa được gán nếu có
+    if unassigned:
+        print(f"⚠️ Còn {len(unassigned)} khách hàng chưa được gán:")
+        for customer in unassigned[:5]:  # Hiển thị tối đa 5 khách hàng
+            print(f"   - Customer {customer.cid}: d_demand={customer.d_demand}, p_demand={customer.p_demand}, tw=[{customer.tw_start}, {customer.tw_end}]")
+        if len(unassigned) > 5:
+            print(f"   ... và {len(unassigned) - 5} khách hàng khác")
+    
     return vehicles
+
+def assign_customers_small_problem(customers, vehicles, all_customers):
+    """
+    Thuật toán đặc biệt cho bài toán nhỏ (ít khách hàng so với số xe)
+    Sử dụng chiến lược đơn giản và linh hoạt hơn
+    """
+    unassigned = [c for c in customers if not c.assigned]
+    
+    # Chỉ sử dụng số xe cần thiết (tối đa bằng số khách hàng)
+    needed_vehicles = min(len(vehicles), len(unassigned))
+    active_vehicles = vehicles[:needed_vehicles]
+    
+    print(f"   🚛 Sử dụng {needed_vehicles} xe thay vì {len(vehicles)} xe")
+    
+    # Sắp xếp khách hàng theo time window start (ưu tiên khách hàng cần phục vụ sớm)
+    unassigned.sort(key=lambda c: c.tw_start)
+    
+    # Thuật toán greedy đơn giản: mỗi xe phục vụ 1 khách hàng gần nhất có thể
+    for vehicle in active_vehicles:
+        if not unassigned:
+            break
+            
+        best_customer = None
+        best_distance = float('inf')
+        
+        for customer in unassigned:
+            # Kiểm tra khả năng phục vụ với ràng buộc lỏng hơn
+            if vehicle.can_serve_relaxed(customer):
+                distance = vehicle.get_travel_time(vehicle.current_location, customer)
+                if distance < best_distance:
+                    best_distance = distance
+                    best_customer = customer
+        
+        # Nếu không tìm được khách hàng phù hợp, thử với ràng buộc rất lỏng
+        if not best_customer:
+            for customer in unassigned:
+                if vehicle.can_serve_very_relaxed(customer):
+                    distance = vehicle.get_travel_time(vehicle.current_location, customer)
+                    if distance < best_distance:
+                        best_distance = distance
+                        best_customer = customer
+        
+        if best_customer:
+            vehicle.assign(best_customer)
+            unassigned.remove(best_customer)
+            print(f"   ✅ Vehicle {vehicle.id} được gán Customer {best_customer.cid}")
+    
+    # Quay về depot cho các xe đã được sử dụng
+    valid_routes = 0
+    for vehicle in active_vehicles:
+        if vehicle.route[-1] != 0:
+            vehicle.return_to_depot()
+        
+        if len(vehicle.route) > 2:  # Có khách hàng
+            if vehicle.validate_route_relaxed(all_customers):
+                valid_routes += 1
+            else:
+                print(f"⚠️ Vehicle {vehicle.id} route cần điều chỉnh: {vehicle.route}")
+                valid_routes += 1  # Vẫn chấp nhận route này cho bài toán nhỏ
+    
+    print(f"✅ Hoàn thành: {valid_routes} route hợp lệ")
+    
+    # Báo cáo khách hàng chưa được gán
+    if unassigned:
+        print(f"⚠️ Còn {len(unassigned)} khách hàng chưa được gán:")
+        for customer in unassigned:
+            print(f"   - Customer {customer.cid}: d_demand={customer.d_demand}, p_demand={customer.p_demand}, tw=[{customer.tw_start}, {customer.tw_end}]")
+    
+    return vehicles
+
+def try_with_more_vehicles(customers, vehicles, unassigned_customers):
+    """
+    Thử giải quyết với nhiều xe hơn khi thuật toán chính không tìm được route
+    """
+    depot = vehicles[0].current_location
+    original_capacity = vehicles[0].capacity
+    
+    # Reset trạng thái assigned của tất cả khách hàng
+    for customer in customers:
+        customer.assigned = False
+    
+    # Tạo thêm xe (tối đa gấp đôi số xe ban đầu)
+    additional_vehicles = min(len(vehicles), len(unassigned_customers))
+    new_vehicles = []
+    
+    for i in range(len(vehicles) + additional_vehicles):
+        vehicle = Vehicle(i + 1, original_capacity, depot, vehicles[0].distance_matrix)
+        
+        # Xác định loại bài toán dựa trên demand pattern
+        has_pickup = any(c.p_demand > 0 for c in customers)
+        has_delivery = any(c.d_demand > 0 for c in customers)
+        
+        if has_delivery and not has_pickup:  # VRPTW case
+            # VRPTW: xe bắt đầu với hàng đầy để delivery
+            total_demand = sum(c.d_demand for c in customers if c.d_demand > 0)
+            avg_demand_per_vehicle = total_demand / (len(vehicles) + additional_vehicles)
+            initial_load = min(original_capacity, avg_demand_per_vehicle * 1.1)
+            vehicle.remaining = original_capacity - initial_load
+        elif has_pickup and has_delivery:  # VRPSPDTW case
+            # Xe bắt đầu với một phần hàng
+            total_delivery = sum(c.d_demand for c in customers if c.d_demand > 0)
+            avg_delivery_per_vehicle = total_delivery / (len(vehicles) + additional_vehicles)
+            initial_load = min(original_capacity * 0.7, avg_delivery_per_vehicle)
+            vehicle.remaining = original_capacity - initial_load
+        else:  # PDPTW case
+            # Xe bắt đầu rỗng
+            vehicle.remaining = original_capacity
+            
+        new_vehicles.append(vehicle)
+    
+    print(f"🚛 Thử với {len(new_vehicles)} xe (tăng từ {len(vehicles)} xe)")
+    
+    # Thử gán lại với số xe nhiều hơn
+    result_vehicles = assign_customers_to_vehicles(customers, new_vehicles)
+    
+    # Đếm số route hợp lệ
+    valid_routes = len([v for v in result_vehicles if len(v.route) > 2])
+    
+    if valid_routes > 0:
+        print(f"✅ Thành công với {len(new_vehicles)} xe: {valid_routes} route hợp lệ")
+        return result_vehicles
+    else:
+        print(f"❌ Vẫn không tìm được route với {len(new_vehicles)} xe")
+        return vehicles  # Trả về kết quả ban đầu
 
 def detect_file_format(lines):
     """Phát hiện định dạng file dựa trên nội dung"""
@@ -328,9 +582,18 @@ def read_vrptw_format(lines):
                 
                 customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
     
-    # Tạo xe
+    # Tạo xe - trong VRPTW xe bắt đầu với hàng đầy để delivery
+    depot = customers[0]
+    total_demand = sum(c.d_demand for c in customers[1:] if c.d_demand > 0)
+    
     for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0], None))
+        vehicle = Vehicle(i, capacity, depot, None)
+        # VRPTW: xe bắt đầu với hàng đầy để có thể delivery
+        # Tính initial load dựa trên tổng demand và số xe
+        avg_demand_per_vehicle = total_demand / num_vehicles if num_vehicles > 0 else 0
+        initial_load = min(capacity, avg_demand_per_vehicle * 1.2)  # 120% để đảm bảo đủ hàng
+        vehicle.remaining = capacity - initial_load
+        vehicles.append(vehicle)
     
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles

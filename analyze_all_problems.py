@@ -90,19 +90,19 @@ def analyze_problem_results():
     
     problems = {
         'PDPTW': {
-            'solution_dir': 'exports/pdptw/solution_100_percent',
+            'solution_dir': 'exports/pdptw/solution',
             'description': 'Pickup and Delivery Problem with Time Windows'
         },
         'VRPTW': {
-            'solution_dir': 'exports/vrptw/solution_100_percent',
+            'solution_dir': 'exports/vrptw/solution',
             'description': 'Vehicle Routing Problem with Time Windows'
         },
         'VRPSPDTW_Wang_Chen': {
-            'solution_dir': 'exports/vrpspdtw_Wang_Chen/solution_100_percent',
+            'solution_dir': 'exports/vrpspdtw_Wang_Chen/solution',
             'description': 'VRP with Simultaneous Pickup-Delivery and Time Windows (Wang-Chen)'
         },
         'VRPSPDTW_Liu_Tang_Yao': {
-            'solution_dir': 'exports/vrpspdtw_Liu_Tang_Yao/solution_100_percent',
+            'solution_dir': 'exports/vrpspdtw_Liu_Tang_Yao/solution',
             'description': 'VRP with Simultaneous Pickup-Delivery and Time Windows (Liu-Tang-Yao)'
         }
     }
