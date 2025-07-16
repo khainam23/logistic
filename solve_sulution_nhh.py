@@ -67,10 +67,14 @@ class Vehicle:
         
         final_payload = current_payload
         
-        # Delivery trước (giải phóng hàng)
+        # Kiểm tra delivery trước (giải phóng hàng)
         if customer.d_demand > 0:
             if current_payload < customer.d_demand:
-                return False  # Không đủ hàng để delivery
+                # Nếu không đủ hàng để delivery, chỉ có thể phục vụ nếu chỉ có pickup
+                if customer.p_demand == 0:
+                    return False  # Chỉ có delivery mà không đủ hàng
+                # Nếu có cả delivery và pickup, cần đủ hàng để delivery trước
+                return False
             final_payload -= customer.d_demand
         
         # Pickup sau (nhận thêm hàng)
@@ -565,6 +569,7 @@ def read_explicit_wang_chen_format(lines):
     vehicles = []
     num_vehicles = 0
     capacity = 0
+    distance_matrix = DistanceMatrix()
     
     # Đọc thông tin header
     for line in lines:
@@ -579,9 +584,12 @@ def read_explicit_wang_chen_format(lines):
     
     # Tìm vị trí bắt đầu NODE_SECTION
     node_start = None
+    distance_start = None
     for i, line in enumerate(lines):
         if line.startswith('NODE_SECTION'):
             node_start = i + 1
+        elif line.startswith('DISTANCETIME_SECTION'):
+            distance_start = i + 1
             break
     
     # Đọc dữ liệu khách hàng từ NODE_SECTION
@@ -601,17 +609,46 @@ def read_explicit_wang_chen_format(lines):
                 service = float(parts[5])
                 
                 # Tạo tọa độ giả (vì explicit format có thể không có tọa độ)
-                # Hoặc có thể lấy từ distance matrix nếu cần
                 x = cid * 10  # Tạm thời tạo tọa độ giả
                 y = 0
                 
                 customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
     
-    # Tạo xe
-    for i in range(1, num_vehicles + 1):
-        vehicles.append(Vehicle(i, capacity, customers[0], None))
+    # Đọc ma trận khoảng cách từ DISTANCETIME_SECTION
+    if distance_start:
+        for i in range(distance_start, len(lines)):
+            line = lines[i]
+            if not line:
+                break
+            
+            parts = line.split(',')
+            if len(parts) >= 4:
+                from_node = int(parts[0])
+                to_node = int(parts[1])
+                distance = float(parts[2])
+                time = float(parts[3])
+                
+                distance_matrix.add_distance(from_node, to_node, distance, time)
     
-    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    # Tạo xe với distance matrix
+    depot = customers[0] if customers else Customer(0, 0, 0, 0, 0, 0, 1236, 0)
+    for i in range(1, num_vehicles + 1):
+        vehicle = Vehicle(i, capacity, depot, distance_matrix)
+        # Trong VRPSPDTW Wang Chen, xe bắt đầu với capacity phù hợp
+        # Tính toán initial load dựa trên tổng delivery demand
+        total_delivery = sum(c.d_demand for c in customers if c.d_demand > 0)
+        total_pickup = sum(c.p_demand for c in customers if c.p_demand > 0)
+        
+        # Xe bắt đầu với lượng hàng = min(capacity, max_delivery_needed)
+        max_delivery_per_vehicle = total_delivery / num_vehicles if num_vehicles > 0 else 0
+        initial_load = min(capacity * 0.8, max_delivery_per_vehicle)  # 80% capacity để có chỗ pickup
+        vehicle.remaining = capacity - initial_load
+        vehicles.append(vehicle)
+    
+    # Loại bỏ depot khỏi danh sách khách hàng nếu có
+    if customers and customers[0].cid == 0:
+        customers.pop(0)
+    
     return customers, vehicles
 
 def read_data(filepath):
