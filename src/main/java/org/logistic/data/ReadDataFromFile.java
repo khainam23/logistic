@@ -37,30 +37,30 @@ public class ReadDataFromFile {
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8),
         VRPSPDTW_LIU_TANG_YAO(true, 7, 9, 0, 1, 2, 3, 4, 5, 6),
         VRPSPDTW_WANG_CHEN(true, 3, 6, 0, 1, 2, 3, 4, 5, 6, 7, 8);
-        
+
         boolean isPickupDelivery;
         int capacityLineIndex;
         int dataStartLineIndex;
         int[] columnIndices;
-        
+
         ProblemType(boolean isPickupDelivery, int capacityLineIndex, int dataStartLineIndex, int... columnIndices) {
             this.isPickupDelivery = isPickupDelivery;
             this.capacityLineIndex = capacityLineIndex;
             this.dataStartLineIndex = dataStartLineIndex;
             this.columnIndices = columnIndices;
         }
-        
+
         public int getColumnIndex(int field) {
             return (field < 0 || field >= columnIndices.length) ? -1 : columnIndices[field];
         }
     }
-    
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SolutionFormat {
-        int headerLines = 0;  // Changed from 5 to 0 to work with PDPTW files
+        int headerLines = 0; // Changed from 5 to 0 to work with PDPTW files
         String routePrefix = ":";
         String delimiter = "\\s+";
     }
@@ -77,7 +77,7 @@ public class ReadDataFromFile {
     public void readSolution(String filePath) {
         readSolution(filePath, new SolutionFormat());
     }
-    
+
     public void readSolution(String filePath, ProblemType problemType) {
         try {
             switch (problemType) {
@@ -101,7 +101,7 @@ public class ReadDataFromFile {
             e.printStackTrace();
         }
     }
-    
+
     public void readSolution(String filePath, SolutionFormat format) {
         try {
             readSolutionFromPath(resolveFilePath(filePath), format);
@@ -110,26 +110,31 @@ public class ReadDataFromFile {
             e.printStackTrace();
         }
     }
-    
+
     private Path resolveFilePath(String filePath) throws IOException {
         try {
             URL resource = ReadDataFromFile.class.getClassLoader().getResource(filePath);
-            if (resource != null) return Paths.get(resource.toURI());
-        } catch (Exception ignored) {}
-        
+            if (resource != null)
+                return Paths.get(resource.toURI());
+        } catch (Exception ignored) {
+        }
+
         Path path = Paths.get(filePath);
-        if (!Files.exists(path)) throw new IOException("File not found: " + filePath);
+        if (!Files.exists(path))
+            throw new IOException("File not found: " + filePath);
         return path;
     }
-    
+
     private File resolveDirectoryPath(String directoryPath) {
         try {
             URL url = ReadDataFromFile.class.getClassLoader().getResource(directoryPath);
-            if (url != null) return new File(url.toURI());
-        } catch (Exception ignored) {}
+            if (url != null)
+                return new File(url.toURI());
+        } catch (Exception ignored) {
+        }
         return new File(directoryPath);
     }
-    
+
     private void readProblemDataFromPath(Path path, ProblemType problemType) throws IOException {
         switch (problemType) {
             case VRPTW:
@@ -148,14 +153,14 @@ public class ReadDataFromFile {
                 throw new IllegalArgumentException("Unsupported problem type: " + problemType);
         }
     }
-    
+
     private void readVRPTWData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (count == problemType.getCapacityLineIndex()) {
                     maxCapacity = Integer.parseInt(line.trim().split("\\s+")[1]);
@@ -177,7 +182,7 @@ public class ReadDataFromFile {
                                 throw new IllegalArgumentException("Invalid column indices for " + problemType);
                             }
                         }
-                        
+
                         int x = Integer.parseInt(parts[indices[1]]);
                         int y = Integer.parseInt(parts[indices[2]]);
                         int demand = Integer.parseInt(parts[indices[3]]);
@@ -203,19 +208,19 @@ public class ReadDataFromFile {
                 }
                 count++;
             }
-            
+
             locations = locationList.toArray(new Location[0]);
             System.out.println("Read " + locations.length + " VRPTW locations from " + path);
         }
     }
-    
+
     private void readPDPTWData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (count == problemType.getCapacityLineIndex()) {
                     maxCapacity = Integer.parseInt(line.trim().split("\\s+")[1]);
@@ -237,7 +242,7 @@ public class ReadDataFromFile {
                                 throw new IllegalArgumentException("Invalid column indices for " + problemType);
                             }
                         }
-                        
+
                         int x = Integer.parseInt(parts[indices[1]]);
                         int y = Integer.parseInt(parts[indices[2]]);
                         int demand = Integer.parseInt(parts[indices[3]]);
@@ -268,22 +273,22 @@ public class ReadDataFromFile {
                 }
                 count++;
             }
-            
+
             locations = locationList.toArray(new Location[0]);
             System.out.println("Read " + locations.length + " PDPTW locations from " + path);
         }
     }
-    
+
     private void readVRPSPDTWLiuTangYaoData(Path path) throws IOException {
         List<Location> locationList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             boolean inNodeSection = false;
-            
+
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                
+
                 // Đọc capacity từ dòng CAPACITY
                 if (line.startsWith("CAPACITY")) {
                     String[] parts = line.split(":");
@@ -293,19 +298,19 @@ public class ReadDataFromFile {
                     }
                     continue;
                 }
-                
+
                 // Bắt đầu đọc dữ liệu node
                 if (line.equals("NODE_SECTION")) {
                     inNodeSection = true;
                     continue;
                 }
-                
+
                 // Kết thúc đọc dữ liệu node
                 if (line.startsWith("DISTANCETIME_SECTION") || line.startsWith("EOF")) {
                     inNodeSection = false;
                     break;
                 }
-                
+
                 // Đọc dữ liệu node
                 if (inNodeSection && !line.isEmpty()) {
                     String[] parts = line.split(",");
@@ -318,15 +323,15 @@ public class ReadDataFromFile {
                             int ltw = Integer.parseInt(parts[4]);
                             int utw = Integer.parseInt(parts[5]);
                             int service = 30;
-                            
+
                             Location location = Location.builder()
-                                    .point(new Point((int)x, (int)y))
+                                    .point(new Point((int) x, (int) y))
                                     .serviceTimePick(0)
                                     .serviceTimeDeliver(service)
                                     .ltw(ltw)
                                     .utw(utw)
                                     .build();
-                            
+
                             if (demand < 0) {
                                 location.setPick(true);
                                 location.setDemandPick(Math.abs(demand));
@@ -339,7 +344,7 @@ public class ReadDataFromFile {
                                 location.setDemandDeliver(0);
                                 location.setDemandPick(0);
                             }
-                            
+
                             locationList.add(location);
                         } catch (NumberFormatException e) {
                             System.err.println("Error parsing Liu Tang Yao line: " + line);
@@ -347,23 +352,23 @@ public class ReadDataFromFile {
                     }
                 }
             }
-            
+
             locations = locationList.toArray(new Location[0]);
             System.out.println("Read " + locations.length + " VRPSPDTW Liu Tang Yao locations from " + path);
         }
     }
-    
+
     private void readVRPSPDTWWangChenData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                
-                // Đọc capacity từ dòng thứ 4 (index 3): "100        25       200"
+
+                // Đọc capacity từ dòng thứ 4 (index 3): "100 25 200"
                 if (count == problemType.getCapacityLineIndex()) {
                     String[] parts = line.split("\\s+");
                     if (parts.length >= 3) {
@@ -371,7 +376,7 @@ public class ReadDataFromFile {
                         System.out.println("Max capacity: " + maxCapacity);
                     }
                 }
-                
+
                 // Bắt đầu đọc dữ liệu từ dòng thứ 7 (index 6)
                 if (count >= problemType.getDataStartLineIndex()) {
                     String[] parts = line.split("\\s+");
@@ -386,7 +391,7 @@ public class ReadDataFromFile {
                             int readyTime = Integer.parseInt(parts[5]);
                             int dueDate = Integer.parseInt(parts[6]);
                             int serviceTime = Integer.parseInt(parts[7]);
-                            
+
                             Location location = Location.builder()
                                     .point(new Point(x, y))
                                     .serviceTimePick(serviceTime)
@@ -394,18 +399,18 @@ public class ReadDataFromFile {
                                     .ltw(readyTime)
                                     .utw(dueDate)
                                     .build();
-                            
+
                             // Xử lý pickup và delivery demand
                             if (pDemand > 0) {
                                 location.setPick(true);
                                 location.setDemandPick(pDemand);
                             }
-                            
+
                             if (dDemand > 0) {
                                 location.setDeliver(true);
                                 location.setDemandDeliver(dDemand);
                             }
-                            
+
                             // Nếu cả hai đều bằng 0 (depot)
                             if (pDemand == 0 && dDemand == 0) {
                                 location.setPick(false);
@@ -413,7 +418,7 @@ public class ReadDataFromFile {
                                 location.setDemandPick(0);
                                 location.setDemandDeliver(0);
                             }
-                            
+
                             locationList.add(location);
                         } catch (NumberFormatException e) {
                             System.err.println("Error parsing VRPSPDTW Wang Chen line " + count + ": " + line);
@@ -422,20 +427,20 @@ public class ReadDataFromFile {
                 }
                 count++;
             }
-            
+
             locations = locationList.toArray(new Location[0]);
             System.out.println("Read " + locations.length + " VRPSPDTW Wang Chen locations from " + path);
         }
     }
-    
+
     private void readVRPTWSolution(Path path) throws IOException {
         List<Route> routeList = new ArrayList<>();
         SolutionFormat format = new SolutionFormat();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
                     try {
@@ -443,29 +448,32 @@ public class ReadDataFromFile {
                         String[] parts = routeData.split(format.getDelimiter());
                         int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
-                        Route route = new Route(indLocs, maxCapacity);
-                        if (locations != null) route.calculateDistance(locations);
-                        routeList.add(route);
+                        if(indLocs.length > 1) {
+                            Route route = new Route(indLocs, maxCapacity);
+                            if (locations != null)
+                                route.calculateDistance(locations);
+                            routeList.add(route);
+                        }
                     } catch (Exception e) {
                         System.err.println("Error parsing VRPTW route at line " + count + ": " + line);
                     }
                 }
                 count++;
             }
-            
+
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " VRPTW routes from " + path);
         }
     }
-    
+
     private void readPDPTWSolution(Path path) throws IOException {
         List<Route> routeList = new ArrayList<>();
         SolutionFormat format = new SolutionFormat();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
                     try {
@@ -474,7 +482,8 @@ public class ReadDataFromFile {
                         int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
                         Route route = new Route(indLocs, maxCapacity);
-                        if (locations != null) route.calculateDistance(locations);
+                        if (locations != null)
+                            route.calculateDistance(locations);
                         routeList.add(route);
                     } catch (Exception e) {
                         System.err.println("Error parsing PDPTW route at line " + count + ": " + line);
@@ -482,23 +491,23 @@ public class ReadDataFromFile {
                 }
                 count++;
             }
-            
+
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " PDPTW routes from " + path);
         }
     }
-    
+
     private void readVRPSPDTWLiuTangYaoSolution(Path path) throws IOException {
         List<Route> routeList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (line.contains("Route")) {
                     try {
-                        // Xử lý định dạng Liu Tang Yao: "Route 1:  185"
+                        // Xử lý định dạng Liu Tang Yao: "Route 1: 185"
                         String[] parts = line.split(":");
                         if (parts.length > 1) {
                             String routeData = parts[1].trim();
@@ -512,10 +521,11 @@ public class ReadDataFromFile {
                                     }
                                 }
                                 nodeList.add(0); // Thêm depot cuối
-                                
+
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
-                                if (locations != null) route.calculateDistance(locations);
+                                if (locations != null)
+                                    route.calculateDistance(locations);
                                 routeList.add(route);
                             }
                         }
@@ -525,23 +535,23 @@ public class ReadDataFromFile {
                 }
                 count++;
             }
-            
+
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " VRPSPDTW Liu Tang Yao routes from " + path);
         }
     }
-    
+
     private void readVRPSPDTWWangChenSolution(Path path) throws IOException {
         List<Route> routeList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.startsWith("Route")) {
                     try {
-                        // Xử lý định dạng Wang Chen: "Route 1:  20 29 46 48"
+                        // Xử lý định dạng Wang Chen: "Route 1: 20 29 46 48"
                         String[] parts = line.split(":");
                         if (parts.length > 1) {
                             String routeData = parts[1].trim();
@@ -549,17 +559,18 @@ public class ReadDataFromFile {
                                 String[] nodeStrings = routeData.split("\\s+");
                                 List<Integer> nodeList = new ArrayList<>();
                                 nodeList.add(0); // Thêm depot đầu
-                                
+
                                 for (String nodeStr : nodeStrings) {
                                     if (!nodeStr.trim().isEmpty()) {
                                         nodeList.add(Integer.parseInt(nodeStr.trim()));
                                     }
                                 }
                                 nodeList.add(0); // Thêm depot cuối
-                                
+
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
-                                if (locations != null) route.calculateDistance(locations);
+                                if (locations != null)
+                                    route.calculateDistance(locations);
                                 routeList.add(route);
                             }
                         }
@@ -569,19 +580,19 @@ public class ReadDataFromFile {
                     }
                 }
             }
-            
+
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " VRPSPDTW Wang Chen routes from " + path);
         }
     }
-    
+
     private void readSolutionFromPath(Path path, SolutionFormat format) throws IOException {
         List<Route> routeList = new ArrayList<>();
-        
+
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             int count = 0;
-            
+
             while ((line = reader.readLine()) != null) {
                 if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
                     try {
@@ -589,85 +600,93 @@ public class ReadDataFromFile {
                         String[] parts = routeData.split(format.getDelimiter());
                         int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
-                        Route route = new Route(indLocs, maxCapacity);
-                        if (locations != null) route.calculateDistance(locations);
-                        routeList.add(route);
+                        if (indLocs.length > 1) {
+                            Route route = new Route(indLocs, maxCapacity);
+                            if (locations != null)
+                                route.calculateDistance(locations);
+                            routeList.add(route);
+                        }
                     } catch (Exception e) {
                         System.err.println("Error parsing route at line " + count + ": " + line);
                     }
                 }
                 count++;
             }
-            
+
             routes = routeList.toArray(new Route[0]);
             System.out.println("Read " + routes.length + " routes from " + path);
         }
     }
-    
+
     private List<File> getFilesInDirectory(String directoryPath, String extension) {
         File directory = resolveDirectoryPath(directoryPath);
-        
+
         if (!directory.exists() || !directory.isDirectory()) {
             System.err.println("Directory not found: " + directoryPath);
             return new ArrayList<>();
         }
-        
+
         File[] files = directory.listFiles();
-        if (files == null || files.length == 0) return new ArrayList<>();
-        
+        if (files == null || files.length == 0)
+            return new ArrayList<>();
+
         return Arrays.stream(files)
                 .filter(file -> file.isFile() && file.getName().endsWith(extension))
                 .sorted(Comparator.comparing(File::getName))
                 .collect(Collectors.toList());
     }
-    
+
     private File getMatchingSolutionFile(File srcFile, String solutionDir) {
         String baseName = srcFile.getName().substring(0, srcFile.getName().lastIndexOf('.'));
         File solutionDirectory = resolveDirectoryPath(solutionDir);
-        
-        if (!solutionDirectory.exists() || !solutionDirectory.isDirectory()) return null;
-        
+
+        if (!solutionDirectory.exists() || !solutionDirectory.isDirectory())
+            return null;
+
         File[] matchingFiles = solutionDirectory.listFiles(
                 file -> file.isFile() && file.getName().startsWith(baseName) && file.getName().endsWith(".txt"));
-        
+
         if (matchingFiles != null && matchingFiles.length > 0) {
             Arrays.sort(matchingFiles, Comparator.comparing(File::getName, Comparator.comparingInt(String::length)));
             return matchingFiles[0];
         }
         return null;
     }
-    
-    public void processAllFilesInDirectory(String srcDirPath, String solutionDirPath, 
-                                          ProblemType problemType, FileProcessCallback callback) {
+
+    public void processAllFilesInDirectory(String srcDirPath, String solutionDirPath,
+            ProblemType problemType, FileProcessCallback callback) {
         List<File> srcFiles = getFilesInDirectory(srcDirPath, ".txt");
         if (srcFiles.isEmpty()) {
             System.err.println("No source files found in directory: " + srcDirPath);
             return;
         }
-        
+
         for (File srcFile : srcFiles) {
             try {
                 locations = null;
                 routes = null;
-                
+
                 readProblemData(srcFile.getAbsolutePath(), problemType);
-                if (locations == null || locations.length == 0) continue;
-                
+                if (locations == null || locations.length == 0)
+                    continue;
+
                 File solutionFile = getMatchingSolutionFile(srcFile, solutionDirPath);
-                if (solutionFile == null) continue;
-                
+                if (solutionFile == null)
+                    continue;
+
                 readSolution(solutionFile.getAbsolutePath());
-                if (routes == null || routes.length == 0) continue;
-                
+                if (routes == null || routes.length == 0)
+                    continue;
+
                 callback.process(locations, routes, srcFile.getName());
                 System.gc();
-                
+
             } catch (Exception e) {
                 System.err.println("Error processing file " + srcFile.getName() + ": " + e.getMessage());
             }
         }
     }
-    
+
     public interface FileProcessCallback {
         void process(Location[] locations, Route[] routes, String fileName);
     }

@@ -257,7 +257,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
         }
         
         // Áp dụng toán tử ngẫu nhiên để đa dạng hóa
-        if (random.nextDouble() < 0.2) {
+        if (random.nextDouble() < 0.5) {
             applyRandomOperation(route);
         }
     }

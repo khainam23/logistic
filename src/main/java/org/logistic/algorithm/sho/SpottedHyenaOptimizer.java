@@ -143,8 +143,8 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
         }
         
-        // Áp dụng các toán tử đa tuyến với xác suất 30%
-        if (random.nextDouble() < 0.3) {
+        // Áp dụng các toán tử đa tuyến với xác suất 10%
+        if (random.nextDouble() < 0.5) {
             applyRandomMultiRouteOperation(routes);
             
             // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến

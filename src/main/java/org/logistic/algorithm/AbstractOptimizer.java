@@ -1,11 +1,13 @@
 package org.logistic.algorithm;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -113,7 +115,8 @@ public abstract class AbstractOptimizer implements Optimizer {
     }
 
     /**
-     * Áp dụng toán tử PD-Shift: Di chuyển một điểm từ một tuyến đường sang tuyến đường khác
+     * Áp dụng toán tử PD-Shift: Di chuyển một điểm từ một tuyến đường sang tuyến
+     * đường khác
      *
      * @param routes Mảng các tuyến đường cần áp dụng toán tử
      */
@@ -230,6 +233,8 @@ public abstract class AbstractOptimizer implements Optimizer {
      * @param route Tuyến đường cần áp dụng toán tử
      */
     protected void applyRandomOperation(Route route) {
+        if (!route.isUse())
+            return;
         int operator = random.nextInt(3);
         switch (operator) {
             case 0 -> applySwapOperator(route);
@@ -248,11 +253,28 @@ public abstract class AbstractOptimizer implements Optimizer {
             return; // Cần ít nhất 2 tuyến đường để thực hiện các toán tử đa tuyến
         }
 
+        // Bỏ qua route không sử dụng
+        List<Route> usableRoutes = new ArrayList<>();
+        for (Route route : routes) {
+            if (route.isUse()) {
+                usableRoutes.add(route);
+            }
+        }
+        Route[] filterRoute = usableRoutes.toArray(new Route[0]);
+
         int operator = random.nextInt(2);
         switch (operator) {
-            case 0 -> applyPdShift(routes);
-            case 1 -> applyPdExchange(routes);
+            case 0 -> applyPdShift(filterRoute);
+            case 1 -> applyPdExchange(filterRoute);
         }
+
+        // Loại bỏ các route rỗng
+        for (int i = 0; i < routes.length; i++) {
+            if (routes[i].getIndLocations().length == 0) {
+                routes[i].setUse(false);
+            }
+        }
+
     }
 
     /**
@@ -264,7 +286,7 @@ public abstract class AbstractOptimizer implements Optimizer {
      * @param currentTarget      Trọng tải hiện tại
      */
     protected void setupParameters(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-                                   Location[] locations, int currentTarget) {
+            Location[] locations, int currentTarget) {
         this.fitnessUtil = fitnessUtil;
         this.checkConditionUtil = checkConditionUtil;
         this.locations = locations;

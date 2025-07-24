@@ -164,8 +164,8 @@ public class AntColonyOptimization extends AbstractOptimizer {
             }
         }
         
-        // Áp dụng các toán tử đa tuyến với xác suất 20%
-        if (random.nextDouble() < 0.2 && routes.length >= 2) {
+        // Áp dụng các toán tử đa tuyến với xác suất 10%
+        if (random.nextDouble() < 0.5 && routes.length >= 2) {
             applyRandomMultiRouteOperation(routes);
             
             // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến

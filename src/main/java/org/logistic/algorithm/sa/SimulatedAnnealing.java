@@ -128,7 +128,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
         Route[] routes = solution.getRoutes();
 
         // Quyết định áp dụng toán tử đơn tuyến hoặc đa tuyến
-        boolean useMultiRouteOperator = random.nextDouble() < 0.3 && routes.length >= 2;
+        boolean useMultiRouteOperator = random.nextDouble() < 0.5 && routes.length >= 2;
 
         if (useMultiRouteOperator) {
             // Áp dụng toán tử đa tuyến (PD-Shift hoặc PD-Exchange)
@@ -143,20 +143,11 @@ public class SimulatedAnnealing extends AbstractOptimizer {
                 }
             }
         } else {
-            // Chọn ngẫu nhiên một toán tử biến đổi đơn tuyến: swap, insert, hoặc reverse
-            int operator = random.nextInt(3);
-
             // Chọn ngẫu nhiên một tuyến đường để biến đổi
             int routeIndex = random.nextInt(routes.length);
             Route cloneRoute = routes[routeIndex].copy();
 
-            // Áp dụng toán tử biến đổi
-            switch (operator) {
-                case 0 -> applySwapOperator(cloneRoute);
-                case 1 -> applyInsertOperator(cloneRoute);
-                case 2 -> applyReverseOperator(cloneRoute);
-                default -> throw new IllegalStateException("Unexpected value: " + operator);
-            }
+            applyRandomOperation(cloneRoute);
 
             // Kiểm tra tính khả thi của tuyến đường mới
             if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload(), currentTarget)) {

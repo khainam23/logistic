@@ -100,7 +100,7 @@ public class WhaleOptimizationAlgorithm extends AbstractOptimizer {
             whale.setSolution(newSolution);
             whale.setFitness(newFitness);
 
-            // Cập nhật linh cẩu tốt nhất
+            // Cập nhật cá voi tốt nhất
             if (newFitness < bestWhale.getFitness()) {
                 bestWhale = new Whale(newSolution.copy(), newFitness);
                 System.out.println("New best solution found with fitness: " + newFitness);
