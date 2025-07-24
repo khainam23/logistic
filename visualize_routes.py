@@ -180,7 +180,7 @@ def create_route_report(routes, output_file="route_report.txt"):
 
 def main():
     # Đường dẫn file solution
-    solution_file = "d:/Logistic/excute_data/logistic/data/pdptw/solution/lr209.txt"
+    solution_file = "d:/Logistic/excute_data/logistic/data/pdptw/solution/lc102.txt"
     
     try:
         print("Đang đọc file solution...")
@@ -202,16 +202,16 @@ def main():
         
         print("Đang tạo visualization...")
         fig, ax = visualize_routes(routes, coordinates, 
-                                 filename_prefix="d:/Logistic/excute_data/logistic/lr209_routes")
+                                 filename_prefix="d:/Logistic/excute_data/logistic/lc102_routes")
         
         print("Đang tạo báo cáo...")
-        create_route_report(routes, "d:/Logistic/excute_data/logistic/lr209_route_report.txt")
+        create_route_report(routes, "d:/Logistic/excute_data/logistic/lc102_route_report.txt")
         
         print("Hoàn thành!")
         print("Các file đã được tạo:")
-        print("- lr209_routes.png (hình ảnh)")
-        print("- lr209_routes.pdf (PDF)")
-        print("- lr209_route_report.txt (báo cáo chi tiết)")
+        print("- lc102_routes.png (hình ảnh)")
+        print("- lc102_routes.pdf (PDF)")
+        print("- lc102_route_report.txt (báo cáo chi tiết)")
         
         # Hiển thị đồ thị
         plt.show()
