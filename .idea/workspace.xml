@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/TestParallel.java" beforeDir="false" />
-    </list>
+    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -190,6 +188,7 @@
       <workItem from="1749909977204" duration="12000" />
       <workItem from="1751288681149" duration="48000" />
       <workItem from="1751336451667" duration="727000" />
+      <workItem from="1753363947155" duration="691000" />
     </task>
     <servers />
   </component>

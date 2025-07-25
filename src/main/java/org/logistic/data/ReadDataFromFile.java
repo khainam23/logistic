@@ -33,7 +33,7 @@ public class ReadDataFromFile {
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public enum ProblemType {
-        VRPTW(false, 3, 6, 0, 1, 2, 3, 4, 5, 6),
+        VRPTW(false, 4, 6, 0, 1, 2, 3, 4, 5, 6),
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8),
         VRPSPDTW_LIU_TANG_YAO(true, 7, 9, 0, 1, 2, 3, 4, 5, 6),
         VRPSPDTW_WANG_CHEN(true, 3, 6, 0, 1, 2, 3, 4, 5, 6, 7, 8);
@@ -444,11 +444,17 @@ public class ReadDataFromFile {
             while ((line = reader.readLine()) != null) {
                 if (count >= format.getHeaderLines() && line.contains(format.getRoutePrefix())) {
                     try {
-                        String routeData = line.substring(line.indexOf(format.getRoutePrefix()) + 1).trim();
+                        String routeData = line
+                                .substring(line.indexOf(format.getRoutePrefix()) + format.getRoutePrefix().length())
+                                .trim();
+                        if (routeData == null || routeData.isEmpty())
+                            continue;
                         String[] parts = routeData.split(format.getDelimiter());
+                        if (parts == null)
+                            continue;
                         int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
-                        if(indLocs.length > 1) {
+                        if (indLocs.length > 1) {
                             Route route = new Route(indLocs, maxCapacity);
                             if (locations != null)
                                 route.calculateDistance(locations);
