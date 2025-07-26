@@ -27,52 +27,123 @@ class Vehicle:
         self.time = 0
 
     def can_serve(self, customer):
+        # Kiểm tra khách hàng đã được phục vụ chưa
+        if customer.assigned:
+            return False
+            
         travel_time = self.current_location.distance_to(customer)
         arrival_time = self.time + travel_time
-        # Kiểm tra nếu xe có thể đến khách hàng trong cửa sổ thời gian
-        within_tw = customer.tw_start <= arrival_time <= customer.tw_end
-        # Kiểm tra nếu xe có đủ dung lượng để phục vụ khách hàng (chỉ kiểm tra delivery demand)
-        can_serve = self.remaining >= customer.d_demand and within_tw
-        return can_serve
+        
+        # Kiểm tra cửa sổ thời gian nghiêm ngặt
+        if arrival_time > customer.tw_end:
+            return False
+            
+        # Kiểm tra dung lượng xe cho cả delivery và pickup
+        capacity_needed = max(customer.d_demand, customer.p_demand)
+        if self.remaining < capacity_needed:
+            return False
+            
+        return True
 
     def assign(self, customer):
+        # Kiểm tra lại trước khi gán để đảm bảo an toàn
+        if customer.assigned or not self.can_serve(customer):
+            return False
+            
         travel_time = self.current_location.distance_to(customer)
         self.time += travel_time
         self.time = max(self.time, customer.tw_start)  # Đảm bảo xe đến sau thời gian sẵn sàng
         self.time += customer.service  # Thời gian phục vụ khách hàng
-        self.remaining -= customer.d_demand  # Giảm dung lượng của xe
+        
+        # Cập nhật dung lượng xe dựa trên loại dịch vụ
+        if customer.d_demand > 0:  # Delivery - giao hàng, tăng chỗ trống
+            self.remaining += customer.d_demand
+        if customer.p_demand > 0:  # Pickup - nhận hàng, giảm chỗ trống
+            self.remaining -= customer.p_demand
+            
         self.route.append(customer.cid)  # Thêm khách hàng vào tuyến đường
         self.current_location = customer  # Cập nhật vị trí của xe
-        customer.assigned = True
+        customer.assigned = True  # Đánh dấu khách hàng đã được phục vụ
+        return True
 
     def return_to_depot(self):
         self.route.append(0)  # Quay lại điểm xuất phát (depot)
 
-# greedy algorithm
+# Thuật toán tối ưu hóa số xe: ưu tiên sử dụng ít xe nhất
 def assign_customers_to_vehicles(customers, vehicles):
-    unassigned = [c for c in customers if not c.assigned]
+    # Reset trạng thái assigned cho tất cả khách hàng
+    for customer in customers:
+        customer.assigned = False
+    
+    # Sắp xếp khách hàng theo độ ưu tiên: thời gian kết thúc sớm nhất và cửa sổ thời gian hẹp nhất
+    customers_sorted = sorted(customers, key=lambda c: (c.tw_end, c.tw_end - c.tw_start, -max(c.d_demand, c.p_demand)))
+    
+    # Chỉ số xe hiện tại đang được sử dụng
+    current_vehicle_index = 0
+    max_attempts_per_customer = 3
+    
+    for customer in customers_sorted:
+        if customer.assigned:
+            continue
+            
+        assigned = False
+        attempts = 0
+        
+        # BƯỚC 1: Thử gán cho xe đang hoạt động trước (từ xe đầu tiên)
+        while not assigned and attempts < max_attempts_per_customer and current_vehicle_index < len(vehicles):
+            for i in range(current_vehicle_index + 1):  # Thử từ xe đầu tiên đến xe hiện tại
+                if i >= len(vehicles):
+                    break
+                    
+                vehicle = vehicles[i]
+                
+                # Chỉ xét xe đang hoạt động hoặc xe đầu tiên chưa dùng
+                if (len(vehicle.route) > 1 and vehicle.route[-1] != 0) or (len(vehicle.route) == 1 and i == current_vehicle_index):
+                    if vehicle.can_serve(customer):
+                        if vehicle.assign(customer):
+                            assigned = True
+                            # Nếu đây là xe mới được kích hoạt, tăng chỉ số
+                            if len(vehicle.route) == 2:  # Vừa gán khách hàng đầu tiên
+                                current_vehicle_index = max(current_vehicle_index, i)
+                            break
+            
+            attempts += 1
+            
+            # BƯỚC 2: Nếu không gán được cho xe hiện tại, thử xe mới (chỉ khi thực sự cần)
+            if not assigned and current_vehicle_index + 1 < len(vehicles):
+                next_vehicle = vehicles[current_vehicle_index + 1]
+                if len(next_vehicle.route) == 1 and next_vehicle.can_serve(customer):
+                    if next_vehicle.assign(customer):
+                        current_vehicle_index += 1
+                        assigned = True
+                        break
+        
+        # BƯỚC 3: Thử lần cuối với tất cả xe có thể (backup plan)
+        if not assigned:
+            for vehicle in vehicles:
+                if (len(vehicle.route) == 1 or vehicle.route[-1] != 0) and vehicle.can_serve(customer):
+                    if vehicle.assign(customer):
+                        assigned = True
+                        break
+    
+    # Thống kê và tối ưu hóa thêm
+    unassigned_count = sum(1 for c in customers if not c.assigned)
+    if unassigned_count > 0:
+        print(f"⚠️  Còn {unassigned_count} khách hàng chưa được phục vụ")
+        
+        # Thử một lần nữa với chiến lược khác
+        remaining_customers = [c for c in customers if not c.assigned]
+        remaining_customers.sort(key=lambda c: (c.tw_start, c.tw_end))  # Sắp xếp theo thời gian bắt đầu
+        
+        for customer in remaining_customers:
+            for vehicle in vehicles:
+                if (len(vehicle.route) == 1 or vehicle.route[-1] != 0) and vehicle.can_serve(customer):
+                    if vehicle.assign(customer):
+                        break
 
-    while unassigned:
-        progress = False
-        for vehicle in vehicles:
-            best_customer = None
-            best_distance = float('inf')
-            for customer in unassigned:
-                if vehicle.can_serve(customer):
-                    dist = vehicle.current_location.distance_to(customer)
-                    if dist < best_distance:
-                        best_distance = dist
-                        best_customer = customer
-            if best_customer:
-                vehicle.assign(best_customer)
-                unassigned.remove(best_customer)
-                progress = True
-        if not progress:
-            break  # Nếu không có tiến bộ, thoát khỏi vòng lặp
-
-    # Quay về depot khi đã hoàn thành các tuyến đường
+    # Quay về depot cho tất cả xe đang hoạt động
     for vehicle in vehicles:
-        if vehicle.route[-1] != 0:
+        if len(vehicle.route) > 1 and vehicle.route[-1] != 0:
             vehicle.return_to_depot()
 
     return vehicles
@@ -272,14 +343,48 @@ def process_directory(src_dir, solution_dir):
         processing_time = time.time() - start_time
         print(f"{processing_time:.2f}s")
         
-        # Thống kê kết quả
+        # Thống kê kết quả chi tiết với focus vào tối ưu hóa số xe
         used_vehicles = sum(1 for v in vehicles_and_way if len(v.route) > 2)
         assigned_customers = sum(1 for c in customers if c.assigned)
+        unassigned_customers = len(customers) - assigned_customers
         
-        print(f"  ✅ Kết quả:")
-        print(f"     - Xe sử dụng: {used_vehicles}/{len(vehicles)}")
-        print(f"     - Khách hàng được phục vụ: {assigned_customers}/{len(customers)}")
-        print(f"     - File kết quả: {os.path.basename(solution_path)}")
+        # Thống kê theo loại khách hàng
+        delivery_customers = sum(1 for c in customers if c.d_demand > 0 and c.assigned)
+        pickup_customers = sum(1 for c in customers if c.p_demand > 0 and c.assigned)
+        
+        # Tính các chỉ số tối ưu hóa
+        customers_per_vehicle = assigned_customers / max(used_vehicles, 1)
+        vehicle_efficiency = (used_vehicles / len(vehicles)) * 100
+        service_rate = (assigned_customers / len(customers)) * 100
+        
+        print(f"  ✅ Kết quả tối ưu hóa:")
+        print(f"     - 🚛 Xe sử dụng: {used_vehicles}/{len(vehicles)} ({vehicle_efficiency:.1f}%) - MỤC TIÊU: ÍT NHẤT")
+        print(f"     - 👥 Khách hàng phục vụ: {assigned_customers}/{len(customers)} ({service_rate:.1f}%)")
+        if unassigned_customers > 0:
+            print(f"     - ⚠️  Chưa phục vụ: {unassigned_customers} khách hàng")
+        print(f"     - 📊 Hiệu quả: {customers_per_vehicle:.1f} khách hàng/xe")
+        print(f"     - 📦 Phân loại: Giao hàng={delivery_customers}, Nhận hàng={pickup_customers}")
+        print(f"     - 💾 File: {os.path.basename(solution_path)}")
+        
+        # Hiển thị chi tiết từng xe để phân tích hiệu quả
+        if used_vehicles > 0:
+            print(f"     - 🔍 Chi tiết từng xe:")
+            total_capacity_used = 0
+            total_capacity_available = 0
+            
+            for v in vehicles_and_way:
+                if len(v.route) > 2:
+                    customers_in_route = len(v.route) - 2  # Trừ depot đầu và cuối
+                    capacity_used = v.capacity - v.remaining
+                    capacity_efficiency = (capacity_used / v.capacity) * 100
+                    total_capacity_used += capacity_used
+                    total_capacity_available += v.capacity
+                    
+                    print(f"       * Xe {v.id}: {customers_in_route} KH, dung lượng {capacity_used}/{v.capacity} ({capacity_efficiency:.0f}%)")
+            
+            # Tổng hiệu quả sử dụng dung lượng
+            overall_capacity_efficiency = (total_capacity_used / max(total_capacity_available, 1)) * 100
+            print(f"     - 📈 Tổng hiệu quả dung lượng: {overall_capacity_efficiency:.1f}%")
         
         processed_count += 1
     

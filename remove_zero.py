@@ -3,10 +3,7 @@ import re
 
 # Danh sách các thư mục cần xử lý
 folder_paths = [
-    r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Liu_Tang_Yao\solution",
-    r"D:\Logistic\excute_data\logistic\data\vrpspdtw_Wang_Chen\solution",
-     r"D:\Logistic\excute_data\logistic\data\pdptw\solution",
-     r"D:\Logistic\excute_data\logistic\data\vrptw\solution",
+    r"D:\Logistic\new\logistic\src\main\resources\data\vrptw",
 ]
 
 for folder_path in folder_paths:
