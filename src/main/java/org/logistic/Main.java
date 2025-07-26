@@ -47,7 +47,7 @@ public class Main {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
-        RunMode runMode = RunMode.DIRECTORY;
+        RunMode runMode = RunMode.SINGLE_FILE;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
         String srcDirectory = "data/vrptw/src";

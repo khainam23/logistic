@@ -182,19 +182,23 @@ public abstract class AbstractOptimizer implements Optimizer {
         int operator = random.nextInt(2);
         switch (operator) {
             case 0 -> applySwapOperator(route);
-            case 2 -> applySwapSequence(route);
+            case 1 -> applySwapSequence(route);
         }
     }
 
+    /**
+     * Áp dụng toán tử hoán đổi chuỗi cho một tuyến đường
+     *
+     * @param route Tuyến đường cần áp dụng toán tử
+     */
     protected void applySwapSequence(Route route) {
         int[] way = route.getIndLocations();
         if (way.length < 2) {
             return; // Không thể hoán đổi nếu chỉ có 1 phần tử hoặc ít hơn
         }
 
-       int i = random.nextInt(10) + 1;
-
-       for (int j = 0; j < i; j++) {
+        int n = random.nextInt(10) + 1;
+        for (int i = 0; i < n; i++) {
             applySwapOperator(route);
         }
     }
