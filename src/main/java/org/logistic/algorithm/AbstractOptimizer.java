@@ -59,62 +59,6 @@ public abstract class AbstractOptimizer implements Optimizer {
     }
 
     /**
-     * Áp dụng toán tử chèn (insert) cho một tuyến đường
-     *
-     * @param route Tuyến đường cần áp dụng toán tử
-     */
-    protected void applyInsertOperator(Route route) {
-        int[] way = route.getIndLocations();
-        if (way.length < 2) {
-            return; // Không thể chèn nếu chỉ có 1 phần tử hoặc ít hơn
-        }
-
-        // Chọn vị trí nguồn và đích
-        int pos = random.nextInt(way.length);
-        int insertPos = random.nextInt(way.length);
-
-        // Thực hiện chèn
-        int posVal = way[Math.max(insertPos, pos)];
-        for (int i = Math.min(insertPos, pos); i <= Math.max(insertPos, pos); i++) {
-            int tempVal = way[i];
-            way[i] = posVal;
-            posVal = tempVal;
-        }
-    }
-
-    /**
-     * Áp dụng toán tử đảo ngược (reverse) cho một tuyến đường
-     *
-     * @param route Tuyến đường cần áp dụng toán tử
-     */
-    protected void applyReverseOperator(Route route) {
-        int[] way = route.getIndLocations();
-        if (way.length < 2) {
-            return; // Không thể đảo ngược nếu chỉ có 1 phần tử hoặc ít hơn
-        }
-
-        // Chọn hai vị trí ngẫu nhiên
-        int pos1 = random.nextInt(way.length);
-        int pos2 = random.nextInt(way.length);
-
-        // Đảm bảo pos1 < pos2
-        if (pos1 > pos2) {
-            int temp = pos1;
-            pos1 = pos2;
-            pos2 = temp;
-        }
-
-        // Đảo ngược đoạn từ pos1 đến pos2
-        while (pos1 < pos2) {
-            int temp = way[pos1];
-            way[pos1] = way[pos2];
-            way[pos2] = temp;
-            pos1++;
-            pos2--;
-        }
-    }
-
-    /**
      * Áp dụng toán tử PD-Shift: Di chuyển một điểm từ một tuyến đường sang tuyến
      * đường khác
      *
@@ -235,11 +179,23 @@ public abstract class AbstractOptimizer implements Optimizer {
     protected void applyRandomOperation(Route route) {
         if (!route.isUse())
             return;
-        int operator = random.nextInt(3);
+        int operator = random.nextInt(2);
         switch (operator) {
             case 0 -> applySwapOperator(route);
-            case 1 -> applyInsertOperator(route);
-            case 2 -> applyReverseOperator(route);
+            case 2 -> applySwapSequence(route);
+        }
+    }
+
+    protected void applySwapSequence(Route route) {
+        int[] way = route.getIndLocations();
+        if (way.length < 2) {
+            return; // Không thể hoán đổi nếu chỉ có 1 phần tử hoặc ít hơn
+        }
+
+       int i = random.nextInt(10) + 1;
+
+       for (int j = 0; j < i; j++) {
+            applySwapOperator(route);
         }
     }
 

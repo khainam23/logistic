@@ -33,7 +33,7 @@ public class ReadDataFromFile {
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public enum ProblemType {
-        VRPTW(false, 4, 6, 0, 1, 2, 3, 4, 5, 6),
+       VRPTW(false, 3, 6, 0, 1, 2, 3, 4, 5, 6),
         PDPTW(true, 0, 1, 2, 3, 4, 5, 6, 7, 8),
         VRPSPDTW_LIU_TANG_YAO(true, 7, 9, 0, 1, 2, 3, 4, 5, 6),
         VRPSPDTW_WANG_CHEN(true, 3, 6, 0, 1, 2, 3, 4, 5, 6, 7, 8);
