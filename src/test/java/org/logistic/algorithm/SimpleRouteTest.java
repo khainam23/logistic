@@ -61,6 +61,7 @@ public class SimpleRouteTest {
         initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, maxCapacity);
 
         System.out.println("SA đã tạo " + initialSolutions.length + " initial solutions");
+        System.out.println("Fitness: " + String.format("%.2f", mainSolution.getFitness()));
 
         // Test SHO
         testAlgorithm("SHO", new SpottedHyenaOptimizer(), initialSolutions, fitnessUtil, checkConditionUtil, locations);

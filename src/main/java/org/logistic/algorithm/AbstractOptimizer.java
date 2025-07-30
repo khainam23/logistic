@@ -204,6 +204,79 @@ public abstract class AbstractOptimizer implements Optimizer {
     }
 
     /**
+ * Áp dụng toán tử PD-Rearrange: Sắp xếp lại các điểm trong tuyến đường theo 3 cách
+ *
+ * @param routes Mảng các tuyến đường cần áp dụng toán tử
+ */
+protected void applyPdRearrange(Route[] routes) {
+    if (routes.length < 1) {
+        return; // Cần ít nhất 1 tuyến đường để thực hiện rearrange
+    }
+
+    // Chọn ngẫu nhiên 1 tuyến đường
+    int routeIndex = random.nextInt(routes.length);
+    Route route = routes[routeIndex];
+    
+    int[] way = route.getIndLocations();
+    
+    // Kiểm tra nếu tuyến đường không có đủ điểm để sắp xếp lại
+    if (way.length < 3) {
+        return;
+    }
+    
+    // Chọn ngẫu nhiên một đoạn để sắp xếp lại
+    int startPos = random.nextInt(way.length - 2);
+    int endPos = startPos + 2 + random.nextInt(Math.min(5, way.length - startPos - 2));
+    int segmentLength = endPos - startPos + 1;
+    
+    // Chọn ngẫu nhiên một trong 3 cách sắp xếp
+    int method = random.nextInt(3);
+    
+    if (method == 0) {
+        // Cách 1: Đảo ngược đoạn
+        int left = startPos;
+        int right = endPos;
+        while (left < right) {
+            int temp = way[left];
+            way[left] = way[right];
+            way[right] = temp;
+            left++;
+            right--;
+        }
+    } 
+    else if (method == 1) {
+        // Cách 2: Xoay vòng đoạn
+        int rotateBy = 1 + random.nextInt(segmentLength - 1);
+        int[] segment = new int[segmentLength];
+        
+        // Sao chép đoạn cần xoay
+        for (int i = 0; i < segmentLength; i++) {
+            segment[i] = way[startPos + i];
+        }
+        
+        // Xoay vòng đoạn
+        for (int i = 0; i < segmentLength; i++) {
+            way[startPos + i] = segment[(i + rotateBy) % segmentLength];
+        }
+    } 
+    else {
+        // Cách 3: Sắp xếp ngẫu nhiên đoạn
+        for (int i = 0; i < segmentLength; i++) {
+            int j = random.nextInt(segmentLength);
+            int temp = way[startPos + i];
+            way[startPos + i] = way[startPos + j];
+            way[startPos + j] = temp;
+        }
+    }
+    
+    // Cập nhật khoảng cách nếu có thông tin về locations
+    if (locations != null) {
+        route.calculateDistance(locations);
+    }
+}
+
+
+    /**
      * Áp dụng toán tử ngẫu nhiên cho nhiều tuyến đường
      *
      * @param routes Mảng các tuyến đường cần áp dụng toán tử
@@ -222,10 +295,11 @@ public abstract class AbstractOptimizer implements Optimizer {
         }
         Route[] filterRoute = usableRoutes.toArray(new Route[0]);
 
-        int operator = random.nextInt(2);
+        int operator = random.nextInt(3);
         switch (operator) {
             case 0 -> applyPdShift(filterRoute);
             case 1 -> applyPdExchange(filterRoute);
+            case 2 -> applyPdRearrange(filterRoute);
         }
 
         // Loại bỏ các route rỗng

@@ -47,7 +47,7 @@ public class Main {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
-        RunMode runMode = RunMode.SINGLE_FILE;
+        RunMode runMode = RunMode.RL;
         String dataLocation = "data/vrptw/src/c101.txt";
         String dataSolution = "data/vrptw/solution/c101.txt";
         String srcDirectory = "data/vrptw/src";
@@ -55,12 +55,12 @@ public class Main {
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
-        int iterations = 30;
+        int iterations = 1;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
         boolean parallelEnabled = true;
         // Số vòng chạy cho RL
-        int epoch = 1;
+        int epoch = 5;
         // Loại bài toán (chỉ định trực tiếp)
         ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPTW;
     }

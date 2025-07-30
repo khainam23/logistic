@@ -11,7 +11,6 @@ import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
 
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpottedHyenaOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
-    static final int MAX_ITERATIONS = 100;
+    static final int MAX_ITERATIONS = 1000;
     static final int CLUSTER_SIZE = 5; // Kích thước cụm linh cẩu
 
     // Danh sách các linh cẩu
@@ -122,7 +121,20 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             // Pha 1: Tìm kiếm (dựa vào vector B)
             if (B[i] > 1) {
                 // Khám phá: thực hiện biến đổi ngẫu nhiên
-                applyRandomOperation(routes[i]);
+                // Áp dụng các toán tử đa tuyến với xác suất 10%
+                if (random.nextDouble() < 0.5) {
+                    applyRandomMultiRouteOperation(routes);
+
+                    // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
+                    for (int j = 0; j < dimensions; j++) {
+                        if (!checkConditionUtil.isInsertionFeasible(routes[j], locations,
+                                routes[j].getMaxPayload(), currentTarget)) {
+                            routes[j] = currentSolution.getRoutes()[j].copy();
+                        }
+                    }
+                } else {
+                    applyRandomOperation(routes[i]);
+                }
             }
             // Pha 2 & 3: Bao vây và tấn công (dựa vào vector E)
             else {
@@ -140,19 +152,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
                     routes[i].getMaxPayload(), currentTarget)) {
                 routes[i] = currentSolution.getRoutes()[i].copy();
-            }
-        }
-        
-        // Áp dụng các toán tử đa tuyến với xác suất 10%
-        if (random.nextDouble() < 0.5) {
-            applyRandomMultiRouteOperation(routes);
-            
-            // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
-            for (int i = 0; i < dimensions; i++) {
-                if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                        routes[i].getMaxPayload(), currentTarget)) {
-                    routes[i] = currentSolution.getRoutes()[i].copy();
-                }
             }
         }
 
@@ -180,14 +179,14 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
     private double calculateRouteDistance(Route route1, Route route2) {
         int[] way1 = route1.getIndLocations();
         int[] way2 = route2.getIndLocations();
-        
+
         if (way1.length == 0 && way2.length == 0) {
             return 0.0;
         }
-        
+
         // Tính toán độ khác biệt về độ dài
         // double lengthDifference = Math.abs(way1.length - way2.length);
-        
+
         // Tính toán số điểm chung
         int commonPoints = 0;
         for (int loc1 : way1) {
@@ -198,7 +197,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                 }
             }
         }
-        
+
         // Tính toán độ tương đồng về thứ tự (cho các điểm chung)
         double orderSimilarity = 0.0;
         int minLength = Math.min(way1.length, way2.length);
@@ -211,12 +210,12 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
             orderSimilarity = (double) samePositions / minLength;
         }
-        
+
         // Kết hợp các yếu tố để tính khoảng cách
         int maxLength = Math.max(way1.length, way2.length);
         double structuralDistance = (maxLength - commonPoints) / (double) maxLength;
         double orderDistance = 1.0 - orderSimilarity;
-        
+
         // Trọng số: 60% cấu trúc, 40% thứ tự
         return 0.6 * structuralDistance + 0.4 * orderDistance;
     }
@@ -226,24 +225,25 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Thực hiện swap và reorder các điểm dựa trên best route
      */
     private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double E) {
+        Route tempRoute = targetRoute.copy();
         int[] targetWay = targetRoute.getIndLocations();
         int[] bestWay = bestRoute.getIndLocations();
-        
+
         if (targetWay.length <= 1 || bestWay.length <= 1) {
             return;
         }
-        
+
         // Tính toán số lượng thay đổi dựa trên công thức SHO
         double intensity = Math.abs(E * D);
         int numSwaps = Math.max(1, (int) Math.round(intensity * targetWay.length / 2));
         numSwaps = Math.min(numSwaps, targetWay.length / 2);
-        
+
         // Thực hiện swap các điểm để học hỏi từ best route
         for (int swap = 0; swap < numSwaps; swap++) {
             // Chọn ngẫu nhiên một điểm từ best route
             int bestIndex = random.nextInt(bestWay.length);
             int bestLocationId = bestWay[bestIndex];
-            
+
             // Tìm điểm này trong target route
             int targetIndex = -1;
             for (int i = 0; i < targetWay.length; i++) {
@@ -252,14 +252,14 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                     break;
                 }
             }
-            
+
             // Nếu tìm thấy, di chuyển nó về vị trí tương tự như trong best route
             if (targetIndex != -1) {
                 // Tính vị trí mục tiêu dựa trên tỷ lệ vị trí trong best route
                 double relativePos = (double) bestIndex / bestWay.length;
                 int newTargetIndex = (int) Math.round(relativePos * (targetWay.length - 1));
                 newTargetIndex = Math.max(0, Math.min(newTargetIndex, targetWay.length - 1));
-                
+
                 // Thực hiện swap nếu vị trí khác nhau
                 if (targetIndex != newTargetIndex) {
                     int temp = targetWay[targetIndex];
@@ -268,6 +268,14 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                 }
             }
         }
+
+        // Kiểm tra ràng buộc
+        targetRoute.setIndLocations(targetWay);
+        if (checkConditionUtil.isInsertionFeasible(targetRoute, locations,
+                targetRoute.getMaxPayload(), currentTarget)) {
+        } else {
+            targetRoute.setIndLocations(tempRoute.getIndLocations());
+        }
     }
 
     /**
@@ -275,8 +283,8 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      */
     @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
-                        CheckConditionUtil checkConditionUtil, Location[] locations,
-                        int currentTarget) {
+            CheckConditionUtil checkConditionUtil, Location[] locations,
+            int currentTarget) {
         // Thiết lập các tham số từ lớp cha
         setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
 
@@ -296,65 +304,9 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             // Cập nhật cụm định kỳ
             if (iteration % 10 == 0) {
                 formClusters();
-                diversifyClusters();
             }
         }
 
         return bestHyena.getSolution();
-    }
-
-    /**
-     * Đa dạng hóa các cụm
-     */
-    private void diversifyClusters() {
-        for (List<Hyena> cluster : clusters) {
-            // Chọn linh cẩu tốt nhất trong cụm
-            Hyena bestInCluster = cluster.stream()
-                    .min(Comparator.comparingDouble(Agent::getFitness))
-                    .orElse(null);
-
-            if (bestInCluster != null) {
-                // Tạo các linh cẩu mới từ linh cẩu tốt nhất cụm
-                for (Hyena hyena : cluster) {
-                    if (hyena != bestInCluster) {
-                        Solution newSolution = createDiversifiedSolution(bestInCluster.getSolution());
-                        double newFitness = fitnessUtil.calculatorFitness(newSolution.getRoutes(), locations);
-                        hyena.setSolution(newSolution);
-                        hyena.setFitness(newFitness);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Tạo giải pháp đa dạng hóa từ giải pháp gốc
-     */
-    private Solution createDiversifiedSolution(Solution original) {
-        Solution newSolution = original.copy();
-        Route[] routes = newSolution.getRoutes();
-        
-        // Áp dụng các toán tử đơn tuyến
-        for (Route route : routes) {
-            int operations = 1 + random.nextInt(2);
-            for (int i = 0; i < operations; i++) {
-                applyRandomOperation(route);
-            }
-        }
-        
-        // Áp dụng các toán tử đa tuyến (PD-Shift và PD-Exchange)
-        int multiRouteOperations = 1 + random.nextInt(2);
-        for (int i = 0; i < multiRouteOperations; i++) {
-            applyRandomMultiRouteOperation(routes);
-        }
-        
-        // Cập nhật khoảng cách cho tất cả các tuyến đường
-        for (Route route : routes) {
-            route.calculateDistance(locations);
-        }
-
-        newSolution.setFitness(fitnessUtil.calculatorFitness(routes, locations));
-
-        return newSolution;
     }
 }
