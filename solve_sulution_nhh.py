@@ -148,19 +148,6 @@ def assign_customers_to_vehicles(customers, vehicles):
 
     return vehicles
 
-def detect_file_format(lines):
-    """Phát hiện định dạng file dựa trên nội dung"""
-    # Kiểm tra các định dạng file
-    for i, line in enumerate(lines):
-        if 'VEHICLE' in line and i < 10:
-            return 'VRPTW'
-    
-    # Nếu dòng đầu chỉ có 3 số thì có thể là PDPTW
-    first_line_parts = lines[0].split()
-    if len(first_line_parts) >= 3 and first_line_parts[0].isdigit():
-        return 'PDPTW'
-    
-    return 'UNKNOWN'
 
 def read_vrptw_format(lines):
     """Đọc định dạng VRPTW (c101.txt style)"""
@@ -244,9 +231,88 @@ def read_pdptw_format(lines):
     customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
     return customers, vehicles
 
-def read_data(filepath):
-    """Hàm đọc dữ liệu tổng quát - tự động phát hiện định dạng file"""
+def read_vrptw_wang_chen_format(lines):
+    """Đọc định dạng VRPTW của Wang Chen (rdp*.txt style)"""
+    customers = []
+    vehicles = []
+    
+    # Tìm thông tin xe
+    for i, line in enumerate(lines):
+        if 'NUMBER' in line and 'CAPACITY' in line:
+            vehicle_info_line = lines[i + 1]
+            parts = vehicle_info_line.split()
+            if len(parts) == 3:  # Định dạng Wang Chen: số khách hàng, số xe, dung lượng
+                num_customers, num_vehicles, capacity = map(int, parts)
+            else:
+                raise ValueError(f"Không thể đọc thông tin xe từ dòng: {vehicle_info_line}")
+            break
+    
+    # Tìm dữ liệu khách hàng
+    customer_data_start = None
+    for i, line in enumerate(lines):
+        if 'CUST NO.' in line:
+            customer_data_start = i + 1  # Không bỏ qua dòng trống trong định dạng Wang Chen
+            break
+    
+    if customer_data_start:
+        for line in lines[customer_data_start:]:
+            parts = line.split()
+            if len(parts) >= 7:
+                cid = int(parts[0])
+                x = float(parts[1])
+                y = float(parts[2])
+                d_demand = float(parts[3])
+                p_demand = float(parts[4])  # Wang Chen có cả pickup demand
+                ready = float(parts[5])
+                due = float(parts[6])
+                service = float(parts[7])
+                
+                customers.append(Customer(cid, x, y, d_demand, p_demand, ready, due, service))
+    
+    # Tạo xe
+    for i in range(1, num_vehicles + 1):
+        vehicles.append(Vehicle(i, capacity, customers[0]))
+    
+    customers.pop(0)  # Loại bỏ depot khỏi danh sách khách hàng
+    return customers, vehicles
+
+def get_supported_formats():
+    """Trả về danh sách các định dạng file được hỗ trợ"""
+    return ['VRPTW', 'VRPTW_WANG_CHEN', 'PDPTW']
+
+def validate_file_format(file_format):
+    """Kiểm tra xem định dạng file có được hỗ trợ không"""
+    if file_format is None:
+        return True  # None có nghĩa là tự động phát hiện
+    return file_format in get_supported_formats()
+
+def detect_file_format(lines):
+    """Phát hiện định dạng file dựa trên nội dung"""
+    # Kiểm tra các định dạng file
+    for i, line in enumerate(lines):
+        if 'VEHICLE' in line and i < 10:
+            # Kiểm tra xem có phải định dạng Wang Chen không
+            if i > 0 and lines[i-1].startswith('Rdp'):
+                return 'VRPTW_WANG_CHEN'
+            return 'VRPTW'
+    
+    # Nếu dòng đầu chỉ có 3 số thì có thể là PDPTW
+    first_line_parts = lines[0].split()
+    if len(first_line_parts) >= 3 and first_line_parts[0].isdigit():
+        return 'PDPTW'
+    
+    return 'UNKNOWN'
+
+def read_data(filepath, file_format=None):
+    """Hàm đọc dữ liệu tổng quát - có thể tự động phát hiện hoặc chỉ định định dạng file"""
     try:
+        # Kiểm tra định dạng file có hợp lệ không
+        if not validate_file_format(file_format):
+            supported_formats = get_supported_formats()
+            print(f"❌ Định dạng file không được hỗ trợ: {file_format}")
+            print(f"📋 Các định dạng được hỗ trợ: {', '.join(supported_formats)}")
+            return [], []
+        
         with open(filepath, 'r', encoding='utf-8') as f:
             lines = [line.strip() for line in f if line.strip()]
         
@@ -254,27 +320,34 @@ def read_data(filepath):
             print(f"File {filepath} trống hoặc không đọc được")
             return [], []
         
-        # Phát hiện định dạng file
-        file_format = detect_file_format(lines)
-        print(f"Phát hiện định dạng file: {file_format}")
+        # Nếu không chỉ định định dạng, tự động phát hiện
+        if file_format is None:
+            file_format = detect_file_format(lines)
+            print(f"🔍 Phát hiện định dạng file: {file_format}")
+        else:
+            print(f"🎯 Sử dụng định dạng được chỉ định: {file_format}")
         
         # Đọc dữ liệu theo định dạng phù hợp
         if file_format == 'VRPTW':
             return read_vrptw_format(lines)
+        elif file_format == 'VRPTW_WANG_CHEN':
+            return read_vrptw_wang_chen_format(lines)
         elif file_format == 'PDPTW':
             return read_pdptw_format(lines)
         else:
-            print(f"Không nhận diện được định dạng file {filepath}")
+            print(f"❌ Định dạng file không được hỗ trợ: {file_format}")
             # Thử đọc như PDPTW format (định dạng đơn giản nhất)
             try:
+                print("🔄 Thử đọc với định dạng PDPTW...")
                 return read_pdptw_format(lines)
             except:
-                print(f"Không thể đọc file {filepath}")
+                print(f"❌ Không thể đọc file {filepath}")
                 return [], []
                 
     except Exception as e:
-        print(f"Lỗi khi đọc file {filepath}: {str(e)}")
+        print(f"❌ Lỗi khi đọc file {filepath}: {str(e)}")
         return [], []
+
 
 def write_solution(filename, vehicles):
     """Ghi kết quả giải thuật ra file"""
@@ -294,8 +367,8 @@ def print_file_info(customers, vehicles, filename):
         print(f"  💰 Dung lượng xe: {vehicles[0].capacity}")
     print(f"  ⏰ Thời gian xử lý: ", end="")
 
-def process_directory(src_dir, solution_dir):
-    """Xử lý tất cả file trong một thư mục"""
+def process_directory(src_dir, solution_dir, file_format=None):
+    """Xử lý tất cả file trong một thư mục với định dạng được chỉ định hoặc tự động phát hiện"""
     if not os.path.exists(src_dir):
         print(f"❌ Thư mục {src_dir} không tồn tại")
         return
@@ -313,6 +386,10 @@ def process_directory(src_dir, solution_dir):
         return
     
     print(f"📂 Tìm thấy {len(txt_files)} file .txt")
+    if file_format:
+        print(f"🎯 Định dạng được chỉ định: {file_format}")
+    else:
+        print(f"🔍 Sử dụng chế độ tự động phát hiện định dạng")
     
     for i, fname in enumerate(txt_files, 1):
         src_path = os.path.join(src_dir, fname)
@@ -322,7 +399,7 @@ def process_directory(src_dir, solution_dir):
         import time
         start_time = time.time()
         
-        customers, vehicles = read_data(src_path)
+        customers, vehicles = read_data(src_path, file_format)
         
         if not customers or not vehicles:
             print(f"❌ Không thể đọc dữ liệu từ file {fname}")
@@ -396,18 +473,39 @@ def process_directory(src_dir, solution_dir):
         print(f"📁 Kết quả lưu tại: {solution_dir}")
     print(f"{'='*50}")
 
-# Định nghĩa các thư mục dữ liệu
+# Định nghĩa các thư mục dữ liệu với định dạng file được chỉ định
+# 
+# Cách sử dụng:
+# - 'format': Chỉ định định dạng file cụ thể ('VRPTW', 'VRPTW_WANG_CHEN', 'PDPTW')
+# - Không có 'format' hoặc 'format': None: Tự động phát hiện định dạng
+# - Các định dạng được hỗ trợ: VRPTW, VRPTW_WANG_CHEN, PDPTW
+#
 data_directories = [
+    # {
+    #     'name': 'VRPTW',
+    #     'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",    
+    #     'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution",
+    #     'format': 'VRPTW'  # Chỉ định định dạng VRPTW
+    # },
+    # {
+    #     'name': 'PDPTW',
+    #     'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
+    #     'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution",
+    #     'format': 'PDPTW'  # Chỉ định định dạng PDPTW
+    # },
     {
-        'name': 'VRPTW',
-        'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution"
-    },
-    {
-        'name': 'PDPTW',
-        'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution"
+        'name': 'VRPTW Wang Chen',
+        'src': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\solution",
+        'format': 'VRPTW_WANG_CHEN'  # Chỉ định định dạng VRPTW Wang Chen
     }
+    # Ví dụ sử dụng tự động phát hiện:
+    # {
+    #     'name': 'Mixed Format Directory',
+    #     'src': r"D:\path\to\mixed\files",
+    #     'solution': r"D:\path\to\solutions"
+    #     # Không có 'format' -> tự động phát hiện
+    # }
 ]
 
 # Xử lý tất cả các thư mục
@@ -416,4 +514,6 @@ for directory in data_directories:
     print(f"XỬ LÝ THƯ MỤC: {directory['name']}")
     print(f"{'='*50}")
     
-    process_directory(directory['src'], directory['solution'])
+    # Sử dụng định dạng được chỉ định hoặc None để tự động phát hiện
+    file_format = directory.get('format', None)
+    process_directory(directory['src'], directory['solution'], file_format)

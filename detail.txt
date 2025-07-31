@@ -1,0 +1,25 @@
+// Cấu trúc file vrpspdtw - nằm ở folder khác
+NAME : [Tên bài toán]
+TYPE : VRPSDPTW
+DIMENSION : [Số lượng điểm bao gồm kho]
+VEHICLES : [Số lượng phương tiện]
+DISPATCHINGCOST : [Chi phí điều phối]
+UNITCOST : [Chi phí đơn vị]
+CAPACITY : [Sức chứa phương tiện]
+EDGE_WEIGHT_TYPE : EXPLICIT
+NODE_SECTION
+[ID],[delivery],[pickup],[start_time],[end_time],[service_time]
+...
+DISTANCETIME_SECTION
+[ID_1],[ID_2],[distance],[time]
+...
+DEPOT_SECTION
+[ID_kho]
+
+
+// Có file dữ liệu gốc khi cần lấy thông tin Tọa độ x, y  - nằm ở folder vrptw
+CUSTOMER
+CUST NO.  XCOORD.   YCOORD.   DDEMAND   PDEMAND   READY TIME  DUE DATE   SERVICE TIME
+    0      40         50          0          0          0       1236          0
+    1      45         68         10         30        912        967         90
+    ...

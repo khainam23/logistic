@@ -49,4 +49,6 @@ build/
 .venv/
 .qodo/
 exports/
-rl_10_30/**
+/output
+/pareto_visualization
+/solution_analysis_plots
