@@ -61,7 +61,9 @@ public class SimpleRouteTest {
         initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, maxCapacity);
 
         System.out.println("SA đã tạo " + initialSolutions.length + " initial solutions");
-        System.out.println("Fitness: " + String.format("%.2f", mainSolution.getFitness()));
+        
+        // In chi tiết thông tin fitness của solution gốc
+        printDetailedFitnessInfo("SOLUTION GỐC", mainSolution, fitnessUtil, locations);
 
         // Test SHO
         testAlgorithm("SHO", new SpottedHyenaOptimizer(), initialSolutions, fitnessUtil, checkConditionUtil, locations);
@@ -85,9 +87,10 @@ public class SimpleRouteTest {
         try {
             Solution result = optimizer.run(initialSolutions, fitnessUtil, checkConditionUtil, locations, 0);
 
-            System.out.println("Fitness: " + String.format("%.2f", result.getFitness()));
-            System.out.println("Routes:");
+            // In chi tiết thông tin fitness
+            printDetailedFitnessInfo(name, result, fitnessUtil, locations);
 
+            System.out.println("Routes:");
             Route[] routes = result.getRoutes();
             for (int i = 0; i < routes.length; i++) {
                 int[] routeLocs = routes[i].getIndLocations();
@@ -96,6 +99,51 @@ public class SimpleRouteTest {
 
         } catch (Exception e) {
             System.out.println("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * In chi tiết thông tin tính toán fitness
+     */
+    private static void printDetailedFitnessInfo(String algorithmName, Solution solution, 
+            FitnessUtil fitnessUtil, Location[] locations) {
+        
+        System.out.println("\n=== CHI TIẾT FITNESS - " + algorithmName + " ===");
+        
+        // Tính toán các thành phần fitness
+        int[] weights = fitnessUtil.calculateWeightsFromSolution(solution, locations);
+        
+        int numberVehicle = weights[0];
+        int totalDistances = weights[1];
+        int totalServiceTime = weights[2];
+        int totalWaitingTime = weights[3];
+        
+        System.out.println("Số phương tiện (Number of Vehicles): " + numberVehicle);
+        System.out.println("Tổng khoảng cách (Total Distance): " + totalDistances);
+        System.out.println("Tổng thời gian phục vụ (Total Service Time): " + totalServiceTime);
+        System.out.println("Tổng thời gian chờ (Total Waiting Time): " + totalWaitingTime);
+        
+        // Tính fitness theo công thức: alpha*distance + beta*serviceTime + gamma*waitingTime + delta*vehicles
+        // Với DefaultFitnessStrategy: alpha=beta=gamma=delta=1.0
+        double calculatedFitness = 1.0 * totalDistances + 1.0 * totalServiceTime + 
+                                  1.0 * totalWaitingTime + 1.0 * numberVehicle;
+        
+        System.out.println("Fitness được tính: " + String.format("%.2f", calculatedFitness));
+        System.out.println("Fitness từ solution: " + String.format("%.2f", solution.getFitness()));
+        
+        // Phân tích tỷ lệ đóng góp của từng thành phần
+        System.out.println("\n--- PHÂN TÍCH ĐÓNG GÓP ---");
+        System.out.println("Khoảng cách: " + String.format("%.1f%%", (totalDistances / calculatedFitness) * 100));
+        System.out.println("Thời gian phục vụ: " + String.format("%.1f%%", (totalServiceTime / calculatedFitness) * 100));
+        System.out.println("Thời gian chờ: " + String.format("%.1f%%", (totalWaitingTime / calculatedFitness) * 100));
+        System.out.println("Số phương tiện: " + String.format("%.1f%%", (numberVehicle / calculatedFitness) * 100));
+        
+        // Thông tin trung bình
+        if (numberVehicle > 0) {
+            System.out.println("\n--- THÔNG TIN TRUNG BÌNH ---");
+            System.out.println("Khoảng cách trung bình/xe: " + String.format("%.2f", (double)totalDistances / numberVehicle));
+            System.out.println("Thời gian phục vụ trung bình/xe: " + String.format("%.2f", (double)totalServiceTime / numberVehicle));
+            System.out.println("Thời gian chờ trung bình/xe: " + String.format("%.2f", (double)totalWaitingTime / numberVehicle));
         }
     }
 }

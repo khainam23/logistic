@@ -3,6 +3,7 @@ package org.logistic.algorithm;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.logistic.model.Solution;
 
@@ -11,6 +12,7 @@ import org.logistic.model.Solution;
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class Agent {
     Solution solution; // Lời giải hiện tại

@@ -231,6 +231,9 @@ public class ExecutionUtil {
             }
         }
         
+        // Dọn dẹp ThreadLocal sau khi hoàn thành tất cả thuật toán
+        FitnessUtil.cleanupThreadLocal();
+        
         return new SequentialResults(bestResults, executionTimes, algorithmStats);
     }
     

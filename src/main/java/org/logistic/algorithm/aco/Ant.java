@@ -13,4 +13,6 @@ public class Ant extends Agent {
     public Ant(Solution solution, double fitness) {
         super(solution, fitness);
     }
+
+    public Ant() {}
 }

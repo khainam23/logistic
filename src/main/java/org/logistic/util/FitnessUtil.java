@@ -17,12 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FitnessUtil {
     static FitnessUtil instance;
-    int[] tempWeights;
+    // Sử dụng ThreadLocal để mỗi thread có bản sao riêng của tempWeights
+    private static final ThreadLocal<int[]> tempWeights = ThreadLocal.withInitial(() -> new int[4]);
     FitnessStrategy fitnessStrategy;
     boolean parallelMode = true; // Mặc định là song song
 
     private FitnessUtil() {
-        this.tempWeights = new int[4];
         this.fitnessStrategy = new DefaultFitnessStrategy();
     }
 
@@ -105,7 +105,7 @@ public class FitnessUtil {
         Arrays.stream(routes).parallel().forEach(route -> {
             int[] indLocs = route.getIndLocations();
 
-            if (indLocs.length > 0) {
+            if (indLocs != null && indLocs.length > 0) {
                 numberVehicle.incrementAndGet();
 
                 for (int j = 0; j < indLocs.length - 1; j++) {
@@ -131,10 +131,11 @@ public class FitnessUtil {
             }
         });
 
-        tempWeights[0] = numberVehicle.get();
-        tempWeights[1] = totalDistances.get();
-        tempWeights[2] = totalServiceTime.get();
-        tempWeights[3] = totalWaitingTime.get();
+        int[] weights = tempWeights.get();
+        weights[0] = numberVehicle.get();
+        weights[1] = totalDistances.get();
+        weights[2] = totalServiceTime.get();
+        weights[3] = totalWaitingTime.get();
 
         // Sử dụng strategy để tính fitness
         return fitnessStrategy.calculateFitness(
@@ -157,7 +158,7 @@ public class FitnessUtil {
         for (Route route : routes) {
             int[] indLocs = route.getIndLocations();
 
-            if (indLocs.length > 0) {
+            if (indLocs != null && indLocs.length > 0) {
                 numberVehicle++;
 
                 for (int j = 0; j < indLocs.length - 1; j++) {
@@ -182,10 +183,11 @@ public class FitnessUtil {
             }
         }
 
-        tempWeights[0] = numberVehicle;
-        tempWeights[1] = totalDistances;
-        tempWeights[2] = totalServiceTime;
-        tempWeights[3] = totalWaitingTime;
+        int[] weights = tempWeights.get();
+        weights[0] = numberVehicle;
+        weights[1] = totalDistances;
+        weights[2] = totalServiceTime;
+        weights[3] = totalWaitingTime;
 
         // Sử dụng strategy để tính fitness
         return fitnessStrategy.calculateFitness(
@@ -203,7 +205,7 @@ public class FitnessUtil {
      *         totalWaitingTime]
      */
     public int[] getTempWeights() {
-        return tempWeights.clone();
+        return tempWeights.get().clone();
     }
 
     /**
@@ -256,6 +258,14 @@ public class FitnessUtil {
         }
 
         return new int[]{numberVehicle, totalDistances, totalServiceTime, totalWaitingTime};
+    }
+
+    /**
+     * Dọn dẹp ThreadLocal để tránh memory leak
+     * Nên được gọi khi thread kết thúc hoặc không còn sử dụng FitnessUtil
+     */
+    public static void cleanupThreadLocal() {
+        tempWeights.remove();
     }
 
     /**

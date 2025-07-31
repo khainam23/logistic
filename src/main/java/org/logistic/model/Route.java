@@ -3,6 +3,7 @@ package org.logistic.model;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Route {
     int[] indLocations; // Những điểm mà đoạn đường đi qua
@@ -44,7 +46,8 @@ public class Route {
      * @return Bản sao của tuyến đường
      */
     public Route copy() {
-        return new Route(indLocations.clone(), maxPayload, distance);
+        int[] copiedIndLocations = (indLocations != null) ? indLocations.clone() : new int[0];
+        return new Route(copiedIndLocations, maxPayload, distance);
     }
 
     /**
@@ -53,7 +56,7 @@ public class Route {
      * @param locations Mảng các địa điểm
      */
     public void calculateDistance(Location[] locations) {
-        if (indLocations.length < 1) {
+        if (indLocations == null || indLocations.length < 1) {
             this.distance = 0;
             return;
         }

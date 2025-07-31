@@ -218,6 +218,9 @@ public class ParallelExecutionManager {
                     System.err.println("Lỗi trong iteration " + iterationNumber +
                             " của thuật toán " + algorithm + ": " + e.getMessage());
                     return null;
+                } finally {
+                    // Dọn dẹp ThreadLocal để tránh memory leak
+                    FitnessUtil.cleanupThreadLocal();
                 }
             }, executorService);
 
