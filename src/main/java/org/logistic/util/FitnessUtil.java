@@ -107,22 +107,36 @@ public class FitnessUtil {
 
             if (indLocs != null && indLocs.length > 0) {
                 numberVehicle.incrementAndGet();
+                
+                // Thời gian hiện tại bắt đầu từ 0 (xuất phát từ kho)
+                int currentTime = 0;
 
-                for (int j = 0; j < indLocs.length - 1; j++) {
+                for (int j = 0; j < indLocs.length; j++) {
                     Location currLoc = locations[indLocs[j]];
-                    Location nextLoc = locations[indLocs[j + 1]];
-
-                    // Tính khoảng cách
-                    totalDistances.addAndGet(currLoc.distance(nextLoc));
-
-                    // Tính thời gian phục vụ
-                    totalServiceTime.addAndGet(nextLoc.totalServiceTime());
-
-                    // Tính thời gian chờ của khách hàng
-                    int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
-                    if (waitingTime > 0) {
-                        totalWaitingTime.addAndGet(waitingTime);
+                    
+                    // Nếu không phải điểm đầu tiên, tính thời gian di chuyển từ điểm trước
+                    if (j > 0) {
+                        Location prevLoc = locations[indLocs[j - 1]];
+                        currentTime += prevLoc.distance(currLoc);
+                        
+                        // Tính khoảng cách
+                        totalDistances.addAndGet(prevLoc.distance(currLoc));
+                    } else {
+                        // Khoảng cách từ kho đến điểm đầu tiên
+                        currentTime += locations[0].distance(currLoc);
+                        totalDistances.addAndGet(locations[0].distance(currLoc));
                     }
+                    
+                    // Tính thời gian chờ nếu đến sớm hơn time window
+                    int waitingTime = Math.max(0, currLoc.getLtw() - currentTime);
+                    totalWaitingTime.addAndGet(waitingTime);
+                    
+                    // Cập nhật thời gian hiện tại (thời gian bắt đầu phục vụ)
+                    currentTime = Math.max(currentTime, currLoc.getLtw());
+                    
+                    // Thêm thời gian phục vụ (chỉ tính thời gian phục vụ tương ứng với hoạt động)
+                    currentTime += currLoc.getServiceTime();
+                    totalServiceTime.addAndGet(currLoc.getServiceTime());
                 }
 
                 // Thêm khoảng cách về kho
@@ -160,22 +174,36 @@ public class FitnessUtil {
 
             if (indLocs != null && indLocs.length > 0) {
                 numberVehicle++;
+                
+                // Thời gian hiện tại bắt đầu từ 0 (xuất phát từ kho)
+                int currentTime = 0;
 
-                for (int j = 0; j < indLocs.length - 1; j++) {
+                for (int j = 0; j < indLocs.length; j++) {
                     Location currLoc = locations[indLocs[j]];
-                    Location nextLoc = locations[indLocs[j + 1]];
-
-                    // Tính khoảng cách
-                    totalDistances += currLoc.distance(nextLoc);
-
-                    // Tính thời gian phục vụ
-                    totalServiceTime += nextLoc.totalServiceTime();
-
-                    // Tính thời gian chờ của khách hàng
-                    int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
-                    if (waitingTime > 0) {
-                        totalWaitingTime += waitingTime;
+                    
+                    // Nếu không phải điểm đầu tiên, tính thời gian di chuyển từ điểm trước
+                    if (j > 0) {
+                        Location prevLoc = locations[indLocs[j - 1]];
+                        currentTime += prevLoc.distance(currLoc);
+                        
+                        // Tính khoảng cách
+                        totalDistances += prevLoc.distance(currLoc);
+                    } else {
+                        // Khoảng cách từ kho đến điểm đầu tiên
+                        currentTime += locations[0].distance(currLoc);
+                        totalDistances += locations[0].distance(currLoc);
                     }
+                    
+                    // Tính thời gian chờ nếu đến sớm hơn time window
+                    int waitingTime = Math.max(0, currLoc.getLtw() - currentTime);
+                    totalWaitingTime += waitingTime;
+                    
+                    // Cập nhật thời gian hiện tại (thời gian bắt đầu phục vụ)
+                    currentTime = Math.max(currentTime, currLoc.getLtw());
+                    
+                    // Thêm thời gian phục vụ (chỉ tính thời gian phục vụ tương ứng với hoạt động)
+                    currentTime += currLoc.getServiceTime();
+                    totalServiceTime += currLoc.getServiceTime();
                 }
 
                 // Thêm khoảng cách về kho
@@ -231,25 +259,36 @@ public class FitnessUtil {
             if (route != null && route.getIndLocations() != null && route.getIndLocations().length > 0) {
                 numberVehicle++;
                 int[] indLocs = route.getIndLocations();
+                
+                // Thời gian hiện tại bắt đầu từ 0 (xuất phát từ kho)
+                int currentTime = 0;
 
-                // Tính khoảng cách từ kho đến điểm đầu tiên
-                totalDistances += locations[0].distance(locations[indLocs[0]]);
-
-                // Tính tổng khoảng cách, thời gian phục vụ và thời gian chờ
                 for (int i = 0; i < indLocs.length; i++) {
                     Location currLoc = locations[indLocs[i]];
-                    totalServiceTime += currLoc.totalServiceTime();
-
-                    if (i < indLocs.length - 1) {
-                        Location nextLoc = locations[indLocs[i + 1]];
-                        totalDistances += currLoc.distance(nextLoc);
-
-                        // Tính thời gian chờ của khách hàng
-                        int waitingTime = nextLoc.getLtw() - currLoc.totalServiceTime() - currLoc.distance(nextLoc);
-                        if (waitingTime > 0) {
-                            totalWaitingTime += waitingTime;
-                        }
+                    
+                    // Nếu không phải điểm đầu tiên, tính thời gian di chuyển từ điểm trước
+                    if (i > 0) {
+                        Location prevLoc = locations[indLocs[i - 1]];
+                        currentTime += prevLoc.distance(currLoc);
+                        
+                        // Tính khoảng cách
+                        totalDistances += prevLoc.distance(currLoc);
+                    } else {
+                        // Khoảng cách từ kho đến điểm đầu tiên
+                        currentTime += locations[0].distance(currLoc);
+                        totalDistances += locations[0].distance(currLoc);
                     }
+                    
+                    // Tính thời gian chờ nếu đến sớm hơn time window
+                    int waitingTime = Math.max(0, currLoc.getLtw() - currentTime);
+                    totalWaitingTime += waitingTime;
+                    
+                    // Cập nhật thời gian hiện tại (thời gian bắt đầu phục vụ)
+                    currentTime = Math.max(currentTime, currLoc.getLtw());
+                    
+                    // Thêm thời gian phục vụ (chỉ tính thời gian phục vụ tương ứng với hoạt động)
+                    currentTime += currLoc.getServiceTime();
+                    totalServiceTime += currLoc.getServiceTime();
                 }
 
                 // Thêm khoảng cách về kho

@@ -80,6 +80,11 @@ public class Location {
      * @return Thời gian phục vụ
      */
     public int getServiceTime() {
+        // Nếu location vừa là pickup vừa là delivery, tính cả hai
+        if (isPick && isDeliver) {
+            return serviceTimePick + serviceTimeDeliver;
+        }
+        // Nếu chỉ là pickup hoặc chỉ là delivery
         return isPick ? serviceTimePick : serviceTimeDeliver;
     }
 }
