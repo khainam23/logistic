@@ -41,7 +41,7 @@ public class CheckConditionUtil {
     public boolean isInsertionFeasible(Route route, Location[] locations, int maxPayload, int currTarget) {
         int[] indLocations = route.getIndLocations();
         int targetPayload = currTarget;
-        int currentTime = 0;
+        double currentTime = 0;
         int length = indLocations.length;
 
         for (int i = 0; i < length; i++) {

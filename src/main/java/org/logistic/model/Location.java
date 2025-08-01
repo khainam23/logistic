@@ -9,12 +9,12 @@ import lombok.*;
 @Data
 public class Location {
     Point point;
-    int serviceTimePick;
-    int serviceTimeDeliver;
-    int demandPick;
-    int demandDeliver;
-    int ltw; // low time window (ready time)
-    int utw; // upper time window (due time)
+    double serviceTimePick;
+    double serviceTimeDeliver;
+    double demandPick;
+    double demandDeliver;
+    double ltw; // low time window (ready time)
+    double utw; // upper time window (due time)
     boolean isPick;
     boolean isDeliver;
 
@@ -22,7 +22,7 @@ public class Location {
      * Lấy tổng thời gian phục vụ
      * @return Tổng thời gian phục vụ
      */
-    public int totalServiceTime() {
+    public double totalServiceTime() {
         return serviceTimeDeliver + serviceTimePick;
     }
 
@@ -31,7 +31,7 @@ public class Location {
      * @param oLocation Địa điểm khác
      * @return Khoảng cách
      */
-    public int distance(Location oLocation) {
+    public double distance(Location oLocation) {
         return this.point.distanceTo(oLocation.point);
     }
     
@@ -39,7 +39,7 @@ public class Location {
      * Lấy tọa độ X
      * @return Tọa độ X
      */
-    public float getX() {
+    public double getX() {
         return point.getX();
     }
     
@@ -47,7 +47,7 @@ public class Location {
      * Lấy tọa độ Y
      * @return Tọa độ Y
      */
-    public float getY() {
+    public double getY() {
         return point.getY();
     }
     
@@ -55,7 +55,7 @@ public class Location {
      * Lấy nhu cầu (demand)
      * @return Nhu cầu
      */
-    public int getDemand() {
+    public double getDemand() {
         return isPick ? demandPick : demandDeliver;
     }
     
@@ -63,7 +63,7 @@ public class Location {
      * Lấy thời gian sẵn sàng (ready time)
      * @return Thời gian sẵn sàng
      */
-    public int getReadyTime() {
+    public double getReadyTime() {
         return ltw;
     }
     
@@ -71,7 +71,7 @@ public class Location {
      * Lấy thời gian hạn chót (due time)
      * @return Thời gian hạn chót
      */
-    public int getDueTime() {
+    public double getDueTime() {
         return utw;
     }
     
@@ -79,7 +79,7 @@ public class Location {
      * Lấy thời gian phục vụ
      * @return Thời gian phục vụ
      */
-    public int getServiceTime() {
+    public double getServiceTime() {
         // Nếu location vừa là pickup vừa là delivery, tính cả hai
         if (isPick && isDeliver) {
             return serviceTimePick + serviceTimeDeliver;

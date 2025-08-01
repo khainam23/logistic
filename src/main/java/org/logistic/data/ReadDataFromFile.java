@@ -360,77 +360,72 @@ public class ReadDataFromFile {
 
     private void readVRPSPDTWWangChenData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
+        boolean readingNodes = false;
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
-            int count = 0;
 
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
+                if (line.isEmpty())
+                    continue;
 
-                // Đọc capacity từ dòng thứ 4 (index 3): "100 25 200"
-                if (count == problemType.getCapacityLineIndex()) {
-                    String[] parts = line.split("\\s+");
-                    if (parts.length >= 3) {
-                        maxCapacity = Integer.parseInt(parts[2]);
+                // Đọc CAPACITY
+                if (line.startsWith("CAPACITY")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        maxCapacity = (int) Double.parseDouble(parts[1].trim());
                         System.out.println("Max capacity: " + maxCapacity);
                     }
+                    continue;
                 }
 
-                // Bắt đầu đọc dữ liệu từ dòng thứ 7 (index 6)
-                if (count >= problemType.getDataStartLineIndex()) {
-                    String[] parts = line.split("\\s+");
-                    System.out.println("Line " + count + ": " + line + " -> Parts: " + parts.length);
+                // Bắt đầu đọc NODE_SECTION
+                if (line.equals("NODE_SECTION")) {
+                    readingNodes = true;
+                    continue;
+                }
+
+                // Bắt đầu DISTANCETIME_SECTION, ngưng đọc location
+                if (line.equals("DISTANCETIME_SECTION")) {
+                    readingNodes = false;
+                    break;
+                }
+
+                // Dừng khi gặp DEPOT_SECTION
+                if (line.equals("DEPOT_SECTION")) {
+                    break;
+                }
+
+                if (readingNodes) {
+                    // Định dạng: ID,X,Y,delivery,pickup,start_time,end_time,service_time
+                    String[] parts = line.split(",");
                     if (parts.length >= 8) {
                         try {
-                            int custNo = Integer.parseInt(parts[0]);
-                            int x = Integer.parseInt(parts[1]);
-                            int y = Integer.parseInt(parts[2]);
-                            int dDemand = Integer.parseInt(parts[3]); // Delivery demand
-                            int pDemand = Integer.parseInt(parts[4]); // Pickup demand
-                            int readyTime = Integer.parseInt(parts[5]);
-                            int dueDate = Integer.parseInt(parts[6]);
-                            int serviceTime = Integer.parseInt(parts[7]);
+                            double x = Double.parseDouble(parts[1].trim());
+                            double y = Double.parseDouble(parts[2].trim());
+                            double dDemand = Double.parseDouble(parts[3].trim());
+                            double pDemand = Double.parseDouble(parts[4].trim());
+                            int readyTime = Integer.parseInt(parts[5].trim());
+                            int dueDate = Integer.parseInt(parts[6].trim());
+                            int serviceTime = Integer.parseInt(parts[7].trim());
 
-                            Location location = Location.builder()
-                                    .point(new Point(x, y))
-                                    .serviceTimePick(serviceTime)
-                                    .serviceTimeDeliver(serviceTime)
-                                    .ltw(readyTime)
-                                    .utw(dueDate)
-                                    .build();
-
-                            // Xử lý pickup và delivery demand
-                            if (pDemand > 0) {
-                                location.setPick(true);
-                                location.setDemandPick(pDemand);
-                            }
-
-                            if (dDemand > 0) {
-                                location.setDeliver(true);
-                                location.setDemandDeliver(dDemand);
-                            }
-
-                            // Nếu cả hai đều bằng 0 (depot)
-                            if (pDemand == 0 && dDemand == 0) {
-                                location.setPick(false);
-                                location.setDeliver(false);
-                                location.setDemandPick(0);
-                                location.setDemandDeliver(0);
-                            }
+                            Location location = new Location(new Point(x, y), serviceTime, serviceTime, pDemand,
+                                    dDemand, readyTime, dueDate, true, true);
 
                             locationList.add(location);
                         } catch (NumberFormatException e) {
-                            System.err.println("Error parsing VRPSPDTW Wang Chen line " + count + ": " + line);
+                            System.err.println("Lỗi định dạng dòng NODE: " + line);
                         }
                     }
                 }
-                count++;
-            }
 
-            locations = locationList.toArray(new Location[0]);
-            System.out.println("Read " + locations.length + " VRPSPDTW Wang Chen locations from " + path);
+                // Nếu cần xử lý DISTANCETIME_SECTION sau này thì viết thêm ở đây
+            }
         }
+
+        locations = locationList.toArray(new Location[0]);
+        System.out.println("Đã đọc " + locations.length + " Location từ: " + path);
     }
 
     private void readVRPTWSolution(Path path) throws IOException {
