@@ -48,8 +48,8 @@ public class Main {
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
         RunMode runMode = RunMode.DIRECTORY;
-        String dataLocation = "data/Wang_Chen/src/cdp101.txt";
-        String dataSolution = "data/Wang_Chen/solution/cdp101.txt";
+        String dataLocation = "data/Wang_Chen/src/rdp201.txt";
+        String dataSolution = "data/Wang_Chen/solution/rdp201.txt";
         String srcDirectory = "data/Wang_Chen/src";
         String solutionDirectory = "data/Wang_Chen/solution";
         // Mặc định xuất dữ liệu ra Excel
@@ -58,7 +58,7 @@ public class Main {
         int iterations = 30;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = true;
+        boolean parallelEnabled = false;
         // Số vòng chạy cho RL
         int epoch = 1;
         // Loại bài toán (chỉ định trực tiếp)
@@ -91,10 +91,10 @@ public class Main {
         FitnessStrategy strategy = FitnessUtil.createStrategyBuilder()
                 .useDistance(true)
                 .useVehicleCount(true)
-                .useServiceTime(false)
-                .useWaitingTime(false)
-                .withAlpha(2000)
-                .withDelta(1.0)
+                .useServiceTime(true)
+                .useWaitingTime(true)
+                .withAlpha(1)
+                .withDelta(1)
                 .build();
         fitnessUtil.setFitnessStrategy(strategy);
         PrintUtil printUtil = PrintUtil.getInstance();

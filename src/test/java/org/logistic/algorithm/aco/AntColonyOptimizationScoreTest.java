@@ -111,7 +111,7 @@ public class AntColonyOptimizationScoreTest {
 
             // Chạy ACO
             AntColonyOptimization aco = new AntColonyOptimization();
-            Solution result = aco.run(initialSolutions, fitnessUtil, checkConditionUtil, locations, maxCapacity);
+            Solution result = aco.run(initialSolutions, fitnessUtil, checkConditionUtil, locations);
 
             long endTime = System.currentTimeMillis();
             double runTime = (endTime - startTime) / 1000.0;
@@ -168,8 +168,7 @@ public class AntColonyOptimizationScoreTest {
             SimulatedAnnealing sa = new SimulatedAnnealing(copiedSolution);
 
             // Chạy SA với ít iterations để tạo diversity
-            solutions[i] = sa.run(new Solution[] { copiedSolution }, fitnessUtil, checkConditionUtil, locations,
-                    maxCapacity);
+            solutions[i] = sa.run(new Solution[] { copiedSolution }, fitnessUtil, checkConditionUtil, locations);
         }
 
         return solutions;

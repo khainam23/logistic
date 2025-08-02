@@ -88,7 +88,7 @@ public class SimulatedAnnealingScoreTest {
         long startTime = System.currentTimeMillis();
 
         // Chạy SA và lấy population
-        Solution[] population = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, maxCapacity);
+        Solution[] population = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations);
 
         long endTime = System.currentTimeMillis();
         double runTime = (endTime - startTime) / 1000.0;

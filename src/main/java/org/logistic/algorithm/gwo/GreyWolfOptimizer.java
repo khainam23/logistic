@@ -135,7 +135,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             
             // Kiểm tra tính khả thi
             if (!checkConditionUtil.isInsertionFeasible(currentRoute, locations,
-                    currentRoute.getMaxPayload(), currentTarget)) {
+                    currentRoute.getMaxPayload())) {
                 routes[i] = currentSolution.getRoutes()[i].copy();
             }
         }
@@ -147,7 +147,7 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
             for (int i = 0; i < dimensions; i++) {
                 if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                        routes[i].getMaxPayload(), currentTarget)) {
+                        routes[i].getMaxPayload())) {
                     routes[i] = currentSolution.getRoutes()[i].copy();
                 }
             }
@@ -268,10 +268,9 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
     @Override
 
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
-                        CheckConditionUtil checkConditionUtil, Location[] locations,
-                        int currentTarget) {
+                        CheckConditionUtil checkConditionUtil, Location[] locations) {
         // Thiết lập các tham số từ lớp cha
-        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        setupParameters(fitnessUtil, checkConditionUtil, locations);
         
         // Khởi tạo quần thể
         initialize(initialSolutions);

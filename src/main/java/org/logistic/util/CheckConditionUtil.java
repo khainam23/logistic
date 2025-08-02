@@ -35,12 +35,11 @@ public class CheckConditionUtil {
      * @param route Tuyến đường cần kiểm tra
      * @param locations Mảng các vị trí
      * @param maxPayload Trọng tải tối đa của phương tiện
-     * @param currTarget Trọng tải hiện tại
      * @return true nếu tuyến đường hợp lệ, false nếu không
      */
-    public boolean isInsertionFeasible(Route route, Location[] locations, int maxPayload, int currTarget) {
+    public boolean isInsertionFeasible(Route route, Location[] locations, int maxPayload) {
         int[] indLocations = route.getIndLocations();
-        int targetPayload = currTarget;
+        int targetPayload = 0;
         double currentTime = 0;
         int length = indLocations.length;
 

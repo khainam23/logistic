@@ -44,7 +44,7 @@ public class ExecutionUtil {
                         Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
                         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
                         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
-                                locations, routes[0].getMaxPayload());
+                                locations);
 
                         // Chạy tất cả các thuật toán tối ưu hóa
                         runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
@@ -97,8 +97,7 @@ public class ExecutionUtil {
             // Tạo giải pháp ban đầu và tập giải pháp
             Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
             SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
-            Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations,
-                    routes[0].getMaxPayload());
+            Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations);
 
             // Chạy tất cả các thuật toán tối ưu hóa
             runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
@@ -189,7 +188,7 @@ public class ExecutionUtil {
                     
                     long startTime = System.currentTimeMillis();
                     Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil, 
-                            checkConditionUtil, locations, maxPayload);
+                            checkConditionUtil, locations);
                     long endTime = System.currentTimeMillis();
                     
                     totalExecutionTime += (endTime - startTime);

@@ -37,9 +37,9 @@ public class SimulatedAnnealing extends AbstractOptimizer {
 
     @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
-                        CheckConditionUtil checkConditionUtil, Location[] locations, int currentTarget) {
+                        CheckConditionUtil checkConditionUtil, Location[] locations) {
         // Thiết lập các tham số từ lớp cha
-        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        setupParameters(fitnessUtil, checkConditionUtil, locations);
 
         // Sử dụng giải pháp ban đầu từ constructor hoặc từ tham số nếu có
         Solution startSolution = initialSolution;
@@ -86,12 +86,12 @@ public class SimulatedAnnealing extends AbstractOptimizer {
      * Phương thức này được giữ lại để tương thích ngược với code cũ
      */
     public Solution[] runAndGetPopulation(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-                                          Location[] locations, int currentTarget) {
+                                          Location[] locations) {
         // Thiết lập các tham số từ lớp cha
-        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        setupParameters(fitnessUtil, checkConditionUtil, locations);
 
         // Chạy thuật toán để tìm giải pháp tốt nhất
-        run(new Solution[]{initialSolution}, fitnessUtil, checkConditionUtil, locations, currentTarget);
+        run(new Solution[]{initialSolution}, fitnessUtil, checkConditionUtil, locations);
 
         // Tạo tập quần thể
         Set<Solution> population = new HashSet<>();
@@ -137,7 +137,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
             // Kiểm tra tính khả thi của tất cả các tuyến đường
             for (int i = 0; i < routes.length; i++) {
                 if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                        routes[i].getMaxPayload(), currentTarget)) {
+                        routes[i].getMaxPayload())) {
                     // Khôi phục tuyến đường không khả thi
                     routes[i] = solution.getRoutes()[i].copy();
                 }
@@ -150,7 +150,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
             applyRandomOperation(cloneRoute);
 
             // Kiểm tra tính khả thi của tuyến đường mới
-            if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload(), currentTarget)) {
+            if (checkConditionUtil.isInsertionFeasible(cloneRoute, locations, cloneRoute.getMaxPayload())) {
                 routes[routeIndex] = cloneRoute; // Cập nhật tuyến đường
             }
         }

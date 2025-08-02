@@ -128,7 +128,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                     // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
                     for (int j = 0; j < dimensions; j++) {
                         if (!checkConditionUtil.isInsertionFeasible(routes[j], locations,
-                                routes[j].getMaxPayload(), currentTarget)) {
+                                routes[j].getMaxPayload())) {
                             routes[j] = currentSolution.getRoutes()[j].copy();
                         }
                     }
@@ -150,7 +150,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
             // Kiểm tra tính khả thi
             if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
-                    routes[i].getMaxPayload(), currentTarget)) {
+                    routes[i].getMaxPayload())) {
                 routes[i] = currentSolution.getRoutes()[i].copy();
             }
         }
@@ -272,7 +272,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         // Kiểm tra ràng buộc
         targetRoute.setIndLocations(targetWay);
         if (checkConditionUtil.isInsertionFeasible(targetRoute, locations,
-                targetRoute.getMaxPayload(), currentTarget)) {
+                targetRoute.getMaxPayload())) {
         } else {
             targetRoute.setIndLocations(tempRoute.getIndLocations());
         }
@@ -283,10 +283,9 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      */
     @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
-            CheckConditionUtil checkConditionUtil, Location[] locations,
-            int currentTarget) {
+            CheckConditionUtil checkConditionUtil, Location[] locations) {
         // Thiết lập các tham số từ lớp cha
-        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        setupParameters(fitnessUtil, checkConditionUtil, locations);
 
         // Khởi tạo quần thể
         initialize(initialSolutions);

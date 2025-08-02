@@ -16,12 +16,10 @@ public interface Optimizer {
      * @param fitnessUtil Utility for calculating fitness
      * @param checkConditionUtil Utility for checking conditions
      * @param locations Array of locations
-     * @param currentTarget Current target location index
      * @return The best solution found
      */
     Solution run(Solution[] initialSolutions, 
                 FitnessUtil fitnessUtil,
                 CheckConditionUtil checkConditionUtil, 
-                Location[] locations,
-                int currentTarget);
+                Location[] locations);
 }

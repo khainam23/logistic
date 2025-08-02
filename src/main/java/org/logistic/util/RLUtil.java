@@ -139,7 +139,7 @@ public class RLUtil {
                             // Tạo initial solutions cho epoch hiện tại
                             SimulatedAnnealing sa = new SimulatedAnnealing(baseSolution);
                             Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
-                                    locations, routes[0].getMaxPayload());
+                                    locations);
                             
                             if (currentEpoch == 1) {
                                 System.out.println("Sử dụng solution gốc cho epoch đầu tiên (fitness: " + 
@@ -248,7 +248,7 @@ public class RLUtil {
                 
                 // Chạy thuật toán một lần cho iterator này
                 Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil, 
-                        checkConditionUtil, locations, maxPayload);
+                        checkConditionUtil, locations);
                 
                 results.put(algorithm, currentSolution);
                 

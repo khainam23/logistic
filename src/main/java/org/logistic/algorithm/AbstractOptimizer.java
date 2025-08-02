@@ -25,8 +25,6 @@ public abstract class AbstractOptimizer implements Optimizer {
     Location[] locations;
     FitnessUtil fitnessUtil;
     CheckConditionUtil checkConditionUtil;
-    int currentTarget;
-
     /**
      * Khởi tạo optimizer
      */
@@ -320,11 +318,10 @@ protected void applyPdRearrange(Route[] routes) {
      * @param currentTarget      Trọng tải hiện tại
      */
     protected void setupParameters(FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-            Location[] locations, int currentTarget) {
+            Location[] locations) {
         this.fitnessUtil = fitnessUtil;
         this.checkConditionUtil = checkConditionUtil;
         this.locations = locations;
-        this.currentTarget = currentTarget;
     }
 
     /**

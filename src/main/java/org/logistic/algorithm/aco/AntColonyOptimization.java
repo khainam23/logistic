@@ -118,6 +118,14 @@ public class AntColonyOptimization extends AbstractOptimizer {
         if (random.nextDouble() < 0.3 && routes.length >= 2) {
             applyRandomMultiRouteOperation(routes);
         }
+
+        // Kiểm tra ràng buộc
+        for (Route route : routes) {
+            if (!checkConditionUtil.isInsertionFeasible(route, locations, routes[0].getMaxPayload())) {
+                
+            }
+        }
+        
         
         // Cập nhật khoảng cách cho tất cả các tuyến đường
         for (Route route : routes) {
@@ -265,10 +273,9 @@ public class AntColonyOptimization extends AbstractOptimizer {
      */
     @Override
     public Solution run(Solution[] initialSolutions, FitnessUtil fitnessUtil,
-                        CheckConditionUtil checkConditionUtil, Location[] locations,
-                        int currentTarget) {
+                        CheckConditionUtil checkConditionUtil, Location[] locations) {
         // Thiết lập các tham số từ lớp cha
-        setupParameters(fitnessUtil, checkConditionUtil, locations, currentTarget);
+        setupParameters(fitnessUtil, checkConditionUtil, locations);
 
         // Khởi tạo đàn kiến
         initialize(initialSolutions);

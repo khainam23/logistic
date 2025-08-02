@@ -58,7 +58,7 @@ public class SimpleRouteTest {
         // Tạo initial solutions từ solution đã đọc bằng SA
         Solution mainSolution = new Solution(solutionRoutes, fitnessUtil.calculatorFitness(solutionRoutes, locations));
         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
-        initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations, maxCapacity);
+        initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations);
 
         System.out.println("SA đã tạo " + initialSolutions.length + " initial solutions");
         
@@ -85,7 +85,7 @@ public class SimpleRouteTest {
         System.out.println("\n--- " + name + " ---");
 
         try {
-            Solution result = optimizer.run(initialSolutions, fitnessUtil, checkConditionUtil, locations, 0);
+            Solution result = optimizer.run(initialSolutions, fitnessUtil, checkConditionUtil, locations);
 
             // In chi tiết thông tin fitness
             printDetailedFitnessInfo(name, result, fitnessUtil, locations);

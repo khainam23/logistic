@@ -178,7 +178,7 @@ public class ParallelExecutionManager {
 
                     // Chạy optimization
                     Solution result = optimizer.run(solutionsCopy, fitnessUtil,
-                            checkConditionUtil, locations, maxPayload);
+                            checkConditionUtil, locations);
 
                     // Ghi thời gian kết thúc và lưu vào performance monitor
                     long executionTime = System.currentTimeMillis() - startTime;

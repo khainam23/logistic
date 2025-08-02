@@ -218,42 +218,6 @@ public class ExcelUtil {
     }
 
     /**
-     * Xuất kết quả ra file Excel (phương thức cũ để tương thích ngược)
-     *
-     * @param totalWeights Mảng 3 chiều chứa các trọng số
-     * @param timeAvgs     Mảng thời gian chạy trung bình
-     * @param fileName     Tên file dữ liệu (nếu có)
-     * @deprecated Sử dụng exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessStrategy) để có điều khiển tốt hơn
-     */
-    @Deprecated
-    public void exportResultsToExcel(double[][][] totalWeights, long[] timeAvgs, String fileName) {
-        // Tạo default strategy với tất cả các thông số enabled để tương thích ngược
-        FitnessStrategy defaultStrategy = new FitnessStrategy() {
-            @Override
-            public double calculateFitness(int numberVehicle, int totalDistances, int totalServiceTime, int totalWaitingTime) {
-                return totalDistances + 100.0 * numberVehicle + totalServiceTime + totalWaitingTime;
-            }
-        };
-        exportResultsToExcel(totalWeights, timeAvgs, fileName, defaultStrategy);
-    }
-    
-    /**
-     * Khởi tạo workbook Excel với cấu hình mặc định (phương thức cũ để tương thích ngược)
-     * @deprecated Sử dụng initializeExcelWorkbook(FitnessStrategy) để có điều khiển tốt hơn
-     */
-    @Deprecated
-    public void initializeExcelWorkbook() {
-        // Tạo default strategy với tất cả các thông số enabled để tương thích ngược
-        FitnessStrategy defaultStrategy = new FitnessStrategy() {
-            @Override
-            public double calculateFitness(int numberVehicle, int totalDistances, int totalServiceTime, int totalWaitingTime) {
-                return totalDistances + 100.0 * numberVehicle + totalServiceTime + totalWaitingTime;
-            }
-        };
-        initializeExcelWorkbook(defaultStrategy);
-    }
-
-    /**
      * Kiểm tra xem workbook Excel đã được khởi tạo chưa
      *
      * @return true nếu workbook đã được khởi tạo, false nếu chưa
