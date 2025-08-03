@@ -47,7 +47,7 @@ public class Main {
         // Chế độ chạy mặc định là xử lý tất cả các file trong thư mục
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
-        RunMode runMode = RunMode.DIRECTORY;
+        RunMode runMode = RunMode.SINGLE_FILE;
         String dataLocation = "data/Wang_Chen/src/rdp201.txt";
         String dataSolution = "data/Wang_Chen/solution/rdp201.txt";
         String srcDirectory = "data/Wang_Chen/src";
@@ -58,7 +58,7 @@ public class Main {
         int iterations = 30;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = false;
+        boolean parallelEnabled = true;
         // Số vòng chạy cho RL
         int epoch = 1;
         // Loại bài toán (chỉ định trực tiếp)
@@ -91,9 +91,9 @@ public class Main {
         FitnessStrategy strategy = FitnessUtil.createStrategyBuilder()
                 .useDistance(true)
                 .useVehicleCount(true)
-                .useServiceTime(true)
-                .useWaitingTime(true)
-                .withAlpha(1)
+                .useServiceTime(false)
+                .useWaitingTime(false)
+                .withAlpha(2000)
                 .withDelta(1)
                 .build();
         fitnessUtil.setFitnessStrategy(strategy);

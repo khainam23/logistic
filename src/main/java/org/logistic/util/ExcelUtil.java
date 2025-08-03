@@ -191,12 +191,15 @@ public class ExcelUtil {
                             row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][0]); // Min
                             row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][1]); // Std
                             row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][2]); // Mean
-                        } else if (partsWeights[weightIndex].length >= 1) {
-                            // Chế độ tuần tự - chỉ có 1 giá trị
-                            double value = partsWeights[weightIndex][0];
-                            row.createCell(colIndex++).setCellValue(value); // Min = giá trị
-                            row.createCell(colIndex++).setCellValue(0.0); // Std = 0 (không có độ lệch chuẩn)
-                            row.createCell(colIndex++).setCellValue(value); // Mean = giá trị
+                        // } else if (partsWeights[weightIndex].length >= 1) {
+                        //     // Chế độ tuần tự - chỉ có 1 giá trị
+                        //     double value = partsWeights[weightIndex][0];
+                        //     // row.createCell(colIndex++).setCellValue(value); // Min = giá trị
+                        //     // row.createCell(colIndex++).setCellValue(0.0); // Std = 0 (không có độ lệch chuẩn)
+                        //     // row.createCell(colIndex++).setCellValue(value); // Mean = giá trị
+                        //     row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][0]); // Min
+                        //     row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][1]); // Std
+                        //     row.createCell(colIndex++).setCellValue(partsWeights[weightIndex][2]); // Mean
                         } else {
                             // Mảng rỗng
                             row.createCell(colIndex++).setCellValue(0.0); // Min
