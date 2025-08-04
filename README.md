@@ -14,12 +14,13 @@
 
 ## 📌 Giới thiệu
 
-Dự án này triển khai một hệ thống tối ưu hóa logistics tiên tiến với khả năng **xử lý song song (parallel processing)** và **tăng tốc GPU**. Hệ thống giải quyết các bài toán phức tạp trong logistics như:
+Dự án này triển khai một hệ thống tối ưu hóa logistics tiên tiến với khả năng **xử lý song song (parallel processing)**, **tăng tốc GPU** và **học tăng cường (Reinforcement Learning)**. Hệ thống giải quyết các bài toán phức tạp trong logistics như:
 
 - **VRPTW** (Vehicle Routing Problem with Time Windows)
 - **PDPTW** (Pickup and Delivery Problem with Time Windows)
+- **VRPSPDTW** (Vehicle Routing Problem with Simultaneous Pickup and Delivery and Time Windows)
 
-Sử dụng 4 thuật toán meta-heuristic tiên tiến chạy song song để tìm ra giải pháp tối ưu nhất.
+Sử dụng 4 thuật toán meta-heuristic tiên tiến chạy song song kết hợp với Reinforcement Learning để tìm ra giải pháp tối ưu nhất.
 
 ---
 
@@ -37,11 +38,15 @@ Sử dụng 4 thuật toán meta-heuristic tiên tiến chạy song song để t
 - **GWO** (Grey Wolf Optimizer)
 - **WOA** (Whale Optimization Algorithm)
 - **SA** (Simulated Annealing) - Tạo quần thể ban đầu
+- **RL** (Reinforcement Learning) - Học tăng cường
 
 ### 📊 Xuất dữ liệu & Báo cáo
 - **Excel Export**: Xuất kết quả chi tiết ra file Excel
+- **CSV Export**: Xuất dữ liệu định dạng CSV
+- **TXT Export**: Xuất báo cáo dạng text
 - **Performance Reports**: Báo cáo hiệu suất và so sánh thuật toán
 - **Real-time Monitoring**: Theo dõi tiến trình thực thi
+- **Configurable Fitness**: Chiến lược fitness có thể cấu hình
 
 ---
 
@@ -61,47 +66,49 @@ Sử dụng 4 thuật toán meta-heuristic tiên tiến chạy song song để t
 
 ```bash
 logistic/
-├── .github/                 # GitHub Actions & workflows
-├── .vscode/                 # VS Code configuration
+├── pseudo/                  # Tài liệu thuật toán (pseudocode)
+│   ├── AlgorithmComparison.md
+│   ├── AntColonyOptimization.md
+│   ├── GreyWolfOptimizer.md
+│   ├── SimulatedAnnealing.md
+│   ├── SpottedHyenaOptimizer.md
+│   └── WhaleOptimizationAlgorithm.md
 ├── src/
-│   └── main/
-│       ├── java/
-│       │   └── org/
-│       │       └── logistic/
-│       │           ├── Main.java           # Entry point chính
-│       │           ├── algorithm/          # Thuật toán tối ưu hóa
-│       │           │   ├── aco/           # Ant Colony Optimization
-│       │           │   ├── gwo/           # Grey Wolf Optimizer
-│       │           │   ├── sa/            # Simulated Annealing
-│       │           │   ├── sho/           # Spotted Hyena Optimizer
-│       │           │   └── woa/           # Whale Optimization Algorithm
-│       │           ├── parallel/          # 🚀 Xử lý song song
-│       │           │   ├── ParallelExecutionManager.java
-│       │           │   ├── PerformanceMonitor.java
-│       │           │   └── GPUManager.java
-│       │           ├── model/             # Data models
-│       │           │   ├── Location.java
-│       │           │   ├── Route.java
-│       │           │   ├── Solution.java
-│       │           │   └── Vehicle.java
-│       │           ├── data/              # Data processing
-│       │           │   └── ReadDataFromFile.java
-│       │           └── util/              # Utilities
-│       │               ├── FitnessUtil.java
-│       │               ├── ExcelUtil.java
-│       │               ├── PrintUtil.java
-│       │               └── CheckConditionUtil.java
-│       └── resources/
-│           └── data/                      # Test datasets
-│               ├── vrptw/                 # VRPTW problems
-│               │   ├── src/              # Problem instances
-│               │   └── solution/         # Known solutions
-│               └── pdptw/                 # PDPTW problems
-│                   ├── src/
-│                   └── solution/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── org/
+│   │   │       └── logistic/
+│   │   │           ├── Main.java           # Entry point chính
+│   │   │           ├── algorithm/          # Thuật toán tối ưu hóa
+│   │   │           │   ├── aco/           # Ant Colony Optimization
+│   │   │           │   ├── gwo/           # Grey Wolf Optimizer
+│   │   │           │   ├── sa/            # Simulated Annealing
+│   │   │           │   ├── sho/           # Spotted Hyena Optimizer
+│   │   │           │   └── woa/           # Whale Optimization Algorithm
+│   │   │           ├── parallel/          # 🚀 Xử lý song song
+│   │   │           ├── model/             # Data models
+│   │   │           ├── data/              # Data processing
+│   │   │           └── util/              # Utilities
+│   │   └── resources/
+│   │       └── data/                      # Test datasets
+│   │           ├── vrptw/                 # VRPTW problems
+│   │           │   ├── src/              # Problem instances
+│   │           │   └── solution/         # Known solutions
+│   │           ├── pdptw/                 # PDPTW problems
+│   │           │   ├── src/
+│   │           │   └── solution/
+│   │           ├── vrptw_vrpspdtw/        # VRPTW & VRPSPDTW combined
+│   │           ├── Liu_Tang_Yao/          # Liu-Tang-Yao benchmark
+│   │           │   ├── src/
+│   │           │   └── solution/
+│   │           └── Wang_Chen/             # Wang-Chen benchmark
+│   │               ├── src/
+│   │               └── solution/
+│   └── test/                # Unit tests
+│       └── java/
 ├── exports/                 # Output files (Excel, CSV)
-├── target/                  # Maven build output
 ├── pom.xml                  # Maven configuration
+├── CODE_OF_CONDUCT.md      # Code of conduct
 └── README.md               # Project documentation
 ```
 
@@ -125,10 +132,13 @@ cd logistic
 mvn clean install
 ```
 
-### 3️⃣ Tải dữ liệu test
+### 3️⃣ Dữ liệu test
 Dữ liệu mẫu đã được tích hợp sẵn trong `src/main/resources/data/`:
 - **VRPTW**: Solomon benchmark instances (C101, C102, ...)
 - **PDPTW**: Li & Lim benchmark instances
+- **VRPTW_VRPSPDTW**: Combined dataset với các instances CDP, RCDP, RDP
+- **Liu_Tang_Yao**: Liu-Tang-Yao benchmark dataset
+- **Wang_Chen**: Wang-Chen benchmark dataset
 
 ### 4️⃣ Chạy ứng dụng
 
@@ -147,11 +157,16 @@ Trong file `Main.java`, bạn có thể điều chỉnh:
 
 ```java
 private static class ConfigParams {
-    RunMode runMode = RunMode.SINGLE_FILE;           // SINGLE_FILE hoặc DIRECTORY
-    String dataLocation = "data/vrptw/src/c101.txt"; // File dữ liệu
-    String dataSolution = "data/vrptw/solution/c101.txt"; // File solution
-    ExportType exportType = ExportType.EXCEL;        // EXCEL, CSV, TXT, ALL
-    int iterations = 5;                              // Số lần chạy lặp
+    RunMode runMode = RunMode.SINGLE_FILE;           // SINGLE_FILE, DIRECTORY, hoặc RL
+    String dataLocation = "data/Wang_Chen/src/rdp201.txt"; // File dữ liệu
+    String dataSolution = "data/Wang_Chen/solution/rdp201.txt"; // File solution
+    String srcDirectory = "data/Wang_Chen/src";      // Thư mục chứa dữ liệu
+    String solutionDirectory = "data/Wang_Chen/solution"; // Thư mục chứa solution
+    ExportType exportType = ExportType.EXCEL;        // NONE, EXCEL, CSV, TXT, ALL
+    int iterations = 30;                             // Số lần chạy lặp
+    boolean parallelEnabled = true;                  // Bật/tắt chế độ song song
+    int epoch = 1;                                   // Số vòng chạy cho RL
+    ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPSPDTW_WANG_CHEN;
 }
 ```
 
@@ -163,6 +178,7 @@ private static class ConfigParams {
 
 1. **SINGLE_FILE**: Xử lý một file dữ liệu cụ thể
 2. **DIRECTORY**: Xử lý tất cả files trong thư mục
+3. **RL**: Chế độ Reinforcement Learning (tăng cường học)
 
 ### 📊 Kết quả đầu ra
 
@@ -224,6 +240,31 @@ Hệ thống tự động:
 - **Li & Lim Instances**: LC1, LC2, LR1, LR2, LRC1, LRC2
 - **Characteristics**: Pickup-delivery pairs, time windows, precedence constraints
 
+### 🔄 VRPTW & VRPSPDTW Combined
+- **CDP Instances**: cdp101-cdp208 (Clustered instances)
+- **RCDP Instances**: rcdp101-rcdp5007 (Random clustered instances)
+- **RDP Instances**: rdp101-rdp211 (Random instances)
+- **Characteristics**: Mixed pickup-delivery with time windows
+
+### 📚 Additional Benchmarks
+- **Liu-Tang-Yao Dataset**: Specialized benchmark instances
+- **Wang-Chen Dataset**: Advanced problem instances với rdp201, rdp202, etc.
+
+---
+
+## 📖 Tài liệu thuật toán
+
+Dự án bao gồm tài liệu chi tiết về các thuật toán trong thư mục `pseudo/`:
+
+- **AlgorithmComparison.md**: So sánh hiệu suất các thuật toán
+- **AntColonyOptimization.md**: Chi tiết thuật toán ACO
+- **GreyWolfOptimizer.md**: Chi tiết thuật toán GWO  
+- **SimulatedAnnealing.md**: Chi tiết thuật toán SA
+- **SpottedHyenaOptimizer.md**: Chi tiết thuật toán SHO
+- **WhaleOptimizationAlgorithm.md**: Chi tiết thuật toán WOA
+
+Các tài liệu này bao gồm pseudocode, giải thích chi tiết và ví dụ minh họa.
+
 ---
 
 ## 🛠️ Phát triển & Đóng góp
@@ -269,9 +310,10 @@ Dự án này được phân phối dưới giấy phép MIT. Xem file `LICENSE`
 
 ## 📬 Liên hệ & Hỗ trợ
 
-- **Email**: khainam23@example.com
+- **GitHub Repository**: [https://github.com/khainam23/logistic](https://github.com/khainam23/logistic)
 - **GitHub Issues**: [Report bugs & feature requests](https://github.com/khainam23/logistic/issues)
 - **Discussions**: [Community discussions](https://github.com/khainam23/logistic/discussions)
+- **Kaggle Demo**: [Chạy thử trực tuyến](https://www.kaggle.com/code/nkn2310/logistic)
 
 ---
 

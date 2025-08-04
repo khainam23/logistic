@@ -184,9 +184,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             return 0.0;
         }
 
-        // Tính toán độ khác biệt về độ dài
-        // double lengthDifference = Math.abs(way1.length - way2.length);
-
         // Tính toán số điểm chung
         int commonPoints = 0;
         for (int loc1 : way1) {

@@ -50,15 +50,15 @@ public class Main {
         RunMode runMode = RunMode.SINGLE_FILE;
         String dataLocation = "data/Wang_Chen/src/rdp201.txt";
         String dataSolution = "data/Wang_Chen/solution/rdp201.txt";
-        String srcDirectory = "data/Wang_Chen/src";
-        String solutionDirectory = "data/Wang_Chen/solution";
+        String srcDirectory = "data/pdptw/src";
+        String solutionDirectory = "data/pdptw/solution";
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
-        int iterations = 30;
+        int iterations = 5;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
-        boolean parallelEnabled = true;
+        boolean parallelEnabled = false;
         // Số vòng chạy cho RL
         int epoch = 1;
         // Loại bài toán (chỉ định trực tiếp)
@@ -91,8 +91,8 @@ public class Main {
         FitnessStrategy strategy = FitnessUtil.createStrategyBuilder()
                 .useDistance(true)
                 .useVehicleCount(true)
-                .useServiceTime(false)
-                .useWaitingTime(false)
+                .useServiceTime(true)
+                .useWaitingTime(true)
                 .withAlpha(2000)
                 .withDelta(1)
                 .build();
