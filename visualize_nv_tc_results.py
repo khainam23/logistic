@@ -15,7 +15,7 @@ class NV_TC_ResultsVisualizer:
     Lớp trực quan hóa kết quả tối ưu hóa tập trung vào 2 tiêu chí: NV (Số xe) và TC (Chi phí tổng)
     """
     
-    def __init__(self, excel_file="20250731_155756_optimization_results.xlsx"):
+    def __init__(self, excel_file="20250801_082341_optimization_results.xlsx"):
         """
         Khởi tạo và đọc dữ liệu từ file Excel chỉ có NV và TC
         """

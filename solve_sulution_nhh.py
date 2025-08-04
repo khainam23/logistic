@@ -481,30 +481,23 @@ def process_directory(src_dir, solution_dir, file_format=None):
 # - Các định dạng được hỗ trợ: VRPTW, VRPTW_WANG_CHEN, PDPTW
 #
 data_directories = [
-    # {
-    #     'name': 'VRPTW',
-    #     'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",    
-    #     'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution",
-    #     'format': 'VRPTW'  # Chỉ định định dạng VRPTW
-    # },
-    # {
-    #     'name': 'PDPTW',
-    #     'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
-    #     'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution",
-    #     'format': 'PDPTW'  # Chỉ định định dạng PDPTW
-    # },
     {
-        'name': 'VRPTW Wang Chen',
-        'src': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\src",
-        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\solution",
-        'format': 'VRPTW_WANG_CHEN'  # Chỉ định định dạng VRPTW Wang Chen
-    }
-    # Ví dụ sử dụng tự động phát hiện:
+        'name': 'VRPTW',
+        'src': r"D:\Logistic\excute_data\logistic\data\vrptw\src",    
+        'solution': r"D:\Logistic\excute_data\logistic\data\vrptw\solution",
+        'format': 'VRPTW'  # Chỉ định định dạng VRPTW
+    },
+    {
+        'name': 'PDPTW',
+        'src': r"D:\Logistic\excute_data\logistic\data\pdptw\src",
+        'solution': r"D:\Logistic\excute_data\logistic\data\pdptw\solution",
+        'format': 'PDPTW'  # Chỉ định định dạng PDPTW
+    },
     # {
-    #     'name': 'Mixed Format Directory',
-    #     'src': r"D:\path\to\mixed\files",
-    #     'solution': r"D:\path\to\solutions"
-    #     # Không có 'format' -> tự động phát hiện
+    #     'name': 'VRPTW Wang Chen',
+    #     'src': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\src",
+    #     'solution': r"D:\Logistic\excute_data\logistic\data\vrptw_Wang_Chen\solution",
+    #     'format': 'VRPTW_WANG_CHEN'  # Chỉ định định dạng VRPTW Wang Chen
     # }
 ]
 

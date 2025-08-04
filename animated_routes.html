@@ -336,10 +336,15 @@
     <div class="container">
         <div class="header">
             <h1>🚛 Mô Phỏng Di Chuyển Logistics</h1>
-            <p class="subtitle">Trực quan hóa thời gian thực - Dữ liệu từ lr209.txt</p>
+            <p class="subtitle">Trực quan hóa thời gian thực</p>
         </div>
 
         <div class="controls">
+            <div class="control-group">
+                <label for="fileInput">File routes (.txt):</label>
+                <input type="file" id="fileInput" accept=".txt" onchange="loadRouteFile(event)">
+            </div>
+
             <div class="control-group">
                 <label for="routeSelect">Chọn tuyến:</label>
                 <select id="routeSelect">
@@ -424,32 +429,28 @@
 
     <script>
         // Dữ liệu tuyến đường
-        const routesData = [
-            [0, 20, 29, 31, 60, 0],
-            [0, 21, 30, 39, 88, 0],
-            [0, 22, 49, 0],
-            [0, 67, 74, 102, 0],
-            [0, 65, 64, 59, 0],
-            [0, 23, 52, 37, 0],
-            [0, 63, 61, 51, 0],
-            [0, 24, 34, 104, 0],
-            [0, 5, 1, 96, 101, 0],
-            [0, 25, 11, 14, 0],
-            [0, 26, 9, 100, 0],
-            [0, 69, 72, 0],
-            [0, 75, 2, 95, 93, 77, 0],
-            [0, 7, 6, 89, 0],
-            [0, 3, 98, 94, 92, 84, 0],
-            [0, 43, 42, 41, 40, 44, 46, 0],
-            [0, 66, 48, 85, 0],
-            [0, 10, 12, 97, 79, 0],
-            [0, 27, 36, 83, 0],
-            [0, 28, 50, 45, 0],
-            [0, 103, 106, 82, 0],
+        let routesData = [
+            [0, 27, 95, 0],
+            [0, 69, 0],
+            [0, 59, 28, 0],
+            [0, 92, 0],
+            [0, 5, 0],
+            [0, 83, 0],
+            [0, 72, 0],
+            [0, 33, 2, 52, 29, 19, 61, 101, 100, 84, 90, 77, 58, 102, 50, 0],
+            [0, 42, 0],
+            [0, 62, 44, 88, 76, 16, 40, 73, 22, 85, 81, 55, 80, 68, 34, 96, 43, 32, 48, 0],
+            [0, 45, 0],
+            [0, 15, 0],
+            [0, 14, 0],
+            [0, 11, 0],
+            [0, 39, 31, 30, 0],
             [0, 47, 0],
-            [0, 62, 68, 80, 0],
-            [0, 4, 91, 0],
-            [0, 8, 99, 0]
+            [0, 63, 0],
+            [0, 23, 82, 38, 99, 41, 6, 8, 7, 86, 25, 56, 4, 74, 35, 54, 1, 89, 0],
+            [0, 36, 67, 21, 75, 78, 9, 53, 93, 57, 17, 94, 13, 3, 66, 97, 24, 91, 0],
+            [0, 64, 0],
+            [0, 65, 98, 12, 71, 70, 79, 51, 18, 87, 49, 46, 10, 20, 26, 37, 60, 0]
         ];
 
         // Canvas và context
@@ -476,6 +477,61 @@
             '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#16a085',
             '#2c3e50'
         ];
+
+        // Function load file txt
+        function loadRouteFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const newRoutes = parseTextFile(content);
+                
+                if (newRoutes.length > 0) {
+                    routesData.length = 0;
+                    routesData.push(...newRoutes);
+                    
+                    resetAnimation();
+                    generateCoordinates();
+                    initializeVehicles();
+                    updateRouteSelect();
+                    populateVehiclesList();
+                    render();
+                    
+                    document.querySelector('.subtitle').textContent = 
+                        `Trực quan hóa thời gian thực - Dữ liệu từ ${file.name}`;
+                } else {
+                    alert('Không thể đọc routes từ file này!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Parse file txt
+        function parseTextFile(content) {
+            const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+            const routes = [];
+
+            for (const line of lines) {
+                if (line.includes('Route') && line.includes(':')) {
+                    const routePart = line.split(':')[1].trim();
+                    const nodes = routePart.split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+                    if (nodes.length >= 2) routes.push(nodes);
+                }
+                else if (line.includes('Trình tự di chuyển:')) {
+                    const routePart = line.split(':')[1].trim();
+                    const nodes = routePart.split('→').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+                    if (nodes.length >= 2) routes.push(nodes);
+                }
+                else if (/^\d+(\s+\d+)+$/.test(line)) {
+                    const nodes = line.split(/\s+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+                    if (nodes.length >= 2) routes.push(nodes);
+                }
+            }
+
+            return routes;
+        }
 
         // Khởi tạo
         function init() {
@@ -555,6 +611,26 @@
             select.addEventListener('change', (e) => {
                 selectedRoute = e.target.value;
                 render();
+            });
+        }
+
+        // Update route select khi load file mới
+        function updateRouteSelect() {
+            const select = document.getElementById('routeSelect');
+            
+            // Xóa options cũ trừ "Tất cả tuyến"
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Thêm options mới
+            routesData.forEach((route, index) => {
+                if (route.length > 2) {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `Tuyến ${index + 1} (${route.length - 2} khách hàng)`;
+                    select.appendChild(option);
+                }
             });
         }
 
