@@ -64,7 +64,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
                     double newEnergy = calculateEnergy(newSolution.getRoutes());
                     double deltaEnergy = newEnergy - currentEnergy;
 
-                    if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
+                    if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) <= random.nextDouble()) {
                         currentSolution = newSolution.copy();
                         if (newEnergy < bestEnergy) {
                             bestSolution = newSolution.copy();
@@ -106,7 +106,7 @@ public class SimulatedAnnealing extends AbstractOptimizer {
                 double newEnergy = calculateEnergy(newSolution.getRoutes());
                 double deltaEnergy = newEnergy - currentEnergy;
 
-                if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) > random.nextDouble()) {
+                if (deltaEnergy < 0 || acceptanceProbability(deltaEnergy, temperature) <= random.nextDouble()) {
                     currentSolution = newSolution.copy();
                 }
             }

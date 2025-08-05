@@ -37,7 +37,7 @@ public class AntColonyOptimization extends AbstractOptimizer {
     double[][] heuristic; // Ma trận heuristic (khoảng cách nghịch đảo)
     
     int numLocations; // Số lượng địa điểm
-
+    
     /**
      * Khởi tạo thuật toán Ant Colony Optimization
      */
