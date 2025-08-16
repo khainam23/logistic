@@ -65,7 +65,7 @@ public class ParallelExecutionManager {
             FitnessUtil fitnessUtil,
             CheckConditionUtil checkConditionUtil,
             Location[] locations,
-            int maxPayload,
+            double maxPayload,
             int iterations,
             OptimizerFactory optimizerFactory) {
 
@@ -82,7 +82,7 @@ public class ParallelExecutionManager {
             FitnessUtil fitnessUtil,
             CheckConditionUtil checkConditionUtil,
             Location[] locations,
-            int maxPayload,
+            double maxPayload,
             int iterations,
             OptimizerFactory optimizerFactory) {
 
@@ -147,7 +147,7 @@ public class ParallelExecutionManager {
             FitnessUtil fitnessUtil,
             CheckConditionUtil checkConditionUtil,
             Location[] locations,
-            int maxPayload,
+            double maxPayload,
             int iterations,
             OptimizerFactory optimizerFactory) {
 

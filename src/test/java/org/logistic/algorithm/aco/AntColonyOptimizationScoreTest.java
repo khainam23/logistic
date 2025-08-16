@@ -66,7 +66,7 @@ public class AntColonyOptimizationScoreTest {
 
         dataReader.readProblemData(dataFile, type);
         Location[] locations = dataReader.getLocations();
-        int maxCapacity = dataReader.getMaxCapacity();
+        double maxCapacity = dataReader.getMaxCapacity();
 
         if (locations == null) {
             System.out.println("❌ Không đọc được dữ liệu từ: " + dataFile);
@@ -144,7 +144,7 @@ public class AntColonyOptimizationScoreTest {
      */
     private static Solution[] generateInitialSolutions(Route[] initialRoutes, Location[] locations,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-            int maxCapacity) {
+            double maxCapacity) {
         int numSolutions = 5; // Tạo 5 initial solutions
         Solution[] solutions = new Solution[numSolutions];
 

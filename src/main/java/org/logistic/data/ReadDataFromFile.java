@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Point;
 import org.logistic.model.Route;
@@ -28,7 +29,8 @@ import lombok.experimental.FieldDefaults;
 public class ReadDataFromFile {
     Location[] locations;
     Route[] routes;
-    int maxCapacity;
+    DistanceTime[] distanceTimes;
+    double maxCapacity;
 
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -281,10 +283,12 @@ public class ReadDataFromFile {
 
     private void readVRPSPDTWLiuTangYaoData(Path path) throws IOException {
         List<Location> locationList = new ArrayList<>();
+        List<DistanceTime> distanceTimeList = new ArrayList<>();
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             boolean inNodeSection = false;
+            boolean inDistanceTimeSection = false;
 
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -293,7 +297,7 @@ public class ReadDataFromFile {
                 if (line.startsWith("CAPACITY")) {
                     String[] parts = line.split(":");
                     if (parts.length > 1) {
-                        maxCapacity = (int) (Double.parseDouble(parts[1].trim()) * 100);
+                        maxCapacity = Double.parseDouble(parts[1].trim());
                         System.out.println("Max capacity: " + maxCapacity);
                     }
                     continue;
@@ -302,12 +306,19 @@ public class ReadDataFromFile {
                 // Bắt đầu đọc dữ liệu node
                 if (line.equals("NODE_SECTION")) {
                     inNodeSection = true;
+                    inDistanceTimeSection = false;
                     continue;
                 }
 
-                // Kết thúc đọc dữ liệu node
-                if (line.startsWith("DISTANCETIME_SECTION") || line.startsWith("EOF")) {
+                // Bắt đầu đọc DISTANCETIME_SECTION
+                if (line.equals("DISTANCETIME_SECTION")) {
                     inNodeSection = false;
+                    inDistanceTimeSection = true;
+                    continue;
+                }
+
+                // Kết thúc đọc dữ liệu
+                if (line.equals("EOF") || line.startsWith("DEMAND_SECTION") || line.startsWith("DEPOT_SECTION")) {
                     break;
                 }
 
@@ -347,14 +358,41 @@ public class ReadDataFromFile {
 
                             locationList.add(location);
                         } catch (NumberFormatException e) {
-                            System.err.println("Error parsing Liu Tang Yao line: " + line);
+                            System.err.println("Lỗi phân tích dòng NODE Liu Tang Yao: " + line);
+                        }
+                    }
+                }
+
+                // Đọc dữ liệu DISTANCETIME_SECTION
+                if (inDistanceTimeSection && !line.isEmpty()) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        try {
+                            int fromNode = Integer.parseInt(parts[0].trim());
+                            int toNode = Integer.parseInt(parts[1].trim());
+                            double distance = Double.parseDouble(parts[2].trim());
+                            double travelTime = Double.parseDouble(parts[3].trim());
+
+                            DistanceTime distanceTime = DistanceTime.builder()
+                                    .fromNode(fromNode)
+                                    .toNode(toNode)
+                                    .distance(distance)
+                                    .travelTime(travelTime)
+                                    .build();
+
+                            distanceTimeList.add(distanceTime);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Lỗi phân tích dòng DISTANCETIME Liu Tang Yao: " + line);
                         }
                     }
                 }
             }
 
             locations = locationList.toArray(new Location[0]);
-            System.out.println("Read " + locations.length + " VRPSPDTW Liu Tang Yao locations from " + path);
+            distanceTimes = distanceTimeList.toArray(new DistanceTime[0]);
+            
+            System.out.println("Đã đọc " + locations.length + " location VRPSPDTW Liu Tang Yao từ " + path);
+            System.out.println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
         }
     }
 

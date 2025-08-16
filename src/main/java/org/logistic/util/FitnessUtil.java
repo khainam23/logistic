@@ -3,12 +3,15 @@ package org.logistic.util;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Tiện ích tính toán giá trị fitness cho các giải pháp
@@ -90,6 +93,40 @@ public class FitnessUtil {
             return calculatorFitnessParallel(routes, locations);
         } else {
             return calculatorFitnessSequential(routes, locations);
+        }
+    }
+
+    /**
+     * Tính giá trị fitness với thông tin DistanceTime (sử dụng chế độ song song hiện tại)
+     *
+     * @param routes        Mảng các tuyến đường
+     * @param locations     Mảng các vị trí
+     * @param distanceTimes Mảng thông tin khoảng cách-thời gian
+     * @return Giá trị fitness (càng thấp càng tốt)
+     */
+    public double calculatorFitness(Route[] routes, Location[] locations, DistanceTime[] distanceTimes) {
+        return calculatorFitness(routes, locations, distanceTimes, this.parallelMode);
+    }
+
+    /**
+     * Tính giá trị fitness với thông tin DistanceTime
+     *
+     * @param routes        Mảng các tuyến đường
+     * @param locations     Mảng các vị trí
+     * @param distanceTimes Mảng thông tin khoảng cách-thời gian
+     * @param parallel      Có sử dụng xử lý song song hay không
+     * @return Giá trị fitness (càng thấp càng tốt)
+     */
+    public double calculatorFitness(Route[] routes, Location[] locations, DistanceTime[] distanceTimes, boolean parallel) {
+        if (distanceTimes == null || distanceTimes.length == 0) {
+            // Fallback về phương thức cũ nếu không có DistanceTime
+            return calculatorFitness(routes, locations, parallel);
+        }
+        
+        if (parallel) {
+            return calculatorFitnessWithDistanceTimeParallel(routes, locations, distanceTimes);
+        } else {
+            return calculatorFitnessWithDistanceTimeSequential(routes, locations, distanceTimes);
         }
     }
 
@@ -216,6 +253,173 @@ public class FitnessUtil {
         weights[3] = totalWaitingTime;
 
         // Sử dụng strategy để tính fitness
+        return fitnessStrategy.calculateFitness(
+                numberVehicle,
+                totalDistances,
+                totalServiceTime,
+                totalWaitingTime);
+    }
+
+    /**
+     * Tính giá trị fitness song song với thông tin DistanceTime
+     */
+    private double calculatorFitnessWithDistanceTimeParallel(Route[] routes, Location[] locations, DistanceTime[] distanceTimes) {
+        AtomicInteger totalDistances = new AtomicInteger(0);
+        AtomicInteger totalServiceTime = new AtomicInteger(0);
+        AtomicInteger totalWaitingTime = new AtomicInteger(0);
+        AtomicInteger numberVehicle = new AtomicInteger(0);
+
+        // Tạo map để tra cứu nhanh DistanceTime
+        Map<String, DistanceTime> distanceMap = Arrays.stream(distanceTimes)
+                .parallel()
+                .collect(Collectors.toConcurrentMap(
+                    dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                    dt -> dt,
+                    (existing, replacement) -> existing
+                ));
+
+        Arrays.stream(routes).parallel().forEach(route -> {
+            int[] indLocs = route.getIndLocations();
+
+            if (indLocs != null && indLocs.length > 0) {
+                numberVehicle.incrementAndGet();
+
+                double currentTime = 0;
+
+                for (int j = 0; j < indLocs.length; j++) {
+                    Location currLoc = locations[indLocs[j]];
+                    
+                    // Tính khoảng cách và thời gian di chuyển
+                    if (j > 0) {
+                        int fromNode = indLocs[j - 1];
+                        int toNode = indLocs[j];
+                        DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
+                        
+                        if (dt != null) {
+                            currentTime += dt.getTravelTime();
+                            totalDistances.addAndGet((int) dt.getDistance());
+                        } else {
+                            // Fallback về tính toán Euclidean nếu không tìm thấy
+                            Location prevLoc = locations[fromNode];
+                            currentTime += prevLoc.distance(currLoc);
+                            totalDistances.addAndGet((int) prevLoc.distance(currLoc));
+                        }
+                    } else {
+                        // Khoảng cách từ depot (node 0) đến điểm đầu tiên
+                        DistanceTime dt = distanceMap.get("0-" + indLocs[j]);
+                        if (dt != null) {
+                            currentTime += dt.getTravelTime();
+                            totalDistances.addAndGet((int) dt.getDistance());
+                        } else {
+                            currentTime += locations[0].distance(currLoc);
+                            totalDistances.addAndGet((int) locations[0].distance(currLoc));
+                        }
+                    }
+
+                    // Tính thời gian chờ
+                    double waitingTime = Math.max(0, currLoc.getLtw() - currentTime);
+                    totalWaitingTime.addAndGet((int) waitingTime);
+
+                    // Cập nhật thời gian hiện tại
+                    currentTime = Math.max(currentTime, currLoc.getLtw());
+                    currentTime += currLoc.getServiceTime();
+                    totalServiceTime.addAndGet((int) currLoc.getServiceTime());
+                }
+
+                // Thêm khoảng cách về depot
+                int lastNode = indLocs[indLocs.length - 1];
+                DistanceTime dt = distanceMap.get(lastNode + "-0");
+                if (dt != null) {
+                    totalDistances.addAndGet((int) dt.getDistance());
+                } else {
+                    totalDistances.addAndGet((int) locations[lastNode].distance(locations[0]));
+                }
+            }
+        });
+
+        return fitnessStrategy.calculateFitness(
+                numberVehicle.get(),
+                totalDistances.get(),
+                totalServiceTime.get(),
+                totalWaitingTime.get());
+    }
+
+    /**
+     * Tính giá trị fitness tuần tự với thông tin DistanceTime
+     */
+    private double calculatorFitnessWithDistanceTimeSequential(Route[] routes, Location[] locations, DistanceTime[] distanceTimes) {
+        int totalDistances = 0;
+        int totalServiceTime = 0;
+        int totalWaitingTime = 0;
+        int numberVehicle = 0;
+
+        // Tạo map để tra cứu nhanh DistanceTime
+        Map<String, DistanceTime> distanceMap = Arrays.stream(distanceTimes)
+                .collect(Collectors.toMap(
+                    dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                    dt -> dt,
+                    (existing, replacement) -> existing
+                ));
+
+        for (Route route : routes) {
+            int[] indLocs = route.getIndLocations();
+
+            if (indLocs != null && indLocs.length > 0) {
+                numberVehicle++;
+
+                double currentTime = 0;
+
+                for (int j = 0; j < indLocs.length; j++) {
+                    Location currLoc = locations[indLocs[j]];
+                    
+                    // Tính khoảng cách và thời gian di chuyển
+                    if (j > 0) {
+                        int fromNode = indLocs[j - 1];
+                        int toNode = indLocs[j];
+                        DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
+                        
+                        if (dt != null) {
+                            currentTime += dt.getTravelTime();
+                            totalDistances += dt.getDistance();
+                        } else {
+                            // Fallback về tính toán Euclidean nếu không tìm thấy
+                            Location prevLoc = locations[fromNode];
+                            currentTime += prevLoc.distance(currLoc);
+                            totalDistances += prevLoc.distance(currLoc);
+                        }
+                    } else {
+                        // Khoảng cách từ depot (node 0) đến điểm đầu tiên
+                        DistanceTime dt = distanceMap.get("0-" + indLocs[j]);
+                        if (dt != null) {
+                            currentTime += dt.getTravelTime();
+                            totalDistances += dt.getDistance();
+                        } else {
+                            currentTime += locations[0].distance(currLoc);
+                            totalDistances += locations[0].distance(currLoc);
+                        }
+                    }
+
+                    // Tính thời gian chờ
+                    double waitingTime = Math.max(0, currLoc.getLtw() - currentTime);
+                    totalWaitingTime += waitingTime;
+
+                    // Cập nhật thời gian hiện tại
+                    currentTime = Math.max(currentTime, currLoc.getLtw());
+                    currentTime += currLoc.getServiceTime();
+                    totalServiceTime += currLoc.getServiceTime();
+                }
+
+                // Thêm khoảng cách về depot
+                int lastNode = indLocs[indLocs.length - 1];
+                DistanceTime dt = distanceMap.get(lastNode + "-0");
+                if (dt != null) {
+                    totalDistances += dt.getDistance();
+                } else {
+                    totalDistances += locations[lastNode].distance(locations[0]);
+                }
+            }
+        }
+
         return fitnessStrategy.calculateFitness(
                 numberVehicle,
                 totalDistances,

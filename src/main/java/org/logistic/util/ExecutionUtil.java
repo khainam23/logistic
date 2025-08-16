@@ -9,6 +9,7 @@ import org.logistic.algorithm.sa.SimulatedAnnealing;
 import org.logistic.algorithm.sho.SpottedHyenaOptimizer;
 import org.logistic.algorithm.woa.WhaleOptimizationAlgorithm;
 import org.logistic.data.ReadDataFromFile;
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
 import org.logistic.model.Solution;
@@ -41,7 +42,16 @@ public class ExecutionUtil {
                         System.out.println("\n=== XỬ LÝ FILE: " + fileName + " ===");
 
                         // Tạo giải pháp ban đầu và tập giải pháp
-                        Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
+                        // Sử dụng DistanceTime nếu có (cho Liu Tang Yao format)
+                        double initialFitness;
+                        if (rdff.getDistanceTimes() != null && rdff.getDistanceTimes().length > 0) {
+                            initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(), parallelEnabled);
+                            System.out.println("Sử dụng thông tin DistanceTime từ DISTANCETIME_SECTION");
+                        } else {
+                            initialFitness = fitnessUtil.calculatorFitness(routes, locations, parallelEnabled);
+                        }
+                        
+                        Solution mainSolution = new Solution(routes, initialFitness);
                         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
                         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
                                 locations);
@@ -49,7 +59,7 @@ public class ExecutionUtil {
                         // Chạy tất cả các thuật toán tối ưu hóa
                         runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                                 routes[0].getMaxPayload(), printUtil, fileName,
-                                exportType, iterations, parallelEnabled);
+                                exportType, iterations, parallelEnabled, rdff.getDistanceTimes());
 
                         System.out.println("=== HOÀN THÀNH XỬ LÝ FILE: " + fileName + " ===\n");
 
@@ -95,14 +105,23 @@ public class ExecutionUtil {
             }
 
             // Tạo giải pháp ban đầu và tập giải pháp
-            Solution mainSolution = new Solution(routes, fitnessUtil.calculatorFitness(routes, locations, parallelEnabled));
+            // Sử dụng DistanceTime nếu có (cho Liu Tang Yao format)
+            double initialFitness;
+            if (rdff.getDistanceTimes() != null && rdff.getDistanceTimes().length > 0) {
+                initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(), parallelEnabled);
+                System.out.println("Sử dụng thông tin DistanceTime từ DISTANCETIME_SECTION");
+            } else {
+                initialFitness = fitnessUtil.calculatorFitness(routes, locations, parallelEnabled);
+            }
+            
+            Solution mainSolution = new Solution(routes, initialFitness);
             SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
             Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations);
 
             // Chạy tất cả các thuật toán tối ưu hóa
             runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
                     routes[0].getMaxPayload(), printUtil, null,
-                    exportType, iterations, parallelEnabled);
+                    exportType, iterations, parallelEnabled, rdff.getDistanceTimes());
 
         } catch (Exception e) {
             System.err.println("Lỗi khi xử lý file đơn: " + e.getMessage());
@@ -158,7 +177,7 @@ public class ExecutionUtil {
      */
     private static SequentialResults runSequentialOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-            Location[] locations, int maxPayload, int iterations) {
+            Location[] locations, double maxPayload, int iterations) {
         
         Map<Algorithm, Solution> bestResults = new HashMap<>();
         Map<Algorithm, Long> executionTimes = new HashMap<>();
@@ -258,6 +277,18 @@ public class ExecutionUtil {
     }
 
     /**
+     * Chạy tất cả các thuật toán tối ưu hóa (overload method để tương thích ngược)
+     */
+    public static void runAllOptimizers(Solution[] initialSolutions,
+            FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
+            Location[] locations, int maxPayload, PrintUtil printUtil,
+            String fileName, ExportType exportType, int iterations,
+            boolean parallelEnabled) {
+        runAllOptimizers(initialSolutions, fitnessUtil, checkConditionUtil, locations,
+                maxPayload, printUtil, fileName, exportType, iterations, parallelEnabled, null);
+    }
+
+    /**
      * Chạy tất cả các thuật toán tối ưu hóa và trả về kết quả tốt nhất
      *
      * @param initialSolutions   Tập giải pháp ban đầu
@@ -270,12 +301,13 @@ public class ExecutionUtil {
      * @param exportType         Loại xuất dữ liệu
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
      * @param parallelEnabled    Có sử dụng xử lý song song hay không
+     * @param distanceTimes      Mảng thông tin khoảng cách-thời gian (có thể null)
      */
     public static void runAllOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-            Location[] locations, int maxPayload, PrintUtil printUtil,
+            Location[] locations, double maxPayload, PrintUtil printUtil,
             String fileName, ExportType exportType, int iterations,
-            boolean parallelEnabled) {
+            boolean parallelEnabled, DistanceTime[] distanceTimes) {
         
         // Thiết lập chế độ parallel cho FitnessUtil
         fitnessUtil.setParallelMode(parallelEnabled);

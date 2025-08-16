@@ -51,7 +51,7 @@ public class SimulatedAnnealingScoreTest {
         
         dataReader.readProblemData(dataFile, type);
         Location[] locations = dataReader.getLocations();
-        int maxCapacity = dataReader.getMaxCapacity();
+        double maxCapacity = dataReader.getMaxCapacity();
 
         if (locations == null) {
             System.out.println("❌ Không đọc được dữ liệu từ: " + dataFile);

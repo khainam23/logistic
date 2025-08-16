@@ -230,7 +230,7 @@ public class RLUtil {
     private static Map<Algorithm, Solution> runAllOptimizersForIterator(
             Solution[] initialSolutions, FitnessUtil fitnessUtil, 
             CheckConditionUtil checkConditionUtil, Location[] locations, 
-            int maxPayload, int iterations, boolean parallelEnabled) {
+            double maxPayload, int iterations, boolean parallelEnabled) {
         
         Map<Algorithm, Solution> results = new HashMap<>();
         Algorithm[] algorithms = Algorithm.values();

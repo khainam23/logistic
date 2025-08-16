@@ -1,14 +1,13 @@
 package org.logistic.model;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -16,7 +15,7 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Route {
     int[] indLocations; // Những điểm mà đoạn đường đi qua
-    int maxPayload; // Trọng tải tối đa trên tuyến này
+    double maxPayload; // Trọng tải tối đa trên tuyến này
     double distance; // Khoảng cách của tuyến đường
     boolean isUse;
 
@@ -26,14 +25,14 @@ public class Route {
      * @param indLocations Mảng chỉ số các địa điểm
      * @param maxPayload   Trọng tải tối đa
      */
-    public Route(int[] indLocations, int maxPayload) {
+    public Route(int[] indLocations, double maxPayload) {
         this.indLocations = indLocations;
         this.maxPayload = maxPayload;
         this.distance = 0;
         this.isUse = true;
     }
 
-    public Route(int[] indLocations, int maxPayload, double distance) {
+    public Route(int[] indLocations, double maxPayload, double distance) {
         this.indLocations = indLocations;
         this.maxPayload = maxPayload;
         this.distance = distance;
