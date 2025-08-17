@@ -1,13 +1,15 @@
 package org.logistic.algorithm;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
+import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
 import org.logistic.util.FitnessUtil;
-import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +25,7 @@ public abstract class AbstractOptimizer implements Optimizer {
 
     // Các tham số được thiết lập trong quá trình chạy
     Location[] locations;
+    DistanceTime[] distanceTimes;
     FitnessUtil fitnessUtil;
     CheckConditionUtil checkConditionUtil;
     /**
@@ -30,6 +33,19 @@ public abstract class AbstractOptimizer implements Optimizer {
      */
     public AbstractOptimizer() {
         // Constructor không tham số
+    }
+
+    /**
+     * Override phương thức run với DistanceTime
+     */
+    @Override
+    public Solution run(Solution[] initialSolutions, 
+                       FitnessUtil fitnessUtil,
+                       CheckConditionUtil checkConditionUtil, 
+                       Location[] locations,
+                       DistanceTime[] distanceTimes) {
+        this.distanceTimes = distanceTimes;
+        return run(initialSolutions, fitnessUtil, checkConditionUtil, locations);
     }
 
     /**
@@ -120,8 +136,13 @@ public abstract class AbstractOptimizer implements Optimizer {
 
         // Cập nhật khoảng cách nếu có thông tin về locations
         if (locations != null) {
-            route1.calculateDistance(locations);
-            route2.calculateDistance(locations);
+            if (distanceTimes != null && distanceTimes.length > 0) {
+                route1.calculateDistance(locations, distanceTimes);
+                route2.calculateDistance(locations, distanceTimes);
+            } else {
+                route1.calculateDistance(locations);
+                route2.calculateDistance(locations);
+            }
         }
     }
 
@@ -164,8 +185,13 @@ public abstract class AbstractOptimizer implements Optimizer {
 
         // Cập nhật khoảng cách nếu có thông tin về locations
         if (locations != null) {
-            route1.calculateDistance(locations);
-            route2.calculateDistance(locations);
+            if (distanceTimes != null && distanceTimes.length > 0) {
+                route1.calculateDistance(locations, distanceTimes);
+                route2.calculateDistance(locations, distanceTimes);
+            } else {
+                route1.calculateDistance(locations);
+                route2.calculateDistance(locations);
+            }
         }
     }
 
@@ -269,7 +295,11 @@ protected void applyPdRearrange(Route[] routes) {
     
     // Cập nhật khoảng cách nếu có thông tin về locations
     if (locations != null) {
-        route.calculateDistance(locations);
+        if (distanceTimes != null && distanceTimes.length > 0) {
+            route.calculateDistance(locations, distanceTimes);
+        } else {
+            route.calculateDistance(locations);
+        }
     }
 }
 

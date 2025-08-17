@@ -322,34 +322,35 @@ public class ReadDataFromFile {
                     break;
                 }
 
-                // Đọc dữ liệu node
+                // Đọc dữ liệu node: [ID],[delivery],[pickup],[start_time],[end_time],[service_time]
                 if (inNodeSection && !line.isEmpty()) {
                     String[] parts = line.split(",");
                     if (parts.length >= 6) {
                         try {
                             int nodeId = Integer.parseInt(parts[0]);
-                            double x = Double.parseDouble(parts[1]) * 1000;
-                            double y = Double.parseDouble(parts[2]) * 1000;
-                            int demand = Integer.parseInt(parts[3]);
-                            int ltw = Integer.parseInt(parts[4]);
-                            int utw = Integer.parseInt(parts[5]);
-                            int service = 30;
+                            double dDemand = Double.parseDouble(parts[1]);
+                            double pDemand = Double.parseDouble(parts[2]);
+                            int ltw = Integer.parseInt(parts[3]);
+                            int utw = Integer.parseInt(parts[4]);
+                            int service = Integer.parseInt(parts[5]);
 
                             Location location = Location.builder()
-                                    .point(new Point((int) x, (int) y))
+                                    .point(new Point(0, 0)) // Tọa độ sẽ được tính từ distance matrix
                                     .serviceTimePick(0)
                                     .serviceTimeDeliver(service)
                                     .ltw(ltw)
                                     .utw(utw)
                                     .build();
 
-                            if (demand < 0) {
+                            if (pDemand > 0) {
                                 location.setPick(true);
-                                location.setDemandPick(Math.abs(demand));
-                            } else if (demand > 0) {
+                                location.setDemandPick(pDemand);
+                            }
+                            if (dDemand > 0) {
                                 location.setDeliver(true);
-                                location.setDemandDeliver(demand);
-                            } else {
+                                location.setDemandDeliver(dDemand);
+                            }
+                            if (pDemand == 0 && dDemand == 0) {
                                 location.setDeliver(false);
                                 location.setPick(false);
                                 location.setDemandDeliver(0);
@@ -398,7 +399,9 @@ public class ReadDataFromFile {
 
     private void readVRPSPDTWWangChenData(Path path, ProblemType problemType) throws IOException {
         List<Location> locationList = new ArrayList<>();
+        List<DistanceTime> distanceTimeList = new ArrayList<>();
         boolean readingNodes = false;
+        boolean inDistanceTimeSection = false;
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
@@ -421,49 +424,95 @@ public class ReadDataFromFile {
                 // Bắt đầu đọc NODE_SECTION
                 if (line.equals("NODE_SECTION")) {
                     readingNodes = true;
+                    inDistanceTimeSection = false;
                     continue;
                 }
 
-                // Bắt đầu DISTANCETIME_SECTION, ngưng đọc location
+                // Bắt đầu DISTANCETIME_SECTION
                 if (line.equals("DISTANCETIME_SECTION")) {
                     readingNodes = false;
-                    break;
+                    inDistanceTimeSection = true;
+                    continue;
                 }
 
-                // Dừng khi gặp DEPOT_SECTION
-                if (line.equals("DEPOT_SECTION")) {
+                // Kết thúc đọc dữ liệu
+                if (line.equals("EOF") || line.startsWith("DEMAND_SECTION") || line.startsWith("DEPOT_SECTION")) {
                     break;
                 }
 
                 if (readingNodes) {
-                    // Định dạng: ID,X,Y,delivery,pickup,start_time,end_time,service_time
+                    // Định dạng: [ID],[delivery],[pickup],[start_time],[end_time],[service_time]
                     String[] parts = line.split(",");
-                    if (parts.length >= 8) {
+                    if (parts.length >= 6) {
                         try {
-                            double x = Double.parseDouble(parts[1].trim());
-                            double y = Double.parseDouble(parts[2].trim());
-                            double dDemand = Double.parseDouble(parts[3].trim());
-                            double pDemand = Double.parseDouble(parts[4].trim());
-                            int readyTime = Integer.parseInt(parts[5].trim());
-                            int dueDate = Integer.parseInt(parts[6].trim());
-                            int serviceTime = Integer.parseInt(parts[7].trim());
+                            int nodeId = Integer.parseInt(parts[0].trim());
+                            double dDemand = Double.parseDouble(parts[1].trim());
+                            double pDemand = Double.parseDouble(parts[2].trim());
+                            int readyTime = Integer.parseInt(parts[3].trim());
+                            int dueDate = Integer.parseInt(parts[4].trim());
+                            int serviceTime = Integer.parseInt(parts[5].trim());
 
-                            Location location = new Location(new Point(x, y), serviceTime, serviceTime, pDemand,
-                                    dDemand, readyTime, dueDate, true, true);
+                            Location location = Location.builder()
+                                    .point(new Point(0, 0)) // Tọa độ sẽ được tính từ distance matrix
+                                    .serviceTimePick(0)
+                                    .serviceTimeDeliver(serviceTime)
+                                    .ltw(readyTime)
+                                    .utw(dueDate)
+                                    .build();
+
+                            if (pDemand > 0) {
+                                location.setPick(true);
+                                location.setDemandPick(pDemand);
+                            }
+                            if (dDemand > 0) {
+                                location.setDeliver(true);
+                                location.setDemandDeliver(dDemand);
+                            }
+                            if (pDemand == 0 && dDemand == 0) {
+                                location.setDeliver(false);
+                                location.setPick(false);
+                                location.setDemandDeliver(0);
+                                location.setDemandPick(0);
+                            }
 
                             locationList.add(location);
                         } catch (NumberFormatException e) {
-                            System.err.println("Lỗi định dạng dòng NODE: " + line);
+                            System.err.println("Lỗi định dạng dòng NODE Wang Chen: " + line);
                         }
                     }
                 }
 
-                // Nếu cần xử lý DISTANCETIME_SECTION sau này thì viết thêm ở đây
+                // Đọc dữ liệu DISTANCETIME_SECTION
+                if (inDistanceTimeSection && !line.isEmpty()) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        try {
+                            int fromNode = Integer.parseInt(parts[0].trim());
+                            int toNode = Integer.parseInt(parts[1].trim());
+                            double distance = Double.parseDouble(parts[2].trim());
+                            double travelTime = Double.parseDouble(parts[3].trim());
+
+                            DistanceTime distanceTime = DistanceTime.builder()
+                                    .fromNode(fromNode)
+                                    .toNode(toNode)
+                                    .distance(distance)
+                                    .travelTime(travelTime)
+                                    .build();
+
+                            distanceTimeList.add(distanceTime);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Lỗi phân tích dòng DISTANCETIME Wang Chen: " + line);
+                        }
+                    }
+                }
             }
         }
 
         locations = locationList.toArray(new Location[0]);
+        distanceTimes = distanceTimeList.toArray(new DistanceTime[0]);
+        
         System.out.println("Đã đọc " + locations.length + " Location từ: " + path);
+        System.out.println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
     }
 
     private void readVRPTWSolution(Path path) throws IOException {
@@ -489,8 +538,13 @@ public class ReadDataFromFile {
 
                         if (indLocs.length > 1) {
                             Route route = new Route(indLocs, maxCapacity);
-                            if (locations != null)
-                                route.calculateDistance(locations);
+                            if (locations != null) {
+                                if (distanceTimes != null && distanceTimes.length > 0) {
+                                    route.calculateDistance(locations, distanceTimes);
+                                } else {
+                                    route.calculateDistance(locations);
+                                }
+                            }
                             routeList.add(route);
                         }
                     } catch (Exception e) {
@@ -521,8 +575,13 @@ public class ReadDataFromFile {
                         int[] indLocs = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
 
                         Route route = new Route(indLocs, maxCapacity);
-                        if (locations != null)
-                            route.calculateDistance(locations);
+                        if (locations != null) {
+                            if (distanceTimes != null && distanceTimes.length > 0) {
+                                route.calculateDistance(locations, distanceTimes);
+                            } else {
+                                route.calculateDistance(locations);
+                            }
+                        }
                         routeList.add(route);
                     } catch (Exception e) {
                         System.err.println("Error parsing PDPTW route at line " + count + ": " + line);
@@ -563,8 +622,13 @@ public class ReadDataFromFile {
 
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
-                                if (locations != null)
-                                    route.calculateDistance(locations);
+                                if (locations != null) {
+                                    if (distanceTimes != null && distanceTimes.length > 0) {
+                                        route.calculateDistance(locations, distanceTimes);
+                                    } else {
+                                        route.calculateDistance(locations);
+                                    }
+                                }
                                 routeList.add(route);
                             }
                         }
@@ -608,8 +672,13 @@ public class ReadDataFromFile {
 
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
-                                if (locations != null)
-                                    route.calculateDistance(locations);
+                                if (locations != null) {
+                                    if (distanceTimes != null && distanceTimes.length > 0) {
+                                        route.calculateDistance(locations, distanceTimes);
+                                    } else {
+                                        route.calculateDistance(locations);
+                                    }
+                                }
                                 routeList.add(route);
                             }
                         }
@@ -641,8 +710,13 @@ public class ReadDataFromFile {
 
                         if (indLocs.length >= 1) {
                             Route route = new Route(indLocs, maxCapacity);
-                            if (locations != null)
-                                route.calculateDistance(locations);
+                            if (locations != null) {
+                                if (distanceTimes != null && distanceTimes.length > 0) {
+                                    route.calculateDistance(locations, distanceTimes);
+                                } else {
+                                    route.calculateDistance(locations);
+                                }
+                            }
                             routeList.add(route);
                         }
                     } catch (Exception e) {

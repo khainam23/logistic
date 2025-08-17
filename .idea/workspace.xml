@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/data/ReadDataFromFile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/model/Route.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/parallel/ParallelExecutionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/parallel/ParallelExecutionManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/CheckConditionUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/ExecutionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/ExecutionUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/logistic/util/FitnessUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/logistic/util/FitnessUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/logistic/algorithm/SimpleRouteTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/logistic/algorithm/SimpleRouteTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="d32210fa-310d-4973-bca3-4a70ff69bddd" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -218,7 +208,7 @@
       <workItem from="1753447336785" duration="30000" />
       <workItem from="1754264059372" duration="577000" />
       <workItem from="1755347592018" duration="148000" />
-      <workItem from="1755347749017" duration="298000" />
+      <workItem from="1755347749017" duration="672000" />
     </task>
     <servers />
   </component>

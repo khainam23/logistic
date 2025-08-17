@@ -1,7 +1,9 @@
 package org.logistic.model;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -50,7 +52,7 @@ public class Route {
     }
 
     /**
-     * Tính khoảng cách của tuyến đường
+     * Tính khoảng cách của tuyến đường sử dụng tọa độ Euclidean
      *
      * @param locations Mảng các địa điểm
      */
@@ -71,6 +73,63 @@ public class Route {
             }
         }
         totalDistance += locations[indLocations[indLocations.length - 1]].distance(locations[0]); // Về kho
+
+        this.distance = totalDistance;
+    }
+
+    /**
+     * Tính khoảng cách của tuyến đường sử dụng thông tin DistanceTime
+     *
+     * @param locations     Mảng các địa điểm
+     * @param distanceTimes Mảng thông tin khoảng cách-thời gian
+     */
+    public void calculateDistance(Location[] locations, DistanceTime[] distanceTimes) {
+        if (indLocations == null || indLocations.length < 1) {
+            this.distance = 0;
+            return;
+        }
+
+        if (distanceTimes == null || distanceTimes.length == 0) {
+            // Fallback về phương thức cũ nếu không có DistanceTime
+            calculateDistance(locations);
+            return;
+        }
+
+        // Tạo map để tra cứu nhanh DistanceTime
+        Map<String, DistanceTime> distanceMap = Arrays.stream(distanceTimes)
+                .collect(Collectors.toMap(
+                    dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                    dt -> dt,
+                    (existing, replacement) -> existing
+                ));
+
+        double totalDistance = 0;
+
+        for (int i = 0; i < indLocations.length - 1; i++) {
+            int fromNode = indLocations[i];
+            int toNode = indLocations[i + 1];
+            
+            DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
+            if (dt != null) {
+                totalDistance += dt.getDistance();
+            } else {
+                // Fallback về tính toán Euclidean nếu không tìm thấy
+                if (fromNode < locations.length && toNode < locations.length) {
+                    totalDistance += locations[fromNode].distance(locations[toNode]);
+                }
+            }
+        }
+
+        // Thêm khoảng cách về depot (node 0)
+        int lastNode = indLocations[indLocations.length - 1];
+        DistanceTime dt = distanceMap.get(lastNode + "-0");
+        if (dt != null) {
+            totalDistance += dt.getDistance();
+        } else {
+            if (lastNode < locations.length) {
+                totalDistance += locations[lastNode].distance(locations[0]);
+            }
+        }
 
         this.distance = totalDistance;
     }

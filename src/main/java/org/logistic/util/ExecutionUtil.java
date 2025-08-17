@@ -173,11 +173,12 @@ public class ExecutionUtil {
      * @param locations          Mảng các vị trí
      * @param maxPayload         Trọng tải tối đa
      * @param iterations         Số lần chạy lặp lại cho mỗi thuật toán
+     * @param distanceTimes      Mảng thông tin khoảng cách-thời gian
      * @return SequentialResults chứa kết quả và thống kê của từng thuật toán
      */
     private static SequentialResults runSequentialOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
-            Location[] locations, double maxPayload, int iterations) {
+            Location[] locations, double maxPayload, int iterations, DistanceTime[] distanceTimes) {
         
         Map<Algorithm, Solution> bestResults = new HashMap<>();
         Map<Algorithm, Long> executionTimes = new HashMap<>();
@@ -207,7 +208,7 @@ public class ExecutionUtil {
                     
                     long startTime = System.currentTimeMillis();
                     Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil, 
-                            checkConditionUtil, locations);
+                            checkConditionUtil, locations, distanceTimes);
                     long endTime = System.currentTimeMillis();
                     
                     totalExecutionTime += (endTime - startTime);
@@ -328,12 +329,13 @@ public class ExecutionUtil {
                 locations,
                 maxPayload,
                 iterations,
-                optimizerFactory
+                optimizerFactory,
+                distanceTimes
             );
         } else {
             // Xử lý tuần tự thông thường
             sequentialResults = runSequentialOptimizers(initialSolutions, fitnessUtil, checkConditionUtil,
-                    locations, maxPayload, iterations);
+                    locations, maxPayload, iterations, distanceTimes);
             results = sequentialResults.getBestResults();
         }
 

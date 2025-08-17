@@ -5,6 +5,7 @@ import me.tongfei.progressbar.ProgressBarBuilder;
 import me.tongfei.progressbar.ProgressBarStyle;
 import org.logistic.Main.Algorithm;
 import org.logistic.algorithm.Optimizer;
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Solution;
 import org.logistic.util.CheckConditionUtil;
@@ -70,7 +71,25 @@ public class ParallelExecutionManager {
             OptimizerFactory optimizerFactory) {
 
         return runAllAlgorithmsParallel(algorithms, initialSolutions, fitnessUtil,
-                checkConditionUtil, locations, maxPayload, iterations, optimizerFactory);
+                checkConditionUtil, locations, maxPayload, iterations, optimizerFactory, null);
+    }
+
+    /**
+     * Chạy tất cả thuật toán với DistanceTime
+     */
+    public Map<Algorithm, Solution> runAllAlgorithms(
+            Algorithm[] algorithms,
+            Solution[] initialSolutions,
+            FitnessUtil fitnessUtil,
+            CheckConditionUtil checkConditionUtil,
+            Location[] locations,
+            double maxPayload,
+            int iterations,
+            OptimizerFactory optimizerFactory,
+            DistanceTime[] distanceTimes) {
+
+        return runAllAlgorithmsParallel(algorithms, initialSolutions, fitnessUtil,
+                checkConditionUtil, locations, maxPayload, iterations, optimizerFactory, distanceTimes);
     }
 
     /**
@@ -84,7 +103,8 @@ public class ParallelExecutionManager {
             Location[] locations,
             double maxPayload,
             int iterations,
-            OptimizerFactory optimizerFactory) {
+            OptimizerFactory optimizerFactory,
+            DistanceTime[] distanceTimes) {
 
         System.out.println("\n=== BẮT ĐẦU CHẠY SONG SONG " + algorithms.length + " THUẬT TOÁN ===");
         System.out.println("Số iterations cho mỗi thuật toán: " + iterations);
@@ -106,7 +126,8 @@ public class ParallelExecutionManager {
                             locations,
                             maxPayload,
                             iterations,
-                            optimizerFactory), executorService);
+                            optimizerFactory,
+                            distanceTimes), executorService);
 
             futures.add(future);
         }
@@ -149,7 +170,8 @@ public class ParallelExecutionManager {
             Location[] locations,
             double maxPayload,
             int iterations,
-            OptimizerFactory optimizerFactory) {
+            OptimizerFactory optimizerFactory,
+            DistanceTime[] distanceTimes) {
 
         System.out.println("Bắt đầu thuật toán " + algorithm + " với " + iterations + " iterations");
 
@@ -178,7 +200,7 @@ public class ParallelExecutionManager {
 
                     // Chạy optimization
                     Solution result = optimizer.run(solutionsCopy, fitnessUtil,
-                            checkConditionUtil, locations);
+                            checkConditionUtil, locations, distanceTimes);
 
                     // Ghi thời gian kết thúc và lưu vào performance monitor
                     long executionTime = System.currentTimeMillis() - startTime;

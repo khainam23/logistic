@@ -157,7 +157,11 @@ public class SimulatedAnnealing extends AbstractOptimizer {
         
         // Cập nhật khoảng cách cho tất cả các tuyến đường
         for (Route route : routes) {
-            route.calculateDistance(locations);
+            if (distanceTimes != null && distanceTimes.length > 0) {
+                route.calculateDistance(locations, distanceTimes);
+            } else {
+                route.calculateDistance(locations);
+            }
         }
 
         return solution;
