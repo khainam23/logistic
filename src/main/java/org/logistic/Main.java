@@ -48,21 +48,21 @@ public class Main {
         // Thay đổi thành RunMode.RL để chạy chế độ tăng cường (Reinforcement Learning)
         // Thay đổi thành RunMode.SINGLE_FILE để chạy với một file duy nhất
         RunMode runMode = RunMode.SINGLE_FILE;
-        String dataLocation = "data/Liu_Tang_Yao/src/200_1.txt";
-        String dataSolution = "data/Liu_Tang_Yao/solution/200_1.txt";
-        String srcDirectory = "data/Liu_Tang_Yao/src";
-        String solutionDirectory = "data/Liu_Tang_Yao/solution";
+        String dataLocation = "data/Wang_Chen/src/rcdp0501.txt";
+        String dataSolution = "data/Wang_Chen/solution/rcdp0501.txt";
+        String srcDirectory = "data/Wang_Chen/src";
+        String solutionDirectory = "data/Wang_Chen/solution";
         // Mặc định xuất dữ liệu ra Excel
         ExportType exportType = ExportType.EXCEL;
         // Số lần chạy lặp lại cho mỗi thuật toán (tăng để thấy hiệu quả parallel)
-        int iterations = 30;
+        int iterations = 1;
         // Bật/tắt chế độ song song (mặc định là bật)
         // Đặt thành false để chạy tuần tự (không song song)
         boolean parallelEnabled = false;
         // Số vòng chạy cho RL
         int epoch = 1;
         // Loại bài toán (chỉ định trực tiếp)
-        ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPSPDTW_LIU_TANG_YAO;
+        ReadDataFromFile.ProblemType problemType = ReadDataFromFile.ProblemType.VRPSPDTW_WANG_CHEN;
     }
 
     /**
@@ -91,8 +91,8 @@ public class Main {
         FitnessStrategy strategy = FitnessUtil.createStrategyBuilder()
                 .useDistance(true)
                 .useVehicleCount(true)
-                .useServiceTime(false)
-                .useWaitingTime(false)
+                .useServiceTime(true)
+                .useWaitingTime(true)
                 .withAlpha(2000)
                 .withDelta(1)
                 .build();

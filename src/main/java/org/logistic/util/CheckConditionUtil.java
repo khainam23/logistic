@@ -1,7 +1,11 @@
 package org.logistic.util;
 
+import org.logistic.model.DistanceTime;
 import org.logistic.model.Location;
 import org.logistic.model.Route;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Tiện ích kiểm tra các điều kiện ràng buộc cho tuyến đường
@@ -35,13 +39,25 @@ public class CheckConditionUtil {
      * @param route Tuyến đường cần kiểm tra
      * @param locations Mảng các vị trí
      * @param maxPayload Trọng tải tối đa của phương tiện
+     * @param distanceTimes Mảng thông tin khoảng cách-thời gian (có thể null)
      * @return true nếu tuyến đường hợp lệ, false nếu không
      */
-    public boolean isInsertionFeasible(Route route, Location[] locations, double maxPayload) {
+    public boolean isInsertionFeasible(Route route, Location[] locations, double maxPayload, DistanceTime[] distanceTimes) {
         int[] indLocations = route.getIndLocations();
         double targetPayload = 0;
         double currentTime = 0;
         int length = indLocations.length;
+
+        // Tạo map để tra cứu nhanh DistanceTime nếu có
+        Map<String, DistanceTime> distanceMap = null;
+        if (distanceTimes != null && distanceTimes.length > 0) {
+            distanceMap = Arrays.stream(distanceTimes)
+                    .collect(Collectors.toMap(
+                        dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                        dt -> dt,
+                        (existing, replacement) -> existing
+                    ));
+        }
 
         for (int i = 0; i < length; i++) {
             Location currLoc = locations[indLocations[i]];
@@ -79,12 +95,39 @@ public class CheckConditionUtil {
 
             // Tính thời gian di chuyển đến địa điểm tiếp theo
             if (i < length - 1) {
-                Location nextLoc = locations[indLocations[i + 1]];
-                currentTime += currLoc.distance(nextLoc);
+                int fromNode = indLocations[i];
+                int toNode = indLocations[i + 1];
+                
+                if (distanceMap != null) {
+                    DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
+                    if (dt != null) {
+                        currentTime += dt.getTravelTime();
+                    } else {
+                        // Fallback về tính toán Euclidean nếu không tìm thấy
+                        Location nextLoc = locations[toNode];
+                        currentTime += currLoc.distance(nextLoc);
+                    }
+                } else {
+                    // Sử dụng khoảng cách Euclidean nếu không có distanceTimes
+                    Location nextLoc = locations[toNode];
+                    currentTime += currLoc.distance(nextLoc);
+                }
             }
         }
 
         // Tuyến đường hợp lệ nếu đã vượt qua tất cả các kiểm tra
         return true;
+    }
+
+    /**
+     * Kiểm tra xem tuyến đường có hợp lệ không (phiên bản tương thích ngược)
+     * 
+     * @param route Tuyến đường cần kiểm tra
+     * @param locations Mảng các vị trí
+     * @param maxPayload Trọng tải tối đa của phương tiện
+     * @return true nếu tuyến đường hợp lệ, false nếu không
+     */
+    public boolean isInsertionFeasible(Route route, Location[] locations, double maxPayload) {
+        return isInsertionFeasible(route, locations, maxPayload, null);
     }
 }

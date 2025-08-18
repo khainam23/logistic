@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @Data
 public class Location {
+    int id;
     Point point;
     double serviceTimePick;
     double serviceTimeDeliver;

@@ -24,7 +24,7 @@ public class SimpleRouteTest {
 
         // Đọc dữ liệu
         ReadDataFromFile dataReader = new ReadDataFromFile();
-        dataReader.readProblemData("data/Wang_Chen/src/cdp101.txt", ReadDataFromFile.ProblemType.VRPSPDTW_WANG_CHEN);
+        dataReader.readProblemData("data/Wang_Chen/src/rcdp0501.txt", ReadDataFromFile.ProblemType.VRPSPDTW_WANG_CHEN);
 
         Location[] locations = dataReader.getLocations();
         double maxCapacity = dataReader.getMaxCapacity();
@@ -41,7 +41,7 @@ public class SimpleRouteTest {
         CheckConditionUtil checkConditionUtil = CheckConditionUtil.getInstance();
 
         // Đọc solution từ file
-        dataReader.readSolution("data/Wang_Chen/solution/cdp101.txt");
+        dataReader.readSolution("data/Wang_Chen/solution/rcdp0501.txt");
         Route[] solutionRoutes = dataReader.getRoutes();
 
         Solution[] initialSolutions;

@@ -97,7 +97,8 @@ public class FitnessUtil {
     }
 
     /**
-     * Tính giá trị fitness với thông tin DistanceTime (sử dụng chế độ song song hiện tại)
+     * Tính giá trị fitness với thông tin DistanceTime (sử dụng chế độ song song
+     * hiện tại)
      *
      * @param routes        Mảng các tuyến đường
      * @param locations     Mảng các vị trí
@@ -117,12 +118,13 @@ public class FitnessUtil {
      * @param parallel      Có sử dụng xử lý song song hay không
      * @return Giá trị fitness (càng thấp càng tốt)
      */
-    public double calculatorFitness(Route[] routes, Location[] locations, DistanceTime[] distanceTimes, boolean parallel) {
+    public double calculatorFitness(Route[] routes, Location[] locations, DistanceTime[] distanceTimes,
+            boolean parallel) {
         if (distanceTimes == null || distanceTimes.length == 0) {
             // Fallback về phương thức cũ nếu không có DistanceTime
             return calculatorFitness(routes, locations, parallel);
         }
-        
+
         if (parallel) {
             return calculatorFitnessWithDistanceTimeParallel(routes, locations, distanceTimes);
         } else {
@@ -263,7 +265,8 @@ public class FitnessUtil {
     /**
      * Tính giá trị fitness song song với thông tin DistanceTime
      */
-    private double calculatorFitnessWithDistanceTimeParallel(Route[] routes, Location[] locations, DistanceTime[] distanceTimes) {
+    private double calculatorFitnessWithDistanceTimeParallel(Route[] routes, Location[] locations,
+            DistanceTime[] distanceTimes) {
         AtomicInteger totalDistances = new AtomicInteger(0);
         AtomicInteger totalServiceTime = new AtomicInteger(0);
         AtomicInteger totalWaitingTime = new AtomicInteger(0);
@@ -273,10 +276,9 @@ public class FitnessUtil {
         Map<String, DistanceTime> distanceMap = Arrays.stream(distanceTimes)
                 .parallel()
                 .collect(Collectors.toConcurrentMap(
-                    dt -> dt.getFromNode() + "-" + dt.getToNode(),
-                    dt -> dt,
-                    (existing, replacement) -> existing
-                ));
+                        dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                        dt -> dt,
+                        (existing, replacement) -> existing));
 
         Arrays.stream(routes).parallel().forEach(route -> {
             int[] indLocs = route.getIndLocations();
@@ -288,13 +290,13 @@ public class FitnessUtil {
 
                 for (int j = 0; j < indLocs.length; j++) {
                     Location currLoc = locations[indLocs[j]];
-                    
+
                     // Tính khoảng cách và thời gian di chuyển
                     if (j > 0) {
                         int fromNode = indLocs[j - 1];
                         int toNode = indLocs[j];
                         DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
-                        
+
                         if (dt != null) {
                             currentTime += dt.getTravelTime();
                             totalDistances.addAndGet((int) dt.getDistance());
@@ -337,6 +339,12 @@ public class FitnessUtil {
             }
         });
 
+        int[] weights = tempWeights.get();
+        weights[0] = numberVehicle.get();
+        weights[1] = totalDistances.get();
+        weights[2] = totalServiceTime.get();
+        weights[3] = totalWaitingTime.get();
+
         return fitnessStrategy.calculateFitness(
                 numberVehicle.get(),
                 totalDistances.get(),
@@ -347,7 +355,8 @@ public class FitnessUtil {
     /**
      * Tính giá trị fitness tuần tự với thông tin DistanceTime
      */
-    private double calculatorFitnessWithDistanceTimeSequential(Route[] routes, Location[] locations, DistanceTime[] distanceTimes) {
+    private double calculatorFitnessWithDistanceTimeSequential(Route[] routes, Location[] locations,
+            DistanceTime[] distanceTimes) {
         int totalDistances = 0;
         int totalServiceTime = 0;
         int totalWaitingTime = 0;
@@ -356,10 +365,9 @@ public class FitnessUtil {
         // Tạo map để tra cứu nhanh DistanceTime
         Map<String, DistanceTime> distanceMap = Arrays.stream(distanceTimes)
                 .collect(Collectors.toMap(
-                    dt -> dt.getFromNode() + "-" + dt.getToNode(),
-                    dt -> dt,
-                    (existing, replacement) -> existing
-                ));
+                        dt -> dt.getFromNode() + "-" + dt.getToNode(),
+                        dt -> dt,
+                        (existing, replacement) -> existing));
 
         for (Route route : routes) {
             int[] indLocs = route.getIndLocations();
@@ -371,13 +379,13 @@ public class FitnessUtil {
 
                 for (int j = 0; j < indLocs.length; j++) {
                     Location currLoc = locations[indLocs[j]];
-                    
+
                     // Tính khoảng cách và thời gian di chuyển
                     if (j > 0) {
                         int fromNode = indLocs[j - 1];
                         int toNode = indLocs[j];
                         DistanceTime dt = distanceMap.get(fromNode + "-" + toNode);
-                        
+
                         if (dt != null) {
                             currentTime += dt.getTravelTime();
                             totalDistances += dt.getDistance();
@@ -419,6 +427,12 @@ public class FitnessUtil {
                 }
             }
         }
+
+        int[] weights = tempWeights.get();
+        weights[0] = numberVehicle;
+        weights[1] = totalDistances;
+        weights[2] = totalServiceTime;
+        weights[3] = totalWaitingTime;
 
         return fitnessStrategy.calculateFitness(
                 numberVehicle,

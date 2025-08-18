@@ -268,9 +268,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
         // Kiểm tra ràng buộc
         targetRoute.setIndLocations(targetWay);
-        if (checkConditionUtil.isInsertionFeasible(targetRoute, locations,
-                targetRoute.getMaxPayload())) {
-        } else {
+        if (!checkConditionUtil.isInsertionFeasible(targetRoute, locations, targetRoute.getMaxPayload())) {
             targetRoute.setIndLocations(tempRoute.getIndLocations());
         }
     }

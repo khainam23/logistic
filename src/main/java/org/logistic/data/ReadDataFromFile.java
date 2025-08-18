@@ -322,7 +322,8 @@ public class ReadDataFromFile {
                     break;
                 }
 
-                // Đọc dữ liệu node: [ID],[delivery],[pickup],[start_time],[end_time],[service_time]
+                // Đọc dữ liệu node:
+                // [ID],[delivery],[pickup],[start_time],[end_time],[service_time]
                 if (inNodeSection && !line.isEmpty()) {
                     String[] parts = line.split(",");
                     if (parts.length >= 6) {
@@ -335,6 +336,7 @@ public class ReadDataFromFile {
                             int service = Integer.parseInt(parts[5]);
 
                             Location location = Location.builder()
+                                    .id(nodeId)
                                     .point(new Point(0, 0)) // Tọa độ sẽ được tính từ distance matrix
                                     .serviceTimePick(0)
                                     .serviceTimeDeliver(service)
@@ -391,9 +393,10 @@ public class ReadDataFromFile {
 
             locations = locationList.toArray(new Location[0]);
             distanceTimes = distanceTimeList.toArray(new DistanceTime[0]);
-            
+
             System.out.println("Đã đọc " + locations.length + " location VRPSPDTW Liu Tang Yao từ " + path);
-            System.out.println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
+            System.out.println(
+                    "Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
         }
     }
 
@@ -453,6 +456,7 @@ public class ReadDataFromFile {
                             int serviceTime = Integer.parseInt(parts[5].trim());
 
                             Location location = Location.builder()
+                                    .id(nodeId)
                                     .point(new Point(0, 0)) // Tọa độ sẽ được tính từ distance matrix
                                     .serviceTimePick(0)
                                     .serviceTimeDeliver(serviceTime)
@@ -510,9 +514,12 @@ public class ReadDataFromFile {
 
         locations = locationList.toArray(new Location[0]);
         distanceTimes = distanceTimeList.toArray(new DistanceTime[0]);
-        
+
+        System.out.println(locationList);
+
         System.out.println("Đã đọc " + locations.length + " Location từ: " + path);
-        System.out.println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
+        System.out
+                .println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");
     }
 
     private void readVRPTWSolution(Path path) throws IOException {
@@ -605,20 +612,17 @@ public class ReadDataFromFile {
             while ((line = reader.readLine()) != null) {
                 if (line.contains("Route")) {
                     try {
-                        // Xử lý định dạng Liu Tang Yao: "Route 1: 185"
                         String[] parts = line.split(":");
                         if (parts.length > 1) {
                             String routeData = parts[1].trim();
                             if (!routeData.isEmpty()) {
                                 String[] nodeStrings = routeData.split("\\s+");
                                 List<Integer> nodeList = new ArrayList<>();
-                                nodeList.add(0); // Thêm depot đầu
                                 for (String nodeStr : nodeStrings) {
                                     if (!nodeStr.trim().isEmpty()) {
                                         nodeList.add(Integer.parseInt(nodeStr.trim()));
                                     }
                                 }
-                                nodeList.add(0); // Thêm depot cuối
 
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
@@ -654,21 +658,18 @@ public class ReadDataFromFile {
                 line = line.trim();
                 if (line.startsWith("Route")) {
                     try {
-                        // Xử lý định dạng Wang Chen: "Route 1: 20 29 46 48"
                         String[] parts = line.split(":");
                         if (parts.length > 1) {
                             String routeData = parts[1].trim();
                             if (!routeData.isEmpty()) {
                                 String[] nodeStrings = routeData.split("\\s+");
                                 List<Integer> nodeList = new ArrayList<>();
-                                nodeList.add(0); // Thêm depot đầu
 
                                 for (String nodeStr : nodeStrings) {
                                     if (!nodeStr.trim().isEmpty()) {
                                         nodeList.add(Integer.parseInt(nodeStr.trim()));
                                     }
                                 }
-                                nodeList.add(0); // Thêm depot cuối
 
                                 int[] indLocs = nodeList.stream().mapToInt(Integer::intValue).toArray();
                                 Route route = new Route(indLocs, maxCapacity);
