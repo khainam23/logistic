@@ -515,8 +515,6 @@ public class ReadDataFromFile {
         locations = locationList.toArray(new Location[0]);
         distanceTimes = distanceTimeList.toArray(new DistanceTime[0]);
 
-        System.out.println(locationList);
-
         System.out.println("Đã đọc " + locations.length + " Location từ: " + path);
         System.out
                 .println("Đã đọc " + distanceTimes.length + " thông tin khoảng cách-thời gian từ DISTANCETIME_SECTION");

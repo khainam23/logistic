@@ -248,11 +248,8 @@ public class GreyWolfOptimizer extends AbstractOptimizer {
             
             // Làm tròn và giới hạn trong phạm vi hợp lệ [0, maxLocationIndex]
             int adjustedPos = (int) Math.round(newPos);
-            if (adjustedPos >= 0 && adjustedPos <= maxLocationIndex) {
+            if (adjustedPos >= 1 && adjustedPos <= maxLocationIndex) {
                 way[i] = adjustedPos;
-            } else if (adjustedPos > maxLocationIndex) {
-                // Nếu vượt quá giới hạn, gán bằng giới hạn
-                way[i] = maxLocationIndex;
             }
         }
         

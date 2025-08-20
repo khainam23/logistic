@@ -109,6 +109,12 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         Solution newSolution = currentSolution.copy();
         Route[] routes = newSolution.getRoutes();
 
+        // Lưu lại bản sao của các tuyến đường gốc để khôi phục nếu cần
+        Route[] originalRoutes = new Route[routes.length];
+        for (int i = 0; i < routes.length; i++) {
+            originalRoutes[i] = routes[i].copy();
+        }
+
         // Số chiều (số tuyến đường)
         int dimensions = routes.length;
 
@@ -127,13 +133,15 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
 
                     // Kiểm tra tính khả thi sau khi áp dụng toán tử đa tuyến
                     for (int j = 0; j < dimensions; j++) {
+                        validateLocationIndices(routes[j].getIndLocations());
                         if (!checkConditionUtil.isInsertionFeasible(routes[j], locations,
                                 routes[j].getMaxPayload())) {
-                            routes[j] = currentSolution.getRoutes()[j].copy();
+                            routes[j] = originalRoutes[j].copy();
                         }
                     }
                 } else {
                     applyRandomOperation(routes[i]);
+                    validateLocationIndices(routes[i].getIndLocations());
                 }
             }
             // Pha 2 & 3: Bao vây và tấn công (dựa vào vector E)
@@ -149,9 +157,10 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
 
             // Kiểm tra tính khả thi
+            validateLocationIndices(routes[i].getIndLocations());
             if (!checkConditionUtil.isInsertionFeasible(routes[i], locations,
                     routes[i].getMaxPayload())) {
-                routes[i] = currentSolution.getRoutes()[i].copy();
+                routes[i] = originalRoutes[i].copy();
             }
         }
 
@@ -171,7 +180,6 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
         }
     }
-
     /**
      * Tính toán khoảng cách giữa hai tuyến đường
      * Sử dụng số lượng điểm khác nhau và độ tương đồng về thứ tự
@@ -222,7 +230,8 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Thực hiện swap và reorder các điểm dựa trên best route
      */
     private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double E) {
-        Route tempRoute = targetRoute.copy();
+        // Lưu lại bản sao của tuyến đường gốc để khôi phục nếu cần
+        int[] originalWay = targetRoute.getIndLocations().clone();
         int[] targetWay = targetRoute.getIndLocations();
         int[] bestWay = bestRoute.getIndLocations();
 
@@ -266,10 +275,12 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
             }
         }
 
-        // Kiểm tra ràng buộc
+        // Kiểm tra ràng buộc và đảm bảo không mất điểm
         targetRoute.setIndLocations(targetWay);
+        validateLocationIndices(targetWay);
+
         if (!checkConditionUtil.isInsertionFeasible(targetRoute, locations, targetRoute.getMaxPayload())) {
-            targetRoute.setIndLocations(tempRoute.getIndLocations());
+            targetRoute.setIndLocations(originalWay);
         }
     }
 

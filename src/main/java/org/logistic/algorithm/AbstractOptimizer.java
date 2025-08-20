@@ -28,6 +28,7 @@ public abstract class AbstractOptimizer implements Optimizer {
     DistanceTime[] distanceTimes;
     FitnessUtil fitnessUtil;
     CheckConditionUtil checkConditionUtil;
+
     /**
      * Khởi tạo optimizer
      */
@@ -39,11 +40,11 @@ public abstract class AbstractOptimizer implements Optimizer {
      * Override phương thức run với DistanceTime
      */
     @Override
-    public Solution run(Solution[] initialSolutions, 
-                       FitnessUtil fitnessUtil,
-                       CheckConditionUtil checkConditionUtil, 
-                       Location[] locations,
-                       DistanceTime[] distanceTimes) {
+    public Solution run(Solution[] initialSolutions,
+            FitnessUtil fitnessUtil,
+            CheckConditionUtil checkConditionUtil,
+            Location[] locations,
+            DistanceTime[] distanceTimes) {
         this.distanceTimes = distanceTimes;
         return run(initialSolutions, fitnessUtil, checkConditionUtil, locations);
     }
@@ -101,6 +102,10 @@ public abstract class AbstractOptimizer implements Optimizer {
             return;
         }
 
+        // Lưu lại bản sao của các tuyến đường gốc để khôi phục nếu cần
+        int[] originalWay1 = way1.clone();
+        int[] originalWay2 = way2.clone();
+
         // Chọn một điểm ngẫu nhiên từ tuyến đường 1 để di chuyển sang tuyến đường 2
         int posToMove = random.nextInt(way1.length);
         int locationToMove = way1[posToMove];
@@ -134,8 +139,17 @@ public abstract class AbstractOptimizer implements Optimizer {
         validateLocationIndices(newWay1);
         validateLocationIndices(newWay2);
 
-        // Cập nhật khoảng cách nếu có thông tin về locations
+        // Kiểm tra tính khả thi
         if (locations != null) {
+            if (!checkConditionUtil.isInsertionFeasible(route1, locations, route1.getMaxPayload()) ||
+                    !checkConditionUtil.isInsertionFeasible(route2, locations, route2.getMaxPayload())) {
+                // Khôi phục lại nếu không khả thi
+                route1.setIndLocations(originalWay1);
+                route2.setIndLocations(originalWay2);
+                return;
+            }
+
+            // Cập nhật khoảng cách
             if (distanceTimes != null && distanceTimes.length > 0) {
                 route1.calculateDistance(locations, distanceTimes);
                 route2.calculateDistance(locations, distanceTimes);
@@ -228,81 +242,79 @@ public abstract class AbstractOptimizer implements Optimizer {
     }
 
     /**
- * Áp dụng toán tử PD-Rearrange: Sắp xếp lại các điểm trong tuyến đường theo 3 cách
- *
- * @param routes Mảng các tuyến đường cần áp dụng toán tử
- */
-protected void applyPdRearrange(Route[] routes) {
-    if (routes.length < 1) {
-        return; // Cần ít nhất 1 tuyến đường để thực hiện rearrange
-    }
+     * Áp dụng toán tử PD-Rearrange: Sắp xếp lại các điểm trong tuyến đường theo 3
+     * cách
+     *
+     * @param routes Mảng các tuyến đường cần áp dụng toán tử
+     */
+    protected void applyPdRearrange(Route[] routes) {
+        if (routes.length < 1) {
+            return; // Cần ít nhất 1 tuyến đường để thực hiện rearrange
+        }
 
-    // Chọn ngẫu nhiên 1 tuyến đường
-    int routeIndex = random.nextInt(routes.length);
-    Route route = routes[routeIndex];
-    
-    int[] way = route.getIndLocations();
-    
-    // Kiểm tra nếu tuyến đường không có đủ điểm để sắp xếp lại
-    if (way.length < 3) {
-        return;
-    }
-    
-    // Chọn ngẫu nhiên một đoạn để sắp xếp lại
-    int startPos = random.nextInt(way.length - 2);
-    int endPos = startPos + 2 + random.nextInt(Math.min(5, way.length - startPos - 2));
-    int segmentLength = endPos - startPos + 1;
-    
-    // Chọn ngẫu nhiên một trong 3 cách sắp xếp
-    int method = random.nextInt(3);
-    
-    if (method == 0) {
-        // Cách 1: Đảo ngược đoạn
-        int left = startPos;
-        int right = endPos;
-        while (left < right) {
-            int temp = way[left];
-            way[left] = way[right];
-            way[right] = temp;
-            left++;
-            right--;
+        // Chọn ngẫu nhiên 1 tuyến đường
+        int routeIndex = random.nextInt(routes.length);
+        Route route = routes[routeIndex];
+
+        int[] way = route.getIndLocations();
+
+        // Kiểm tra nếu tuyến đường không có đủ điểm để sắp xếp lại
+        if (way.length < 3) {
+            return;
         }
-    } 
-    else if (method == 1) {
-        // Cách 2: Xoay vòng đoạn
-        int rotateBy = 1 + random.nextInt(segmentLength - 1);
-        int[] segment = new int[segmentLength];
-        
-        // Sao chép đoạn cần xoay
-        for (int i = 0; i < segmentLength; i++) {
-            segment[i] = way[startPos + i];
-        }
-        
-        // Xoay vòng đoạn
-        for (int i = 0; i < segmentLength; i++) {
-            way[startPos + i] = segment[(i + rotateBy) % segmentLength];
-        }
-    } 
-    else {
-        // Cách 3: Sắp xếp ngẫu nhiên đoạn
-        for (int i = 0; i < segmentLength; i++) {
-            int j = random.nextInt(segmentLength);
-            int temp = way[startPos + i];
-            way[startPos + i] = way[startPos + j];
-            way[startPos + j] = temp;
-        }
-    }
-    
-    // Cập nhật khoảng cách nếu có thông tin về locations
-    if (locations != null) {
-        if (distanceTimes != null && distanceTimes.length > 0) {
-            route.calculateDistance(locations, distanceTimes);
+
+        // Chọn ngẫu nhiên một đoạn để sắp xếp lại
+        int startPos = random.nextInt(way.length - 2);
+        int endPos = startPos + 2 + random.nextInt(Math.min(5, way.length - startPos - 2));
+        int segmentLength = endPos - startPos + 1;
+
+        // Chọn ngẫu nhiên một trong 3 cách sắp xếp
+        int method = random.nextInt(3);
+
+        if (method == 0) {
+            // Cách 1: Đảo ngược đoạn
+            int left = startPos;
+            int right = endPos;
+            while (left < right) {
+                int temp = way[left];
+                way[left] = way[right];
+                way[right] = temp;
+                left++;
+                right--;
+            }
+        } else if (method == 1) {
+            // Cách 2: Xoay vòng đoạn
+            int rotateBy = 1 + random.nextInt(segmentLength - 1);
+            int[] segment = new int[segmentLength];
+
+            // Sao chép đoạn cần xoay
+            for (int i = 0; i < segmentLength; i++) {
+                segment[i] = way[startPos + i];
+            }
+
+            // Xoay vòng đoạn
+            for (int i = 0; i < segmentLength; i++) {
+                way[startPos + i] = segment[(i + rotateBy) % segmentLength];
+            }
         } else {
-            route.calculateDistance(locations);
+            // Cách 3: Sắp xếp ngẫu nhiên đoạn
+            for (int i = 0; i < segmentLength; i++) {
+                int j = random.nextInt(segmentLength);
+                int temp = way[startPos + i];
+                way[startPos + i] = way[startPos + j];
+                way[startPos + j] = temp;
+            }
+        }
+
+        // Cập nhật khoảng cách nếu có thông tin về locations
+        if (locations != null) {
+            if (distanceTimes != null && distanceTimes.length > 0) {
+                route.calculateDistance(locations, distanceTimes);
+            } else {
+                route.calculateDistance(locations);
+            }
         }
     }
-}
-
 
     /**
      * Áp dụng toán tử ngẫu nhiên cho nhiều tuyến đường
@@ -359,7 +371,7 @@ protected void applyPdRearrange(Route[] routes) {
      *
      * @param indices Mảng các chỉ số cần kiểm tra
      */
-    private void validateLocationIndices(int[] indices) {
+    protected void validateLocationIndices(int[] indices) {
         if (locations == null) {
             return;
         }
