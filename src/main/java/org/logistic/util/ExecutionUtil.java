@@ -29,7 +29,7 @@ public class ExecutionUtil {
      */
     public static void processAllFilesInDirectory(String srcDirectory, String solutionDirectory,
             ReadDataFromFile rdff, FitnessUtil fitnessUtil, PrintUtil printUtil,
-            CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType, 
+            CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType,
             ExportType exportType, int iterations, boolean parallelEnabled) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ TẤT CẢ CÁC FILE TRONG THƯ MỤC ===");
         System.out.println("Thư mục src: " + srcDirectory);
@@ -45,12 +45,13 @@ public class ExecutionUtil {
                         // Sử dụng DistanceTime nếu có (cho Liu Tang Yao format)
                         double initialFitness;
                         if (rdff.getDistanceTimes() != null && rdff.getDistanceTimes().length > 0) {
-                            initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(), parallelEnabled);
+                            initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(),
+                                    parallelEnabled);
                             System.out.println("Sử dụng thông tin DistanceTime từ DISTANCETIME_SECTION");
                         } else {
                             initialFitness = fitnessUtil.calculatorFitness(routes, locations, parallelEnabled);
                         }
-                        
+
                         Solution mainSolution = new Solution(routes, initialFitness);
                         SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
                         Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil,
@@ -79,7 +80,7 @@ public class ExecutionUtil {
      */
     public static void processSingleFile(String dataLocation, String dataSolution,
             ReadDataFromFile rdff, FitnessUtil fitnessUtil, PrintUtil printUtil,
-            CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType, 
+            CheckConditionUtil checkConditionUtil, ReadDataFromFile.ProblemType problemType,
             ExportType exportType, int iterations, boolean parallelEnabled) {
         System.out.println("\n=== BẮT ĐẦU XỬ LÝ FILE ĐƠN ===");
 
@@ -108,12 +109,13 @@ public class ExecutionUtil {
             // Sử dụng DistanceTime nếu có (cho Liu Tang Yao format)
             double initialFitness;
             if (rdff.getDistanceTimes() != null && rdff.getDistanceTimes().length > 0) {
-                initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(), parallelEnabled);
+                initialFitness = fitnessUtil.calculatorFitness(routes, locations, rdff.getDistanceTimes(),
+                        parallelEnabled);
                 System.out.println("Sử dụng thông tin DistanceTime từ DISTANCETIME_SECTION");
             } else {
                 initialFitness = fitnessUtil.calculatorFitness(routes, locations, parallelEnabled);
             }
-            
+
             Solution mainSolution = new Solution(routes, initialFitness);
             SimulatedAnnealing sa = new SimulatedAnnealing(mainSolution);
             Solution[] initialSolutions = sa.runAndGetPopulation(fitnessUtil, checkConditionUtil, locations);
@@ -179,17 +181,17 @@ public class ExecutionUtil {
     private static SequentialResults runSequentialOptimizers(Solution[] initialSolutions,
             FitnessUtil fitnessUtil, CheckConditionUtil checkConditionUtil,
             Location[] locations, double maxPayload, int iterations, DistanceTime[] distanceTimes) {
-        
+
         Map<Algorithm, Solution> bestResults = new HashMap<>();
         Map<Algorithm, Long> executionTimes = new HashMap<>();
         Map<Algorithm, double[][]> algorithmStats = new HashMap<>(); // [weight_type][all_values]
         Algorithm[] algorithms = Algorithm.values();
-        
+
         // Chạy từng thuật toán một cách tuần tự
         for (Algorithm algorithm : algorithms) {
             try {
                 System.out.println("\n=== Bắt đầu chạy thuật toán: " + algorithm + " ===");
-                
+
                 Optimizer optimizer = createOptimizer(algorithm);
                 if (optimizer == null) {
                     System.err.println("Không thể tạo optimizer cho thuật toán: " + algorithm);
@@ -197,29 +199,38 @@ public class ExecutionUtil {
                     executionTimes.put(algorithm, 0L);
                     continue;
                 }
-                
+
                 // Thu thập dữ liệu từ tất cả các lần chạy
                 Solution bestSolution = null;
                 double[][] allWeights = new double[4][iterations]; // [weight_type][iteration]
                 long totalExecutionTime = 0;
-                
+
                 for (int i = 0; i < iterations; i++) {
                     System.out.println("Lần chạy " + (i + 1) + "/" + iterations + " cho " + algorithm);
-                    
+
                     long startTime = System.currentTimeMillis();
-                    Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil, 
+                    Solution currentSolution = optimizer.run(initialSolutions, fitnessUtil,
                             checkConditionUtil, locations, distanceTimes);
                     long endTime = System.currentTimeMillis();
-                    
+
                     totalExecutionTime += (endTime - startTime);
-                    
+
                     if (currentSolution != null) {
                         // Thu thập dữ liệu weights cho lần chạy này
-                        int[] weights = fitnessUtil.calculateWeightsFromSolution(currentSolution, locations);
+                        int[] weights;
+
+                        // Tính lại fitness với DistanceTime để cập nhật tempWeights
+                        if (distanceTimes != null && distanceTimes.length > 0) {
+                            fitnessUtil.calculatorFitness(currentSolution.getRoutes(), locations, distanceTimes);
+                            weights = fitnessUtil.getTempWeights();
+                        } else {
+                            weights = fitnessUtil.calculateWeightsFromSolution(currentSolution, locations);
+                        }
+                        
                         for (int j = 0; j < 4; j++) {
                             allWeights[j][i] = weights[j];
                         }
-                        
+
                         // Cập nhật best solution
                         if (bestSolution == null || currentSolution.getFitness() < bestSolution.getFitness()) {
                             bestSolution = currentSolution;
@@ -231,17 +242,18 @@ public class ExecutionUtil {
                         }
                     }
                 }
-                
+
                 bestResults.put(algorithm, bestSolution);
                 executionTimes.put(algorithm, totalExecutionTime / iterations); // Thời gian trung bình
                 algorithmStats.put(algorithm, allWeights);
-                
+
                 if (bestSolution != null) {
-                    System.out.println("Hoàn thành " + algorithm + " với fitness tốt nhất: " + bestSolution.getFitness());
+                    System.out
+                            .println("Hoàn thành " + algorithm + " với fitness tốt nhất: " + bestSolution.getFitness());
                 } else {
                     System.out.println("Thuật toán " + algorithm + " không trả về kết quả");
                 }
-                
+
             } catch (Exception e) {
                 System.err.println("Lỗi khi chạy thuật toán " + algorithm + ": " + e.getMessage());
                 e.printStackTrace();
@@ -249,13 +261,13 @@ public class ExecutionUtil {
                 executionTimes.put(algorithm, 0L);
             }
         }
-        
+
         // Dọn dẹp ThreadLocal sau khi hoàn thành tất cả thuật toán
         FitnessUtil.cleanupThreadLocal();
-        
+
         return new SequentialResults(bestResults, executionTimes, algorithmStats);
     }
-    
+
     /**
      * Class để lưu trữ kết quả của việc chạy tuần tự
      */
@@ -263,18 +275,26 @@ public class ExecutionUtil {
         private final Map<Algorithm, Solution> bestResults;
         private final Map<Algorithm, Long> executionTimes;
         private final Map<Algorithm, double[][]> algorithmStats;
-        
-        public SequentialResults(Map<Algorithm, Solution> bestResults, 
-                               Map<Algorithm, Long> executionTimes,
-                               Map<Algorithm, double[][]> algorithmStats) {
+
+        public SequentialResults(Map<Algorithm, Solution> bestResults,
+                Map<Algorithm, Long> executionTimes,
+                Map<Algorithm, double[][]> algorithmStats) {
             this.bestResults = bestResults;
             this.executionTimes = executionTimes;
             this.algorithmStats = algorithmStats;
         }
-        
-        public Map<Algorithm, Solution> getBestResults() { return bestResults; }
-        public Map<Algorithm, Long> getExecutionTimes() { return executionTimes; }
-        public Map<Algorithm, double[][]> getAlgorithmStats() { return algorithmStats; }
+
+        public Map<Algorithm, Solution> getBestResults() {
+            return bestResults;
+        }
+
+        public Map<Algorithm, Long> getExecutionTimes() {
+            return executionTimes;
+        }
+
+        public Map<Algorithm, double[][]> getAlgorithmStats() {
+            return algorithmStats;
+        }
     }
 
     /**
@@ -309,29 +329,28 @@ public class ExecutionUtil {
             Location[] locations, double maxPayload, PrintUtil printUtil,
             String fileName, ExportType exportType, int iterations,
             boolean parallelEnabled, DistanceTime[] distanceTimes) {
-        
+
         // Thiết lập chế độ parallel cho FitnessUtil
         fitnessUtil.setParallelMode(parallelEnabled);
-        
+
         Map<Algorithm, Solution> results;
         SequentialResults sequentialResults = null;
-        
+
         if (parallelEnabled) {
             // Sử dụng parallel execution manager khi chạy song song
             ParallelExecutionManager parallelManager = ParallelExecutionManager.getInstance();
             ParallelExecutionManager.OptimizerFactory optimizerFactory = ExecutionUtil::createOptimizer;
-            
+
             results = parallelManager.runAllAlgorithms(
-                Algorithm.values(),
-                initialSolutions,
-                fitnessUtil,
-                checkConditionUtil,
-                locations,
-                maxPayload,
-                iterations,
-                optimizerFactory,
-                distanceTimes
-            );
+                    Algorithm.values(),
+                    initialSolutions,
+                    fitnessUtil,
+                    checkConditionUtil,
+                    locations,
+                    maxPayload,
+                    iterations,
+                    optimizerFactory,
+                    distanceTimes);
         } else {
             // Xử lý tuần tự thông thường
             sequentialResults = runSequentialOptimizers(initialSolutions, fitnessUtil, checkConditionUtil,
@@ -342,7 +361,7 @@ public class ExecutionUtil {
         // Tìm thuật toán tốt nhất
         Solution bestSolution = null;
         Algorithm bestAlgorithm = null;
-        
+
         for (Map.Entry<Algorithm, Solution> entry : results.entrySet()) {
             Solution solution = entry.getValue();
             if (solution != null && (bestSolution == null || solution.getFitness() < bestSolution.getFitness())) {
@@ -357,7 +376,7 @@ public class ExecutionUtil {
             if (solution != null) {
                 System.out.printf("%-5s: Fitness = %.2f, Số phương tiện = %d\n",
                         algorithm, solution.getFitness(), solution.getRoutes().length);
-                
+
                 // In kết quả chi tiết
                 printResults(printUtil, solution, algorithm);
             } else {
@@ -378,17 +397,18 @@ public class ExecutionUtil {
                     PerformanceMonitor performanceMonitor = PerformanceMonitor.getInstance();
                     double[][][] totalWeights = performanceMonitor.calculateTotalWeights();
                     long[] timeAvgs = new long[Algorithm.values().length];
-                    
+
                     for (Algorithm algorithm : Algorithm.values()) {
                         timeAvgs[algorithm.ordinal()] = (long) performanceMonitor.getAverageExecutionTime(algorithm);
                     }
-                    
+
                     ExcelUtil excelUtil = ExcelUtil.getInstance();
                     if (!excelUtil.isWorkbookInitialized()) {
                         excelUtil.initializeExcelWorkbook(fitnessUtil.getFitnessStrategy());
                     }
                     excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessUtil.getFitnessStrategy());
-                    System.out.println("Đã chuẩn bị dữ liệu Excel với dữ liệu được lọc theo cấu hình fitness (chế độ song song)");
+                    System.out.println(
+                            "Đã chuẩn bị dữ liệu Excel với dữ liệu được lọc theo cấu hình fitness (chế độ song song)");
                 } else {
                     // Tạo dữ liệu cho chế độ tuần tự với cấu trúc phù hợp từ SequentialResults
                     // Cấu trúc: [algorithm][weight_type][statistic]
@@ -396,30 +416,30 @@ public class ExecutionUtil {
                     // statistic: 0=Min, 1=Std, 2=Mean
                     double[][][] totalWeights = new double[Algorithm.values().length][4][3];
                     long[] timeAvgs = new long[Algorithm.values().length];
-                    
+
                     if (sequentialResults != null) {
                         Map<Algorithm, Long> executionTimes = sequentialResults.getExecutionTimes();
                         Map<Algorithm, double[][]> algorithmStats = sequentialResults.getAlgorithmStats();
-                        
+
                         // Điền dữ liệu từ kết quả thống kê chi tiết
                         for (Algorithm algorithm : Algorithm.values()) {
                             int algIndex = algorithm.ordinal();
-                            
+
                             // Lấy thời gian thực thi trung bình
                             timeAvgs[algIndex] = executionTimes.getOrDefault(algorithm, 0L);
-                            
+
                             double[][] stats = algorithmStats.get(algorithm);
                             if (stats != null) {
                                 // Tính toán thống kê cho từng loại weight
                                 for (int weightType = 0; weightType < 4; weightType++) {
                                     double[] values = stats[weightType];
-                                    
+
                                     if (values != null && values.length > 0) {
                                         // Tính Min, Mean, Std
                                         double min = Double.MAX_VALUE;
                                         double sum = 0.0;
                                         int validCount = 0;
-                                        
+
                                         for (double value : values) {
                                             if (value >= 0) { // Chỉ tính các giá trị hợp lệ
                                                 min = Math.min(min, value);
@@ -427,10 +447,10 @@ public class ExecutionUtil {
                                                 validCount++;
                                             }
                                         }
-                                        
+
                                         if (validCount > 0) {
                                             double mean = sum / validCount;
-                                            
+
                                             // Tính standard deviation
                                             double variance = 0.0;
                                             for (double value : values) {
@@ -439,9 +459,9 @@ public class ExecutionUtil {
                                                 }
                                             }
                                             double std = validCount > 1 ? Math.sqrt(variance / (validCount - 1)) : 0.0;
-                                            
-                                            totalWeights[algIndex][weightType][0] = min;  // Min
-                                            totalWeights[algIndex][weightType][1] = std;  // Std
+
+                                            totalWeights[algIndex][weightType][0] = min; // Min
+                                            totalWeights[algIndex][weightType][1] = std; // Std
                                             totalWeights[algIndex][weightType][2] = mean; // Mean
                                         } else {
                                             // Không có dữ liệu hợp lệ
@@ -477,7 +497,7 @@ public class ExecutionUtil {
                             }
                         }
                     }
-                    
+
                     ExcelUtil excelUtil = ExcelUtil.getInstance();
                     if (!excelUtil.isWorkbookInitialized()) {
                         excelUtil.initializeExcelWorkbook(fitnessUtil.getFitnessStrategy());
@@ -485,7 +505,7 @@ public class ExecutionUtil {
                     excelUtil.exportResultsToExcel(totalWeights, timeAvgs, fileName, fitnessUtil.getFitnessStrategy());
                     System.out.println("Đã chuẩn bị dữ liệu Excel với dữ liệu thống kê đầy đủ (chế độ tuần tự)");
                 }
-                
+
                 // Lưu ý: Không gọi saveExcelWorkbook() ở đây để tránh tạo nhiều file Excel
                 // File Excel sẽ được lưu một lần duy nhất ở cuối quá trình xử lý
             } catch (Exception e) {

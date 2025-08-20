@@ -213,7 +213,16 @@ public class ParallelExecutionManager {
                         performanceMonitor.recordFitness(algorithm, result.getFitness());
 
                         // Ghi lại weights data từ FitnessUtil
-                        int[] weights = fitnessUtil.getTempWeights();
+                        int[] weights;
+
+                        // Tính lại fitness với DistanceTime để cập nhật tempWeights
+                        if (distanceTimes != null && distanceTimes.length > 0) {
+                            fitnessUtil.calculatorFitness(result.getRoutes(), locations, distanceTimes);
+                            weights = fitnessUtil.getTempWeights();
+                        } else {
+                            weights = fitnessUtil.getTempWeights();
+                        }
+                        
                         performanceMonitor.recordWeights(algorithm, weights);
 
                         System.out.println("[" + algorithm + "] Iteration " + iterationNumber +
