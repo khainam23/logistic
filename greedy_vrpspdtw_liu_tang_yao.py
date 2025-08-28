@@ -13,9 +13,9 @@ class Customer:
     id: int
     delivery_demand: float
     pickup_demand: float
-    ready_time: int
-    due_date: int
-    service_time: int
+    ready_time: float
+    due_date: float
+    service_time: float
 
 @dataclass
 class Vehicle:
@@ -23,7 +23,7 @@ class Vehicle:
     capacity: float
     current_load_delivery: float = 0.0
     current_load_pickup: float = 0.0
-    current_time: int = 0
+    current_time: float = 0.0
     current_location: int = 0
     route: List[int] = None
     
@@ -75,9 +75,9 @@ class VRPSPDTWInstance:
                             customer_id = int(parts[0])
                             delivery = float(parts[1])
                             pickup = float(parts[2])
-                            ready_time = int(parts[3])
-                            due_date = int(parts[4])
-                            service_time = int(parts[5])
+                            ready_time = float(parts[3])
+                            due_date = float(parts[4])
+                            service_time = float(parts[5])
                             
                             self.customers[customer_id] = Customer(
                                 id=customer_id,
