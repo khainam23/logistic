@@ -152,7 +152,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
                 // Cập nhật vị trí theo công thức SHO
                 if (Math.abs(E[i]) < 1) {
                     // Khai thác: di chuyển về phía giải pháp tốt nhất
-                    learnFromBestRoute(routes[i], bestSolution.getRoutes()[i], D, E[i]);
+                    learnFromBestRoute(routes[i], bestSolution.getRoutes()[i], D, B[i]);
                 }
             }
 
@@ -229,7 +229,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
      * Học hỏi từ tuyến đường tốt nhất với công thức SHO
      * Thực hiện swap và reorder các điểm dựa trên best route
      */
-    private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double E) {
+    private void learnFromBestRoute(Route targetRoute, Route bestRoute, double D, double B) {
         // Lưu lại bản sao của tuyến đường gốc để khôi phục nếu cần
         int[] originalWay = targetRoute.getIndLocations().clone();
         int[] targetWay = targetRoute.getIndLocations();
@@ -240,7 +240,7 @@ public class SpottedHyenaOptimizer extends AbstractOptimizer {
         }
 
         // Tính toán số lượng thay đổi dựa trên công thức SHO
-        double intensity = Math.abs(E * D);
+        double intensity = Math.abs(B * D);
         int numSwaps = Math.max(1, (int) Math.round(intensity * targetWay.length / 2));
         numSwaps = Math.min(numSwaps, targetWay.length / 2);
 

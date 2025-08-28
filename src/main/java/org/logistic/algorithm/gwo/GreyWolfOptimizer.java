@@ -20,7 +20,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GreyWolfOptimizer extends AbstractOptimizer {
     // Các tham số của thuật toán
-    static final int MAX_ITERATIONS = 100;
+    static final int MAX_ITERATIONS = 1000;
 
     // Danh sách các sói
     List<Wolf> population;
